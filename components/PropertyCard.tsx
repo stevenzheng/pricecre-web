@@ -450,8 +450,11 @@ export default function PropertyCard({
                       </span>
                     </div>
                     <div
-                      className="text-xs font-medium truncate" style={{ minHeight: "18px", display: "flex", alignItems: "center" }}
+                      className="text-xs font-medium truncate"
                       style={{
+                        minHeight: "18px",
+                        display: "flex",
+                        alignItems: "center",
                         color: isFieldLocked ? "var(--text-hint)" : isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
                         fontFamily: "var(--font-mono)",
                       }}

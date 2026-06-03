@@ -35,21 +35,22 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
   /* Init map */
   useEffect(() => {
     if (!scriptReady || !mapRef.current || !(window as any).BMap) return;
-    if (mapInstance.current) { mapInstance.current.clearOverlays(); mapInstance.current.centerAndZoom(center, 14); setLoaded(true); return; }
-    mapInstance.current = new BMap.Map(mapRef.current);
-    mapInstance.current.centerAndZoom(center, 14);
-    mapInstance.current.enableScrollWheelZoom();
 
     const BMap = (window as any).BMap;
     const userCenter = userCoords ? new BMap.Point(userCoords.lng, userCoords.lat) : null;
     const cityC = cityCenter[activeCity] || [121.47, 31.23];
     const center = userCenter || new BMap.Point(cityC[0], cityC[1]);
 
-    );
-      
-      
+    if (!mapInstance.current) {
+      mapInstance.current = new BMap.Map(mapRef.current, {
+        
+        
+      });
+      mapInstance.current.centerAndZoom(center, 14);
+      mapInstance.current.enableScrollWheelZoom(true);
+      mapInstance.current.;
     } else {
-      
+      mapInstance.current.centerAndZoom(center, 14);
     }
 
     mapInstance.current.clearOverlays();

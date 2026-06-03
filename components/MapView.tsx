@@ -23,9 +23,9 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
 
   /* Load Baidu Maps */
   useEffect(() => {
-    if ((window as any).BMapGL) { setScriptReady(true); return; }
+    if ((window as any).BMap) { setScriptReady(true); return; }
     const script = document.createElement("script");
-    script.src = "https://api.map.baidu.com/api?v=3.0&type=webgl&ak=B8Yc5OGGfc12G5RMjzYGOFc05ZjRmXWO";
+    script.src = "https://api.map.baidu.com/getscript?v=3.0&ak=B8Yc5OGGfc12G5RMjzYGOFc05ZjRmXWO";
     script.onload = () => setScriptReady(true);
     script.onerror = () => setScriptReady(false);
     document.head.appendChild(script);
@@ -34,31 +34,30 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
 
   /* Init map */
   useEffect(() => {
-    if (!scriptReady || !mapRef.current || !(window as any).BMapGL) return;
+    if (!scriptReady || !mapRef.current || !(window as any).BMap) return;
+    if (mapInstance.current) { mapInstance.current.clearOverlays(); mapInstance.current.centerAndZoom(center, 14); setLoaded(true); return; }
+    mapInstance.current = new BMap.Map(mapRef.current);
+    mapInstance.current.centerAndZoom(center, 14);
+    mapInstance.current.enableScrollWheelZoom();
 
-    const BMapGL = (window as any).BMapGL;
-    const userCenter = userCoords ? new BMapGL.Point(userCoords.lng, userCoords.lat) : null;
+    const BMap = (window as any).BMap;
+    const userCenter = userCoords ? new BMap.Point(userCoords.lng, userCoords.lat) : null;
     const cityC = cityCenter[activeCity] || [121.47, 31.23];
-    const center = userCenter || new BMapGL.Point(cityC[0], cityC[1]);
+    const center = userCenter || new BMap.Point(cityC[0], cityC[1]);
 
-    if (!mapInstance.current) {
-      mapInstance.current = new BMapGL.Map(mapRef.current, {
-        enableMapClick: false,
-        style: { style: "dark" },
-      });
-      mapInstance.current.centerAndZoom(center, 14);
-      mapInstance.current.enableScrollWheelZoom(true);
-      mapInstance.current.setMapStyleV2({ styleId: "ceb36adcc5f161b3aeb88e0a25c70881" });
+    );
+      
+      
     } else {
-      mapInstance.current.centerAndZoom(center, 14);
+      
     }
 
     mapInstance.current.clearOverlays();
 
     // Add user location marker
     if (userCoords) {
-      const userPoint = new BMapGL.Point(userCoords.lng, userCoords.lat);
-      const userMarker = new BMapGL.Marker(userPoint);
+      const userPoint = new BMap.Point(userCoords.lng, userCoords.lat);
+      const userMarker = new BMap.Marker(userPoint);
       mapInstance.current.addOverlay(userMarker);
     }
 
@@ -67,11 +66,11 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       const offset = 0.015;
       const lng = cityC[0] + Math.cos(i * 1.8) * offset * (i + 1);
       const lat = cityC[1] + Math.sin(i * 1.8) * offset * (i + 1);
-      const point = new BMapGL.Point(lng, lat);
+      const point = new BMap.Point(lng, lat);
 
-      const label = new BMapGL.Label(`¥${p.faceRent.toFixed(0)}`, {
+      const label = new BMap.Label(`¥${p.faceRent.toFixed(0)}`, {
         position: point,
-        offset: new BMapGL.Size(-25, -15),
+        offset: new BMap.Size(-25, -15),
       });
       label.setStyle({
         color: "var(--accent)",
@@ -84,7 +83,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       });
       mapInstance.current.addOverlay(label);
 
-      const marker = new BMapGL.Marker(point);
+      const marker = new BMap.Marker(point);
       marker.addEventListener("click", () => {
         setSelectedProperty(p.id);
         onSelectProperty?.(p.id);
@@ -139,11 +138,11 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {p.propertyType === "OFFICE" ? (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>
                   ) : p.propertyType === "SHOPS" ? (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>
                   ) : (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>
                   )}
                   <div className="min-w-0">
                     <div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div>

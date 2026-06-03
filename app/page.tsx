@@ -414,7 +414,7 @@ export default function Home() {
         {/* Share CTA */}
         <div id="share-section" className="max-w-7xl mx-auto px-4 pb-8">
           <div
-            className="max-w-lg mx-auto rounded-2xl p-6 sm:p-8 text-center overflow-hidden relative"
+            className="max-w-lg mx-auto rounded-2xl p-4 sm:p-5 text-center overflow-hidden relative"
             style={{
               background: "var(--accent)",
               backgroundImage: "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #000) 100%)",
@@ -430,8 +430,8 @@ export default function Home() {
             <div className="absolute bottom-4 left-6 opacity-15 text-4xl font-bold" style={{ color: "var(--text-inverse)" }}>+3</div>
 
             {/* Gift icon */}
-            <div className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.15)" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-8 h-8 mx-auto mb-3 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 12 20 22 4 22 4 12" />
                 <rect x="2" y="7" width="20" height="5" />
                 <line x1="12" y1="22" x2="12" y2="7" />
@@ -440,16 +440,16 @@ export default function Home() {
               </svg>
             </div>
 
-            <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: "var(--text-inverse)" }}>
+            <h3 className="text-base font-bold mb-1.5" style={{ color: "var(--text-inverse)" }}>
               邀请好友 · 双方各得查看额度
             </h3>
-            <p className="text-sm mb-5 opacity-80" style={{ color: "var(--text-inverse)" }}>
+            <p className="text-xs mb-4 opacity-80" style={{ color: "var(--text-inverse)" }}>
               好友通过你的专属链接注册，双方各获得 3 次免费查看额度
             </p>
 
             <div className="flex items-center gap-2 max-w-xs mx-auto">
               <code
-                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold truncate"
+                className="flex-1 px-4 py-2.5 rounded-lg text-xs font-medium truncate"
                 style={{
                   background: "rgba(255,255,255,0.15)",
                   color: "var(--text-inverse)",
@@ -460,7 +460,7 @@ export default function Home() {
                 PRICECRE-SZ2026
               </code>
               <button
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95"
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95"
                 style={{
                   background: "var(--text-inverse)",
                   color: "var(--accent)",

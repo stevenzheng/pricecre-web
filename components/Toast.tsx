@@ -2,22 +2,28 @@
 
 import { useEffect, useState } from "react";
 
-let toastId = 0;
-const listeners: Set<(msg: string) => void> = new Set();
+let modalId = 0;
+const listeners: Set<(msg: string, confirm?: boolean) => void> = new Set();
 
-export function showToast(msg: string) {
-  listeners.forEach((fn) => fn(msg));
+export function showModal(msg: string) {
+  listeners.forEach((fn) => fn(msg, false));
 }
 
-export default function Toast() {
+export function showToast(msg: string) {
+  listeners.forEach((fn) => fn(msg, true));
+}
+
+export default function Modal() {
   const [message, setMessage] = useState("");
   const [visible, setVisible] = useState(false);
+  const [isToast, setIsToast] = useState(false);
 
   useEffect(() => {
-    const handler = (msg: string) => {
+    const handler = (msg: string, toast?: boolean) => {
       setMessage(msg);
+      setIsToast(!!toast);
       setVisible(true);
-      setTimeout(() => setVisible(false), 2500);
+      if (toast) setTimeout(() => setVisible(false), 2500);
     };
     listeners.add(handler);
     return () => { listeners.delete(handler); };
@@ -26,17 +32,32 @@ export default function Toast() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-slide-up">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center animate-fade-in" onClick={() => !isToast && setVisible(false)}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="px-5 py-3 rounded-xl text-sm font-medium shadow-lg"
-        style={{
-          background: "var(--bg-surface)",
-          color: "var(--text-strong)",
-          border: "1px solid var(--line)",
-          backdropFilter: "blur(20px)",
-        }}
+        className="relative max-w-sm w-[90vw] rounded-2xl p-6 shadow-2xl text-center z-10 animate-slide-up"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--line)" }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {message}
+        <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--text)" }}>{message}</p>
+        <div className="flex gap-2 justify-center">
+          {!isToast && (
+            <button
+              className="px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
+              style={{ background: "var(--panel)", color: "var(--text-muted)" }}
+              onClick={() => setVisible(false)}
+            >
+              关闭
+            </button>
+          )}
+          <button
+            className="px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
+            style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
+            onClick={() => setVisible(false)}
+          >
+            知道了
+          </button>
+        </div>
       </div>
     </div>
   );

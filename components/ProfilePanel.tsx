@@ -1,5 +1,5 @@
 "use client";
-import { showToast } from "@/components/Toast";
+import { showModal } from "@/components/Toast";
 
 import { useState } from "react";
 
@@ -80,7 +80,7 @@ export default function ProfilePanel() {
   /* ---- 登录 / 注册主界面 ---- */
   if (!loggedIn) {
     return (
-      <div className="max-w-sm mx-auto px-4 py-10">
+      <div className="max-w-sm mx-auto px-4 py-4">
         <div className="card p-6 space-y-5">
           {/* 标签 */}
           <div className="flex items-center gap-2 justify-center">
@@ -233,7 +233,7 @@ export default function ProfilePanel() {
 
   /* ---- 已登录 ---- */
   return (
-    <div className="max-w-sm mx-auto px-4 py-6 space-y-5">
+    <div className="max-w-sm mx-auto px-4 py-4 space-y-5">
       <div className="card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--panel)" }}>
@@ -269,7 +269,7 @@ export default function ProfilePanel() {
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实数据获取额度</button>}
         {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { setQuota((q) => q + 8); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}
-        <button className="btn-secondary w-full text-xs" onClick={() => showToast("即将上线")}>账户设置</button>
+        <button className="btn-secondary w-full text-xs" onClick={() => showModal("即将上线")}>账户设置</button>
       </div>
     </div>
   );

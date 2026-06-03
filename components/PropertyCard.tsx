@@ -1,5 +1,5 @@
 "use client";
-import { showToast } from "@/components/Toast";
+import { showModal } from "@/components/Toast";
 
 import { useReducer, useMemo, useCallback } from "react";
 import {
@@ -245,11 +245,11 @@ export default function PropertyCard({
     <div id={`property-${property.id}`} className={`card overflow-hidden ${state.isExpanded ? "ring-1" : ""}`} style={{ borderColor: state.isExpanded ? "var(--accent-border)" : "var(--line)" }}>
       {/* ---- Collapsed Header ---- */}
       <div
-        className="p-4 sm:p-5 cursor-pointer select-none"
+        className="p-3 sm:p-4 cursor-pointer select-none"
         onClick={() => dispatch({ type: "TOGGLE_EXPAND" })}
       >
         {/* Top Row: Type Badge (left) + Mini Indicators (right) */}
-        <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex items-start justify-between gap-1.5 mb-1.5">
           <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider flex-shrink-0" style={{ color: "var(--text-muted)" }}>
             <span style={{ color: "var(--accent)" }}>{typeIcon}</span>
             {typeLabel}
@@ -285,7 +285,7 @@ export default function PropertyCard({
         </div>
 
         {/* Project Name */}
-        <h3 className="text-[17px] font-bold mb-0.5" style={{ color: "var(--text-strong)" }}>
+        <h3 className="text-[15px] font-bold mb-0.5" style={{ color: "var(--text-strong)" }}>
           {property.projectName}
         </h3>
 
@@ -304,11 +304,11 @@ export default function PropertyCard({
         {/* Face Rent + Status */}
         <div className="flex items-end justify-between">
           <div>
-            <div className="text-[11px] uppercase tracking-wider mb-1 font-medium" style={{ color: "var(--text-hint)" }}>
+            <div className="text-[10px] uppercase tracking-wider mb-0.5 font-medium" style={{ color: "var(--text-hint)" }}>
               挂牌租金面价
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
+              <span className="text-lg font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
                 <span className="text-lg font-normal">¥</span>{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
@@ -345,7 +345,7 @@ export default function PropertyCard({
           <div className="p-4 sm:p-5" style={{ background: "var(--panel)" }}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-1.5 mb-2">
                   <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                     净有效租金
                   </span>
@@ -414,7 +414,7 @@ export default function PropertyCard({
               )}
             </div>
             {/* Mobile: 3 cols, Desktop: 4 cols */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
               {sortedFields.map((field) => {
                 const isFieldLocked = field.isLocked && !isUnlocked;
                 const displayValue = isFieldLocked ? "****" : formatValue(field.value, field.format);
@@ -429,7 +429,7 @@ export default function PropertyCard({
                     onClick={() => {
                       if (isFieldLocked && !isUnlocked) {
                         if (remainingCredits <= 0) {
-                          showToast("额度不足，请通过邀约分享或购买获取更多额度");
+                          showModal("额度不足，请通过邀约分享或购买获取更多额度");
                         } else {
                           handleUnlock();
                         }

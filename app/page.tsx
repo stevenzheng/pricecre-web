@@ -8,8 +8,8 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
-import Toast from "@/components/Toast";
-import { showToast } from "@/components/Toast";
+import Modal from "@/components/Toast";
+import { showModal } from "@/components/Toast";
 import MapView from "@/components/MapView";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
@@ -416,7 +416,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20">
+            <div className="flex flex-col items-center justify-center py-12">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
                 style={{ background: "var(--panel)", border: "1px solid var(--line)" }}
@@ -477,7 +477,7 @@ export default function Home() {
                   fontFamily: "var(--font-mono)",
                 }}
               >
-                PRICECRE-SZ2026
+                https://pricecre.com/r/sz2026
               </code>
               <button
                 className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95"
@@ -486,7 +486,7 @@ export default function Home() {
                   color: "var(--accent)",
                 }}
                 onClick={() => {
-                  navigator.clipboard.writeText("PRICECRE-SZ2026");
+                  navigator.clipboard.writeText("https://pricecre.com/r/sz2026");
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}
@@ -534,19 +534,21 @@ export default function Home() {
               <span className="hidden sm:inline">v3.0.0_MODULAR</span>
             </div>
             <div className="text-[12px] leading-relaxed max-w-md" style={{ color: "var(--text-hint)" }}>
-              数据来源于公开市场信息与用户提交，仅供参考，不构成投资建议。每日 8:00 更新。
+              数据来源于公开市场信息与用户提交，
+              仅供参考，不构成投资建议。
+              每日 8:00 更新。
             </div>
             <div className="flex items-center gap-4 text-[12px]">
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>服务条款</a>
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>隐私政策</a>
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>联系我们</a>
+              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>服务条款</a>
+              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>隐私政策</a>
+              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>联系我们</a>
             </div>
           </div>
         </div>
       </footer>
 
       {/* ====== Mobile Bottom Nav ====== */}
-      <Toast />
+      <Modal />
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

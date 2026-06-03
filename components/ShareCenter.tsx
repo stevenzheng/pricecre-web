@@ -1,5 +1,5 @@
 "use client";
-import { showToast } from "@/components/Toast";
+import { showModal } from "@/components/Toast";
 
 import { useState } from "react";
 
@@ -183,7 +183,7 @@ export default function ShareCenter() {
           <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>你的全局专属裂变链接</div>
           <div className="flex gap-2">
             <input type="text" readOnly value="pricecre.com/r/sz2026" className="input-search flex-1 text-xs" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} />
-            <button className="btn-secondary text-xs px-4 flex-shrink-0" onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); showToast("已复制裂变链接"); }}>
+            <button className="btn-secondary text-xs px-4 flex-shrink-0" onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); showModal("已复制裂变链接"); }}>
               一键复制
             </button>
           </div>
@@ -201,12 +201,12 @@ export default function ShareCenter() {
           <input type="text" placeholder="输入 6 位兑换码" value={inputCode}
             onChange={(e) => setInputCode(e.target.value.toUpperCase())}
             className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6} />
-          <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => { if (inputCode) { showToast(`兑换码 ${inputCode} 已激活 · 确权额度已并网`); setInputCode(""); } }}>
+          <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => { if (inputCode) { showModal(`兑换码 ${inputCode} 已激活 · 确权额度已并网`); setInputCode(""); } }}>
             激活
           </button>
         </div>
         <button className="text-[10px] font-medium hover:underline ml-auto block" style={{ color: "var(--text-muted)" }}
-          onClick={() => showToast("稍后可在「我的」页面兑换")}>先去看盘，稍后兑换 →</button>
+          onClick={() => showModal("稍后可在「我的」页面兑换")}>先去看盘，稍后兑换 →</button>
       </div>
 
       {/* 商业付费 */}
@@ -226,7 +226,7 @@ export default function ShareCenter() {
             <button
               className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 flex items-center justify-center gap-2"
               style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
-              onClick={() => showToast("VIP 即将上线")}
+              onClick={() => showModal("VIP 即将上线")}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
               不限次包月 · 299元/月

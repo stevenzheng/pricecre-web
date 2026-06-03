@@ -6,7 +6,7 @@ import {
   DynamicIndicators,
   PropertyType,
 } from "@/types/indicators";
-import { propertyTypeIcons, propertyTypeLabels } from "@/lib/mock-data";
+import { propertyTypeLabels } from "@/lib/mock-data";
 
 /* ===== State Machine ===== */
 

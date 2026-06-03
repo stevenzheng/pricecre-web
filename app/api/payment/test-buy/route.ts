@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         : "50 次查看额度已到账 · 永久有效",
       paidAt: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json({ error: "支付处理失败" }, { status: 500 });
   }
 }

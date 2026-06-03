@@ -58,7 +58,7 @@ export default function Home() {
   }, []);
 
   // Handlers
-  const handleUnlock = useCallback((propertyId: string) => {
+  const handleUnlock = useCallback((_propertyId: string) => {
     setCredits((prev) => {
       if (prev.referral > 0) return { ...prev, referral: prev.referral - 1 };
       if (prev.purchased > 0) return { ...prev, purchased: prev.purchased - 1 };

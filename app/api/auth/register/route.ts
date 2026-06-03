@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       // 开发模式下返回验证码方便调试
       ...(process.env.NODE_ENV !== "production" ? { devCode: code } : {}),
     });
-  } catch (err: any) {
+  } catch (err: Error) {
     console.error("[Register Error]", err);
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
   }

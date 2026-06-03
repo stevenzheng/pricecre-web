@@ -1,4 +1,5 @@
 "use client";
+import { showToast } from "@/components/Toast";
 
 import { useReducer, useMemo, useCallback } from "react";
 import {
@@ -428,7 +429,7 @@ export default function PropertyCard({
                     onClick={() => {
                       if (isFieldLocked && !isUnlocked) {
                         if (remainingCredits <= 0) {
-                          alert("额度不足，请通过邀约分享或购买获取更多额度");
+                          showToast("额度不足，请通过邀约分享或购买获取更多额度");
                         } else {
                           handleUnlock();
                         }

@@ -8,6 +8,8 @@ import LanguageToggle from "@/components/LanguageToggle";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
+import Toast from "@/components/Toast";
+import { showToast } from "@/components/Toast";
 import MapView from "@/components/MapView";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
@@ -521,29 +523,30 @@ export default function Home() {
       <footer className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
         <div className="max-w-7xl mx-auto px-4 py-5">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center gap-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
+            <div className="flex items-center gap-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
               <span className="font-semibold" style={{ color: "var(--text-strong)" }}>PriceCRE</span>
               <span>·</span>
               <span>商业地产量化精算资产终端</span>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
               <span>&copy; 2026 PriceCRE</span>
               <span className="opacity-30 hidden sm:inline">|</span>
               <span className="hidden sm:inline">v3.0.0_MODULAR</span>
             </div>
-            <div className="text-[10px] leading-relaxed max-w-md" style={{ color: "var(--text-hint)" }}>
+            <div className="text-[12px] leading-relaxed max-w-md" style={{ color: "var(--text-hint)" }}>
               数据来源于公开市场信息与用户提交，仅供参考，不构成投资建议。每日 8:00 更新。
             </div>
-            <div className="flex items-center gap-4 text-[10px]">
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
-              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
+            <div className="flex items-center gap-4 text-[12px]">
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>服务条款</a>
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>隐私政策</a>
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>联系我们</a>
             </div>
           </div>
         </div>
       </footer>
 
       {/* ====== Mobile Bottom Nav ====== */}
+      <Toast />
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

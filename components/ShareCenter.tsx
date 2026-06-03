@@ -75,14 +75,7 @@ export default function ShareCenter() {
 
       {/* ===== 数据提报 ===== */}
       <div className="card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="badge badge-accent text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
-            DATA_SUBMISSION
-          </span>
-          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 提交租金成交真实数据
-          </span>
-        </div>
+        
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -104,7 +97,6 @@ export default function ShareCenter() {
             <option value="苏州">苏州</option>
             <option value="成都">成都</option>
           </select>
-
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>¥</span>
@@ -176,14 +168,7 @@ export default function ShareCenter() {
 
       {/* ===== 裂变池 ===== */}
       <div className="card p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="badge badge-live text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
-            REFERRAL_NETWORK
-          </span>
-          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 分享转发获得查看额度
-          </span>
-        </div>
+        
         <div className="mb-4 text-center">
           <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
           <div className="flex items-center justify-center gap-2">
@@ -208,14 +193,7 @@ export default function ShareCenter() {
 
       {/* ===== 兑换码 ===== */}
       <div className="card p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="badge badge-accent text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
-            REDEMPTION_GATEWAY
-          </span>
-          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 激活兑换码
-          </span>
-        </div>
+        
         <div className="flex gap-2 mb-2">
           <input type="text" placeholder="输入 6 位兑换码" value={inputCode}
             onChange={(e) => setInputCode(e.target.value.toUpperCase())}
@@ -230,17 +208,7 @@ export default function ShareCenter() {
 
       {/* ===== 商业付费直通车 ===== */}
       <div className="card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="badge badge-negative text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
-            COMMERCIAL_PACKAGE
-          </span>
-          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 商业付费直通车
-          </span>
-          <span className="badge badge-live text-[9px] tracking-wider font-bold ml-auto" style={{ fontFamily: "var(--font-mono)" }}>
-            TEST_MODE
-          </span>
-        </div>
+        
 
         {purchaseStep === "idle" && (
           <div className="space-y-2">
@@ -327,12 +295,6 @@ export default function ShareCenter() {
         )}
       </div>
 
-      {/* ===== 底部标识 ===== */}
-      <div className="text-center pb-2">
-        <span className="text-[9px] tracking-[0.12em] font-bold uppercase" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
-          GATEWAY_SHIELD // SECURE_CONVERSION_FUNNEL
-        </span>
-      </div>
     </div>
   );
 }

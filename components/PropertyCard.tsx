@@ -416,7 +416,17 @@ export default function PropertyCard({
                 return (
                   <div
                     key={field.key}
-                    className={`metric-cell ${isFieldLocked ? "locked" : isUnlocked ? "unlocked" : ""}`}
+                    className={`metric-cell ${isFieldLocked ? "locked cursor-pointer hover:bg-[var(--accent-soft)]" : isUnlocked ? "unlocked" : ""}`}
+                    style={isFieldLocked ? { transition: "background 0.15s" } : {}}
+                    onClick={() => {
+                      if (isFieldLocked && !isUnlocked) {
+                        if (remainingCredits <= 0) {
+                          alert("额度不足，请通过邀约分享或购买获取更多额度");
+                        } else {
+                          handleUnlock();
+                        }
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="text-[11px] font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>

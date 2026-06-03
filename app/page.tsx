@@ -33,6 +33,48 @@ export default function Home() {
 
   const totalCredits = credits.referral + credits.purchased;
 
+  // Geolocation — auto-detect user city
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoDetected, setGeoDetected] = useState(false);
+
+  useEffect(() => {
+    if (geoDetected || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setUserCoords({ lat, lng });
+        // Simple reverse geocode using Amap IP API
+        fetch(`https://restapi.amap.com/v3/ip?key=c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5`)
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.city) {
+              const cityName = d.city.replace("市", "");
+              if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
+                setActiveCity(cityName);
+              }
+            }
+          })
+          .catch(() => {});
+        setGeoDetected(true);
+      },
+      () => {
+        // Fallback: IP-based city detection without coords
+        fetch(`https://restapi.amap.com/v3/ip?key=c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5`)
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.city) {
+              const cityName = d.city.replace("市", "");
+              if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
+                setActiveCity(cityName);
+              }
+            }
+          })
+          .catch(() => {});
+        setGeoDetected(true);
+      }
+    );
+  }, [geoDetected]);
+
   // Filtered data
   const filteredProperties = useMemo(() => {
     return mockProperties.filter((p) => {
@@ -439,7 +481,7 @@ export default function Home() {
         )}
 
         {/* Map Tab */}
-        {mobileTab === "map" && <MapView onSelectProperty={handleMapSelectProperty} />}
+        {mobileTab === "map" && <MapView onSelectProperty={handleMapSelectProperty} userCoords={userCoords} />}
 
         {/* Share Tab */}
         {mobileTab === "share" && <ShareCenter />}

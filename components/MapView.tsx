@@ -12,9 +12,9 @@ const cityCenter: Record<string, [number, number]> = {
   "成都": [104.0665, 30.5728],
 };
 
-interface MapViewProps { onSelectProperty?: (id: string) => void }
+interface MapViewProps { onSelectProperty?: (id: string) => void; userCoords?: { lat: number; lng: number } | null }
 
-export default function MapView({ onSelectProperty }: MapViewProps) {
+export default function MapView({ onSelectProperty, userCoords }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const [activeCity, setActiveCity] = useState<string>("上海");
@@ -38,15 +38,16 @@ export default function MapView({ onSelectProperty }: MapViewProps) {
     if (!loaded || !mapRef.current || !(window as any).AMap) return;
 
     const AMap = (window as any).AMap;
-    const center = cityCenter[activeCity] || [121.47, 31.23];
+    const userCenter = userCoords ? [userCoords.lng, userCoords.lat] : null;
+    const center = userCenter || cityCenter[activeCity] || [121.47, 31.23];
 
     if (!mapInstance.current) {
       mapInstance.current = new AMap.Map(mapRef.current, {
-        zoom: 12, center, resizeEnable: true,
+        zoom: userCoords ? 14 : 12, center, resizeEnable: true,
         mapStyle: "amap://styles/dark",
       });
     } else {
-      mapInstance.current.setZoomAndCenter(12, center);
+      mapInstance.current.setZoomAndCenter(userCoords ? 14 : 12, center);
     }
 
     /* Clear old markers */

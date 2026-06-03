@@ -25,6 +25,16 @@ export default function Home() {
   const [mobileTab, setMobileTab] = useState<"market" | "map" | "share" | "profile">("market");
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
+
+  // Listen for hamburger menu nav events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const tab = (e as CustomEvent).detail;
+      if (tab === "map") setMobileTab("map");
+    };
+    document.addEventListener("nav-to-tab", handler);
+    return () => document.removeEventListener("nav-to-tab", handler);
+  }, []);
   const [copied, setCopied] = useState(false);
 
   // Credits

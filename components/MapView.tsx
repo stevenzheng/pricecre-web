@@ -117,7 +117,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       </div>
 
       {/* Map */}
-      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "280px", background: "#1a1a2e" }}>
+      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "320px", height: "100%", background: "#1a1a2e" }}>
         {!loaded && (
           <div className="w-full h-full flex items-center justify-center" style={{ background: "#1a1a2e" }}>
             <div className="text-center">
@@ -133,7 +133,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
         <div className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between">
             <span className="text-xs font-bold" style={{ color: "var(--text-strong)" }}>{activeCity} · {cityProps.length} 资产</span>
-            <span className="text-[9px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{zh.mapViewDetails}</span>
+            <span className="text-[12px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{zh.mapViewDetails}</span>
           </div>
           <div className="px-4 pb-4 space-y-2">
             {cityProps.map((p) => (
@@ -160,7 +160,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
                 </div>
                 <div className="text-right flex-shrink-0 ml-2">
                   <div className="text-sm font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>¥{p.faceRent.toFixed(1)}</div>
-                  <div className="text-[9px]" style={{ color: "var(--text-hint)" }}>/㎡/天</div>
+                  <div className="text-[12px]" style={{ color: "var(--text-hint)" }}>/㎡/天</div>
                 </div>
               </div>
             ))}

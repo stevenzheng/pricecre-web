@@ -307,7 +307,7 @@ export default function PropertyCard({
               挂牌租金面价
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-semibold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
+              <span className="text-xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
                 <span className="text-lg font-normal">¥</span>{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { mockProperties, cityList } from "@/lib/mock-data";
-import { zh } from "@/lib/i18n";
 
 const cityCenter: Record<string, [number, number]> = {
   "上海": [121.4737, 31.2304],
@@ -17,93 +16,89 @@ interface MapViewProps { onSelectProperty?: (id: string) => void; userCoords?: {
 export default function MapView({ onSelectProperty, userCoords }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
   const [activeCity, setActiveCity] = useState<string>("上海");
   const [loaded, setLoaded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [leafletReady, setLeafletReady] = useState(false);
+  const [scriptReady, setScriptReady] = useState(false);
 
-  /* Load Leaflet CSS + JS */
+  /* Load Baidu Maps */
   useEffect(() => {
-    if (document.getElementById("leaflet-css")) { setLeafletReady(true); return; }
-    const link = document.createElement("link");
-    link.id = "leaflet-css";
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-
+    if ((window as any).BMapGL) { setScriptReady(true); return; }
     const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => setLeafletReady(true);
+    script.src = "https://api.map.baidu.com/api?v=3.0&type=webgl&ak=B8Yc5OGGfc12G5RMjzYGOFc05ZjRmXWO";
+    script.onload = () => setScriptReady(true);
+    script.onerror = () => setScriptReady(false);
     document.head.appendChild(script);
-
-    return () => {
-      link.remove();
-      script.remove();
-    };
+    return () => { script.remove(); };
   }, []);
 
   /* Init map */
   useEffect(() => {
-    if (!leafletReady || !mapRef.current || !(window as any).L) return;
-    const L = (window as any).L;
-    setLoaded(true);
+    if (!scriptReady || !mapRef.current || !(window as any).BMapGL) return;
 
-    const userCenter = userCoords ? [userCoords.lat, userCoords.lng] : null;
-    const cityC = userCenter || cityCenter[activeCity] || [31.23, 121.47];
+    const BMapGL = (window as any).BMapGL;
+    const userCenter = userCoords ? new BMapGL.Point(userCoords.lng, userCoords.lat) : null;
+    const cityC = cityCenter[activeCity] || [121.47, 31.23];
+    const center = userCenter || new BMapGL.Point(cityC[0], cityC[1]);
 
     if (!mapInstance.current) {
-      mapInstance.current = L.map(mapRef.current, {
-        center: cityC,
-        zoom: userCoords ? 14 : 12,
-        zoomControl: false,
-        attributionControl: false,
+      mapInstance.current = new BMapGL.Map(mapRef.current, {
+        enableMapClick: false,
+        style: { style: "dark" },
       });
-
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 18,
-      }).addTo(mapInstance.current);
-
-      L.control.zoom({ position: "bottomright" }).addTo(mapInstance.current);
+      mapInstance.current.centerAndZoom(center, 14);
+      mapInstance.current.enableScrollWheelZoom(true);
+      mapInstance.current.setMapStyleV2({ styleId: "ceb36adcc5f161b3aeb88e0a25c70881" });
     } else {
-      mapInstance.current.setView(cityC, userCoords ? 14 : 12);
+      mapInstance.current.centerAndZoom(center, 14);
     }
 
-    /* Clear markers */
-    markersRef.current.forEach((m) => mapInstance.current?.removeLayer(m));
-    markersRef.current = [];
+    mapInstance.current.clearOverlays();
+
+    // Add user location marker
+    if (userCoords) {
+      const userPoint = new BMapGL.Point(userCoords.lng, userCoords.lat);
+      const userMarker = new BMapGL.Marker(userPoint);
+      mapInstance.current.addOverlay(userMarker);
+    }
 
     const cityProps = mockProperties.filter((p) => p.city === activeCity);
     cityProps.forEach((p, i) => {
-      const offset = 0.012;
-      const lat = cityC[0] + Math.cos(i * 1.8) * offset * (i + 1);
-      const lng = cityC[1] + Math.sin(i * 1.8) * offset * (i + 1);
+      const offset = 0.015;
+      const lng = cityC[0] + Math.cos(i * 1.8) * offset * (i + 1);
+      const lat = cityC[1] + Math.sin(i * 1.8) * offset * (i + 1);
+      const point = new BMapGL.Point(lng, lat);
 
-      const icon = L.divIcon({
-        className: "leaflet-marker-icon",
-        html: `<div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap">¥${p.faceRent.toFixed(0)}</div>`,
-        iconSize: [60, 20],
-        iconAnchor: [30, 10],
+      const label = new BMapGL.Label(`¥${p.faceRent.toFixed(0)}`, {
+        position: point,
+        offset: new BMapGL.Size(-25, -15),
       });
+      label.setStyle({
+        color: "var(--accent)",
+        fontSize: "13px",
+        fontWeight: "700",
+        fontFamily: "var(--font-mono)",
+        border: "none",
+        background: "none",
+        padding: "0",
+      });
+      mapInstance.current.addOverlay(label);
 
-      const marker = L.marker([lat, lng], { icon }).addTo(mapInstance.current);
-      marker.on("click", () => {
+      const marker = new BMapGL.Marker(point);
+      marker.addEventListener("click", () => {
         setSelectedProperty(p.id);
         onSelectProperty?.(p.id);
       });
-      markersRef.current.push(marker);
+      mapInstance.current.addOverlay(marker);
     });
 
-    return () => {
-      // Don't destroy map on re-render, just cleanup markers
-    };
-  }, [leafletReady, activeCity, userCoords]);
+    setLoaded(true);
+  }, [scriptReady, activeCity, userCoords]);
 
   const cityProps = mockProperties.filter((p) => p.city === activeCity);
 
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--bg)" }}>
-      {/* City Tabs */}
       <div className="flex items-center gap-1 px-3 py-2.5 overflow-x-auto border-b" style={{ borderColor: "var(--line)" }}>
         {["全部", ...cityList].map((city) => (
           <button
@@ -116,24 +111,21 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
         ))}
       </div>
 
-      {/* Map */}
-      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "320px", height: "100%", background: "#1a1a2e" }}>
+      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "320px", background: "#111" }}>
         {!loaded && (
           <div className="w-full h-full flex items-center justify-center" style={{ background: "#1a1a2e" }}>
             <div className="text-center">
               <div className="w-8 h-8 mx-auto mb-2 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--accent)", borderTopColor: "transparent" }} />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{zh.mapLoading}</span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>加载地图数据...</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Property List */}
       {cityProps.length > 0 && (
         <div className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between">
             <span className="text-xs font-bold" style={{ color: "var(--text-strong)" }}>{activeCity} · {cityProps.length} 资产</span>
-            <span className="text-[12px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{zh.mapViewDetails}</span>
           </div>
           <div className="px-4 pb-4 space-y-2">
             {cityProps.map((p) => (

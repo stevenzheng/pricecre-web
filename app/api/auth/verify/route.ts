@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       message: "邮箱验证成功",
       token: `pk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
     });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
   }
 }

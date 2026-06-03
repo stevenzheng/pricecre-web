@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 import PropertyCard from "@/components/PropertyCard";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -25,7 +26,6 @@ export default function Home() {
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [lang, setLang] = useState<"zh" | "en">("zh");
 
   // Credits
   const [credits, setCredits] = useState({
@@ -34,6 +34,7 @@ export default function Home() {
   });
 
   const totalCredits = credits.referral + credits.purchased;
+  const { lang, t, toggleLang } = useLanguage();
 
   // Geolocation — auto-detect user city
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -284,7 +285,7 @@ export default function Home() {
               </span>
             </button>
 
-            <LanguageToggle lang={lang} onToggle={() => setLang(lang === "zh" ? "en" : "zh")} />
+            <LanguageToggle lang={lang} onToggle={toggleLang} />
 
             <ThemeToggle />
 

@@ -253,8 +253,7 @@ body {
     background: var(--panel-hover);
   }
   .metric-cell.locked {
-    background: var(--negative-soft);
-    border-color: var(--negative-border);
+    background: var(--panel);
   }
   .metric-cell.unlocked {
     background: var(--positive-soft);

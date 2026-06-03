@@ -436,7 +436,7 @@ export default function PropertyCard({
                     }}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>
+                      <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
                         {field.label}
                       </span>
                       <span
@@ -450,14 +450,14 @@ export default function PropertyCard({
                       </span>
                     </div>
                     <div
-                      className="text-xs font-bold truncate"
+                      className="text-xs font-medium truncate" style={{ minHeight: "18px", display: "flex", alignItems: "center" }}
                       style={{
-                        color: isFieldLocked ? "var(--negative)" : isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
+                        color: isFieldLocked ? "var(--text-hint)" : isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
                         fontFamily: "var(--font-mono)",
                       }}
                     >
                       {isFieldLocked ? (
-                        <span className="inline-flex items-center gap-1" style={{ fontSize: "10px", fontWeight: 300, letterSpacing: "0.1em" }}>
+                        <span className="inline-flex items-center gap-1" style={{ fontSize: "10px", fontWeight: 400, letterSpacing: "0.1em" }}>
                           <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
                             <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
                             <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />

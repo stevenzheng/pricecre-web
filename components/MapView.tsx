@@ -48,7 +48,6 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       });
       mapInstance.current.centerAndZoom(center, 14);
       mapInstance.current.enableScrollWheelZoom(true);
-      mapInstance.current.;
     } else {
       mapInstance.current.centerAndZoom(center, 14);
     }

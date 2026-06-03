@@ -38,7 +38,7 @@ export default function Home() {
   const [geoDetected, setGeoDetected] = useState(false);
 
   useEffect(() => {
-    if (geoDetected || !navigator.geolocation) return;
+    if (typeof window === "undefined" || geoDetected || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;

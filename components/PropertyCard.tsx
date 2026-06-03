@@ -457,7 +457,7 @@ export default function PropertyCard({
                       }}
                     >
                       {isFieldLocked ? (
-                        <span className="inline-flex items-center gap-1" style={{ fontSize: "6px", fontWeight: 300, letterSpacing: "0.1em" }}>
+                        <span className="inline-flex items-center gap-1" style={{ fontSize: "10px", fontWeight: 300, letterSpacing: "0.1em" }}>
                           <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
                             <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
                             <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />

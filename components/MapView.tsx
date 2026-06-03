@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { mockProperties, propertyTypeLabels, propertyTypeIcons, cityList } from "@/lib/mock-data";
+import { mockProperties, propertyTypeLabels, cityList } from "@/lib/mock-data";
 
 /* Approximate coordinates for demo cities (center) */
 const cityCenter: Record<string, [number, number]> = {
@@ -135,7 +135,13 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                    {propertyTypeIcons[p.propertyType]}
+                    {p.propertyType === "OFFICE" ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>
+              ) : p.propertyType === "SHOPS" ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>
+              )}
                   </span>
                   <div className="min-w-0">
                     <div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>

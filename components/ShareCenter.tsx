@@ -79,7 +79,7 @@ export default function ShareCenter() {
           <span className="badge badge-accent text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
             DATA_SUBMISSION
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             // 提交租金成交真实数据
           </span>
         </div>
@@ -180,7 +180,7 @@ export default function ShareCenter() {
           <span className="badge badge-live text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
             REFERRAL_NETWORK
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             // 分享转发获得查看额度
           </span>
         </div>
@@ -211,7 +211,7 @@ export default function ShareCenter() {
           <span className="badge badge-accent text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
             REDEMPTION_GATEWAY
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             // 激活兑换码
           </span>
         </div>
@@ -233,7 +233,7 @@ export default function ShareCenter() {
           <span className="badge badge-negative text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
             COMMERCIAL_PACKAGE
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             // 商业付费直通车
           </span>
           <span className="badge badge-live text-[9px] tracking-wider font-bold ml-auto" style={{ fontFamily: "var(--font-mono)" }}>

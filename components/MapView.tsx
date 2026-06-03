@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -23,7 +24,7 @@ export default function MapView({ onSelectProperty }: MapViewProps) {
 
   /* Load AMap script */
   useEffect(() => {
-    if ((window as unknown as Record<string, unknown>).AMap) { setLoaded(true); return; }
+    if ((window as any).AMap) { setLoaded(true); return; }
     const key = "c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5";
     const script = document.createElement("script");
     script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}`;
@@ -35,13 +36,13 @@ export default function MapView({ onSelectProperty }: MapViewProps) {
 
   /* Init / update map */
   useEffect(() => {
-    if (!loaded || !mapRef.current || !(window as unknown as Record<string, unknown>).AMap) return;
+    if (!loaded || !mapRef.current || !(window as any).AMap) return;
 
-    const AMap = (window as unknown as Record<string, unknown>).AMap;
+    const AMap = (window as any).AMap;
     const center = cityCenter[activeCity] || [121.47, 31.23];
 
     if (!mapInstance.current) {
-      mapInstance.current = new (window as any).AMap.Map(mapRef.current, {
+      mapInstance.current = new AMap.Map(mapRef.current, {
         zoom: 12, center, resizeEnable: true,
         mapStyle: "amap://styles/dark",
       });

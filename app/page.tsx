@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import PropertyCard from "@/components/PropertyCard";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageToggle from "@/components/LanguageToggle";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
@@ -24,6 +25,7 @@ export default function Home() {
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [lang, setLang] = useState<"zh" | "en">("zh");
 
   // Credits
   const [credits, setCredits] = useState({
@@ -281,6 +283,8 @@ export default function Home() {
                 {totalCredits}
               </span>
             </button>
+
+            <LanguageToggle lang={lang} onToggle={() => setLang(lang === "zh" ? "en" : "zh")} />
 
             <ThemeToggle />
 

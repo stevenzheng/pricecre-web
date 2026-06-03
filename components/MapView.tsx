@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { mockProperties, propertyTypeLabels, cityList } from "@/lib/mock-data";
+import { mockProperties, cityList } from "@/lib/mock-data";
+import { zh } from "@/lib/i18n";
 
-/* Approximate coordinates for demo cities (center) */
 const cityCenter: Record<string, [number, number]> = {
   "上海": [121.4737, 31.2304],
   "北京": [116.4074, 39.9042],
@@ -17,68 +17,87 @@ interface MapViewProps { onSelectProperty?: (id: string) => void; userCoords?: {
 export default function MapView({ onSelectProperty, userCoords }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
   const [activeCity, setActiveCity] = useState<string>("上海");
   const [loaded, setLoaded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [leafletReady, setLeafletReady] = useState(false);
 
-  /* Load AMap script */
+  /* Load Leaflet CSS + JS */
   useEffect(() => {
-    if ((window as any).AMap) { setLoaded(true); return; }
-    const key = "c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5";
+    if (document.getElementById("leaflet-css")) { setLeafletReady(true); return; }
+    const link = document.createElement("link");
+    link.id = "leaflet-css";
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(link);
+
     const script = document.createElement("script");
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}`;
-    script.onload = () => setLoaded(true);
-    script.onerror = () => setLoaded(false);
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onload = () => setLeafletReady(true);
     document.head.appendChild(script);
-    return () => { if (script.parentNode) script.parentNode.removeChild(script); };
+
+    return () => {
+      link.remove();
+      script.remove();
+    };
   }, []);
 
-  /* Init / update map */
+  /* Init map */
   useEffect(() => {
-    if (!loaded || !mapRef.current || !(window as any).AMap) return;
+    if (!leafletReady || !mapRef.current || !(window as any).L) return;
+    const L = (window as any).L;
+    setLoaded(true);
 
-    const AMap = (window as any).AMap;
-    const userCenter = userCoords ? [userCoords.lng, userCoords.lat] : null;
-    const center = userCenter || cityCenter[activeCity] || [121.47, 31.23];
+    const userCenter = userCoords ? [userCoords.lat, userCoords.lng] : null;
+    const cityC = userCenter || cityCenter[activeCity] || [31.23, 121.47];
 
     if (!mapInstance.current) {
-      mapInstance.current = new AMap.Map(mapRef.current, {
-        zoom: userCoords ? 14 : 12, center, resizeEnable: true,
-        mapStyle: "amap://styles/dark",
+      mapInstance.current = L.map(mapRef.current, {
+        center: cityC,
+        zoom: userCoords ? 14 : 12,
+        zoomControl: false,
+        attributionControl: false,
       });
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 18,
+      }).addTo(mapInstance.current);
+
+      L.control.zoom({ position: "bottomright" }).addTo(mapInstance.current);
     } else {
-      mapInstance.current.setZoomAndCenter(userCoords ? 14 : 12, center);
+      mapInstance.current.setView(cityC, userCoords ? 14 : 12);
     }
 
-    /* Clear old markers */
-    mapInstance.current.clearMap();
+    /* Clear markers */
+    markersRef.current.forEach((m) => mapInstance.current?.removeLayer(m));
+    markersRef.current = [];
 
-    /* City properties */
     const cityProps = mockProperties.filter((p) => p.city === activeCity);
     cityProps.forEach((p, i) => {
-      /* Spread markers slightly around city center so they're all visible */
-      const offset = 0.015;
-      const lng = center[0] + (Math.cos(i * 1.8) * offset * (i + 1));
-      const lat = center[1] + (Math.sin(i * 1.8) * offset * (i + 1));
+      const offset = 0.012;
+      const lat = cityC[0] + Math.cos(i * 1.8) * offset * (i + 1);
+      const lng = cityC[1] + Math.sin(i * 1.8) * offset * (i + 1);
 
-      const marker = new AMap.Marker({
-        position: [lng, lat],
-        title: p.projectName,
-        label: {
-          content: `<span style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent)">¥${p.faceRent.toFixed(0)}</span>`,
-          offset: new AMap.Pixel(0, -28),
-        },
+      const icon = L.divIcon({
+        className: "leaflet-marker-icon",
+        html: `<div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap">¥${p.faceRent.toFixed(0)}</div>`,
+        iconSize: [60, 20],
+        iconAnchor: [30, 10],
       });
 
-      marker.on("click", () => setSelectedProperty(p.id));
-      mapInstance.current.add(marker);
+      const marker = L.marker([lat, lng], { icon }).addTo(mapInstance.current);
+      marker.on("click", () => {
+        setSelectedProperty(p.id);
+        onSelectProperty?.(p.id);
+      });
+      markersRef.current.push(marker);
     });
 
     return () => {
-      if (mapInstance.current) mapInstance.current.destroy?.();
-      mapInstance.current = null;
+      // Don't destroy map on re-render, just cleanup markers
     };
-  }, [loaded, activeCity]);
+  }, [leafletReady, activeCity, userCoords]);
 
   const cityProps = mockProperties.filter((p) => p.city === activeCity);
 
@@ -89,71 +108,58 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
         {["全部", ...cityList].map((city) => (
           <button
             key={city}
-            onClick={() => city === "全部" ? setActiveCity("上海") : setActiveCity(city)}
+            onClick={() => city !== "全部" && setActiveCity(city)}
             className={`chip text-[11px] ${activeCity === city || (city === "全部" && activeCity === "上海") ? "active" : ""}`}
           >
-            {city === "全部" ? "全部" : city}
+            {city}
           </button>
         ))}
       </div>
 
-      {/* Map Container */}
-      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "280px" }}>
+      {/* Map */}
+      <div ref={mapRef} className="flex-1 w-full" style={{ minHeight: "280px", background: "#1a1a2e" }}>
         {!loaded && (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--panel)" }}>
+          <div className="w-full h-full flex items-center justify-center" style={{ background: "#1a1a2e" }}>
             <div className="text-center">
               <div className="w-8 h-8 mx-auto mb-2 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--accent)", borderTopColor: "transparent" }} />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>加载地图数据...</span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{zh.mapLoading}</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Property List Below Map */}
+      {/* Property List */}
       {cityProps.length > 0 && (
         <div className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between">
-            <span className="text-xs font-bold" style={{ color: "var(--text-strong)" }}>
-              {activeCity} · {cityProps.length} 资产
-            </span>
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-hint)" }}>
-              点击查看详情
-            </span>
+            <span className="text-xs font-bold" style={{ color: "var(--text-strong)" }}>{activeCity} · {cityProps.length} 资产</span>
+            <span className="text-[9px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{zh.mapViewDetails}</span>
           </div>
           <div className="px-4 pb-4 space-y-2">
             {cityProps.map((p) => (
               <div
                 key={p.id}
-                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedProperty === p.id ? "ring-1" : ""
+                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer ${
+                  selectedProperty === p.id ? "ring-1 bg-[var(--accent-soft)]" : "bg-[var(--panel)] hover:bg-[var(--bg-hover)]"
                 }`}
-                style={{
-                  background: selectedProperty === p.id ? "var(--accent-soft)" : "var(--panel)",
-                  borderColor: selectedProperty === p.id ? "var(--accent)" : "transparent",
-                }}
+                style={{ borderColor: selectedProperty === p.id ? "var(--accent)" : "transparent" }}
                 onClick={() => { setSelectedProperty(p.id); onSelectProperty?.(p.id); }}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                    {p.propertyType === "OFFICE" ? (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>
-              ) : p.propertyType === "SHOPS" ? (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>
-              ) : (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>
-              )}
-                  </span>
+                  {p.propertyType === "OFFICE" ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>
+                  ) : p.propertyType === "SHOPS" ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>
+                  ) : (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>
+                  )}
                   <div className="min-w-0">
-                    <div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>
-                      {p.projectName}
-                    </div>
+                    <div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div>
                     <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.district}</div>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0 ml-2">
-                  <div className="text-sm font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
-                    ¥{p.faceRent.toFixed(1)}
-                  </div>
+                  <div className="text-sm font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>¥{p.faceRent.toFixed(1)}</div>
                   <div className="text-[9px]" style={{ color: "var(--text-hint)" }}>/㎡/天</div>
                 </div>
               </div>

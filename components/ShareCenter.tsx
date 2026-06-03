@@ -207,7 +207,7 @@ export default function ShareCenter() {
             onChange={(e) => setInputCode(e.target.value.toUpperCase())}
             className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6} />
           <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => { if (inputCode) { alert(`兑换码 ${inputCode} 已激活 · 确权额度已并网`); setInputCode(""); } }}>
-            激活并网
+            激活
           </button>
         </div>
         <button className="text-[10px] font-medium hover:underline ml-auto block" style={{ color: "var(--text-muted)" }}
@@ -268,9 +268,9 @@ export default function ShareCenter() {
                   color: paymentMethod === "wechat" ? "var(--positive)" : "var(--text-muted)",
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" />
-                  <path d="M14.332 11.09a9.225 9.225 0 00-1.525.197c-1.961.36-3.717 1.525-4.775 3.053-.556.803-.858 1.69-.858 2.59 0 2.637 1.99 4.964 4.83 5.807a5.19 5.19 0 001.445.213c.506 0 1.007-.073 1.493-.213l1.086.636a.18.18 0 00.095.031.17.17 0 00.168-.168c0-.041-.017-.082-.027-.122l-.222-.846a.338.338 0 01.121-.38c1.822-1.209 2.922-3.083 2.922-5.314 0-3.26-2.95-5.684-6.278-5.684z" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#07C160"/>
+                  <path d="M7.5 9.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3.75c.28 0 .5.22.5.5s-.22.5-.5.5H7.5zm0 2.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h6.25c.28 0 .5.22.5.5s-.22.5-.5.5H7.5zm0 2.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h4.5c.28 0 .5.22.5.5s-.22.5-.5.5H7.5z" fill="#fff"/>
                 </svg>
                 微信支付
               </button>
@@ -286,8 +286,9 @@ export default function ShareCenter() {
                   color: paymentMethod === "alipay" ? "var(--accent)" : "var(--text-muted)",
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 14h-3.5v-2h3.5v-2h-3.5V8h-2v8h5.5v2z" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#1677FF"/>
+                  <path d="M9.5 8h5c.28 0 .5.22.5.5v7c0 .28-.22.5-.5.5h-5c-.28 0-.5-.22-.5-.5v-7c0-.28.22-.5.5-.5zm1.25 1.5v5h2.5v-5h-2.5z" fill="#fff"/>
                 </svg>
                 支付宝
               </button>

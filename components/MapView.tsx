@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { mockProperties, propertyTypeLabels, cityList } from "@/lib/mock-data";
+import { mockProperties, propertyTypeLabels, propertyTypeIcons, cityList } from "@/lib/mock-data";
 
 /* Approximate coordinates for demo cities (center) */
 const cityCenter: Record<string, [number, number]> = {
@@ -135,7 +135,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                    {propertyTypeLabels[p.propertyType].slice(0, 2)}
+                    {propertyTypeIcons[p.propertyType]}
                   </span>
                   <div className="min-w-0">
                     <div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>
@@ -148,7 +148,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
                   <div className="text-sm font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
                     ¥{p.faceRent.toFixed(1)}
                   </div>
-                  <div className="text-[9px]" style={{ color: "var(--text-hint)" }}>/天</div>
+                  <div className="text-[9px]" style={{ color: "var(--text-hint)" }}>/㎡/天</div>
                 </div>
               </div>
             ))}

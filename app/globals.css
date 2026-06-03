@@ -336,7 +336,7 @@ body {
 
   /* Stat Bar Item */
   .stat-item {
-    text-align: left;
+    text-align: center;
   }
   .stat-label {
     font-size: 10px;

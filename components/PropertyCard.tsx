@@ -288,19 +288,26 @@ export default function PropertyCard({
           {property.projectName}
         </h3>
 
-        {/* Location */}
-        <p className="text-[13px] mb-4" style={{ color: "var(--text-muted)" }}>
-          {property.city} · {property.district}
-        </p>
+        {/* Location + Insight */}
+        <div className="flex items-start justify-between mb-4 gap-3">
+          <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
+            {property.city} · {property.district}
+          </p>
+          <div className="text-right text-[11px] leading-snug hidden sm:block" style={{ color: "var(--text-hint)" }}>
+            {(property.dynamicIndicators.kolBuzzIndex ?? 0) > 80 ? "🔥 高热度商圈" : 
+             (property.dynamicIndicators.submarketVacancy ?? 100) < 8 ? "📉 低空置率" :
+             (property.dynamicIndicators.netCorporateMigration ?? 0) > 20 ? "📈 企业净迁入" : "数据持续更新中"}
+          </div>
+        </div>
 
         {/* Face Rent + Status */}
         <div className="flex items-end justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-wider mb-1 font-medium" style={{ color: "var(--text-hint)" }}>
-              挂牌面价
+              挂牌租金面价
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
+              <span className="text-3xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
                 ¥{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
@@ -353,7 +360,7 @@ export default function PropertyCard({
                 </div>
                 {netEffectiveRent !== null ? (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
+                    <span className="text-3xl font-bold" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
                       ¥{netEffectiveRent.toFixed(1)}
                     </span>
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>

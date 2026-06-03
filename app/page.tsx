@@ -29,8 +29,8 @@ export default function Home() {
   // Listen for hamburger menu nav events
   useEffect(() => {
     const handler = (e: Event) => {
-      const tab = (e as CustomEvent).detail as string;
-      if (["map", "share", "market", "profile"].includes(tab)) setMobileTab(tab as any);
+      const tab = (e as CustomEvent).detail;
+      if (["map", "share", "market", "profile"].includes(tab)) setMobileTab(tab as "map" | "share" | "market" | "profile");
     };
     document.addEventListener("nav-to-tab", handler);
     return () => document.removeEventListener("nav-to-tab", handler);
@@ -314,12 +314,15 @@ export default function Home() {
 
         {/* Credit Panel Popover */}
         {showCreditPanel && (
-          <div className="absolute right-4 top-[calc(var(--nav-height)+4px)] z-50 animate-slide-up">
-            <CreditPanel
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowCreditPanel(false)} />
+            <div className="absolute right-4 top-[calc(var(--nav-height)+4px)] z-50 animate-slide-up">
+              <CreditPanel
               credits={credits}
               onClose={() => setShowCreditPanel(false)}
-            />
-          </div>
+              />
+            </div>
+          </>
         )}
       </header>
 
@@ -423,8 +426,6 @@ export default function Home() {
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>未找到匹配资产</p>
               <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>调整筛选条件或搜索关键词</p>
             </div>
-            </div>
-          </>
           )}
         </div>
 

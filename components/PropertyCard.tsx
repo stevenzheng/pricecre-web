@@ -309,21 +309,28 @@ export default function PropertyCard({
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
-                <span className="text-lg font-normal">¥</span>{property.faceRent.toFixed(1)}
+                <span className="text-base font-normal">¥</span>{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
+              <button
+                className="ml-2 p-1.5 rounded-lg hover:bg-[var(--panel)] transition-colors"
+                onClick={(e) => { e.stopPropagation(); showModal('即将上线：生成微信卡片图片'); }}
+                aria-label="微信分享"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              </button>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             {isUnlocked ? (
-              <span className="badge badge-positive">
-                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--positive)" }} />
+              <span className="badge badge-positive gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                 已解锁
               </span>
             ) : (
-              <span className="badge badge-negative">
-                <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--negative)" }} />
+              <span className="badge badge-negative gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--negative)" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="var(--negative)"/></svg>
                 待解锁
               </span>
             )}
@@ -361,14 +368,14 @@ export default function PropertyCard({
                 </div>
                 {netEffectiveRent !== null ? (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
+                    <span className="text-3xl font-medium" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
                       ¥{netEffectiveRent.toFixed(1)}
                     </span>
                     <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>**.**</span>
+                    <span className="text-xl font-medium" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>**.**</span>
                     <span className="text-xs" style={{ color: "var(--text-hint)" }}>解锁查看真实市价</span>
                   </div>
                 )}

@@ -266,8 +266,8 @@ export default function ProfilePanel() {
         </div>
       </div>
       <div className="space-y-2">
-        {!activated && <button className="btn-primary w-full" onClick={() => setActivated(true)}>提交数据获取额度</button>}
-        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => setQuota((q) => q + 8)}>购买额度</button>}
+        {!activated && <button className="btn-primary w-full" onClick={() => setActivated(true)} onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实数据获取额度<>/button>}
+        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => setQuota((q) => q + 8)} onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度<>/button>}
         <button className="btn-secondary w-full text-xs" onClick={() => alert("即将上线")}>账户设置</button>
       </div>
     </div>

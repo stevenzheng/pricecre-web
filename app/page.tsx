@@ -29,8 +29,8 @@ export default function Home() {
   // Listen for hamburger menu nav events
   useEffect(() => {
     const handler = (e: Event) => {
-      const tab = (e as CustomEvent).detail;
-      if (tab === "map") setMobileTab("map");
+      const tab = (e as CustomEvent).detail as string;
+      if (["map", "share", "market", "profile"].includes(tab)) setMobileTab(tab as any);
     };
     document.addEventListener("nav-to-tab", handler);
     return () => document.removeEventListener("nav-to-tab", handler);
@@ -324,7 +324,7 @@ export default function Home() {
       </header>
 
       {/* ====== Main Content ====== */}
-      <main className="pt-[var(--nav-height)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] lg:pb-8">
+      <main className="pt-[var(--nav-height)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+40px)] lg:pb-8">
         {mobileTab === "market" && (
           <>
         {/* Stats Bar */}
@@ -423,6 +423,8 @@ export default function Home() {
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>未找到匹配资产</p>
               <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>调整筛选条件或搜索关键词</p>
             </div>
+            </div>
+          </>
           )}
         </div>
 

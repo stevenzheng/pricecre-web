@@ -72,7 +72,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>分享链接获取</div>
             </div>
           </div>
-          <span className="text-lg font-bold" style={{ color: credits.referral > 0 ? "var(--positive)" : "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{credits.referral}</span>
+          <span className="text-base font-medium" style={{ color: credits.referral > 0 ? "var(--positive)" : "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{credits.referral}</span>
         </div>
 
         <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--panel)" }}>
@@ -85,7 +85,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>直接购买 · ¥99/50次</div>
             </div>
           </div>
-          <span className="text-lg font-bold" style={{ color: credits.purchased > 0 ? "var(--accent)" : "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{credits.purchased}</span>
+          <span className="text-base font-medium" style={{ color: credits.purchased > 0 ? "var(--accent)" : "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{credits.purchased}</span>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       <div className="px-5 pb-4">
         <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: isExhausted ? "var(--negative-soft)" : "var(--positive-soft)" }}>
           <span className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>可用额度</span>
-          <span className="text-lg font-bold" style={{ color: isExhausted ? "var(--negative)" : "var(--positive)", fontFamily: "var(--font-mono)" }}>{total}</span>
+          <span className="text-base font-medium" style={{ color: isExhausted ? "var(--negative)" : "var(--positive)", fontFamily: "var(--font-mono)" }}>{total}</span>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       <div className="px-5 py-3 border-t grid grid-cols-3 gap-2" style={{ borderColor: "var(--line)" }}>
         {[{ label: "累计提报", value: 0 }, { label: "累计购买", value: 0 }, { label: "已确权", value: 0 }].map((s) => (
           <div key={s.label} className="text-center">
-            <div className="text-[13px] font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
+            <div className="text-xs font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
             <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{s.label}</div>
           </div>
         ))}
@@ -110,7 +110,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       {/* CTA */}
       <div className="px-5 py-3 border-t flex gap-2" style={{ borderColor: "var(--line)" }}>
         <button className="btn-primary text-xs flex-1">提交数据获取额度</button>
-        <button className="btn-secondary text-xs flex-1">购买额度</button>
+        <button className="btn-secondary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}>购买额度</button>
       </div>
     </div>
   );

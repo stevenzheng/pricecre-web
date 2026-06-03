@@ -211,6 +211,20 @@ export default function ProfilePanel() {
               </button>
             </>
           )}
+
+          {/* 微信公众号 */}
+          <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t" style={{ borderColor: "var(--line)" }}>
+            <div className="flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#07C160">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                <path d="M8.5 9a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" fill="#fff"/>
+              </svg>
+              <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>关注微信公众号</span>
+            </div>
+            <span className="text-sm font-bold" style={{ color: "var(--positive)" }}>PriceCRE</span>
+            <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>获取最新资产数据推送与行业洞察</span>
+          </div>
+
         </div>
       </div>
     );

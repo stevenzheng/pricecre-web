@@ -184,11 +184,12 @@ export default function ShareCenter() {
             // 分享转发获得查看额度
           </span>
         </div>
-        <div className="mb-4">
-          <div className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>历史累计已获赠确权额度</div>
-          <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-lg font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>/ 100 次</span>
+        <div className="mb-4 text-center">
+          <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-2xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
+            <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>次</span>
           </div>
         </div>
         <div className="space-y-2">

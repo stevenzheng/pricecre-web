@@ -112,12 +112,8 @@ export default function HamburgerMenu({
                 <rect x="16" y="14" width="6" height="3" rx="1" />
               </svg>
             </div>
-            <span className="font-bold text-[15px]" style={{ color: "var(--text-strong)" }}>
-              PriceCRE
-            </span>
-            <span className="text-[12px] font-light tracking-wide" style={{ color: "var(--text-muted)" }}>
-              地产价值
-            </span>
+            <span className="font-medium text-[15px]" style={{ color: "var(--text-strong)" }}>PriceCRE</span>
+            <span className="text-[12px] font-normal tracking-wide" style={{ color: "var(--text-muted)" }}>地产价值</span>
           </div>
           <button
             onClick={onClose}

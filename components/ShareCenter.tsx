@@ -69,13 +69,13 @@ export default function ShareCenter() {
           提交租金数据，获取累计查看额度
         </h2>
         <p className="text-[11px] mt-2 px-4 py-2 rounded-lg inline-block" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-          每提交 1 次真实交易数据，可获取 8 次楼盘精确档案查看额度
+          每提交一次真实确认的租金交易数据，可获得 8 次资产数据查看额度
         </p>
       </div>
 
-      {/* ===== 数据提报 ===== */}
+      {/* 数据提报 */}
       <div className="card p-5">
-        
+        <div className="section-title">提交租金成交真实数据</div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -166,8 +166,9 @@ export default function ShareCenter() {
         </form>
       </div>
 
-      {/* ===== 裂变池 ===== */}
+      {/* 分享转发 */}
       <div className="card p-5">
+        <div className="section-title">分享转发获得查看额度</div>
         
         <div className="mb-4 text-center">
           <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
@@ -191,8 +192,9 @@ export default function ShareCenter() {
         </div>
       </div>
 
-      {/* ===== 兑换码 ===== */}
+      {/* 兑换码 */}
       <div className="card p-5">
+        <div className="section-title">激活兑换码</div>
         
         <div className="flex gap-2 mb-2">
           <input type="text" placeholder="输入 6 位兑换码" value={inputCode}
@@ -206,8 +208,9 @@ export default function ShareCenter() {
           onClick={() => alert("稍后可在「我的」页面兑换")}>先去看盘，稍后兑换 →</button>
       </div>
 
-      {/* ===== 商业付费直通车 ===== */}
+      {/* 商业付费 */}
       <div className="card p-5">
+        <div className="section-title">商业付费直通车</div>
         
 
         {purchaseStep === "idle" && (

@@ -517,3 +517,10 @@ body {
     display: none;
   }
 }
+
+/* ---- Mobile Typography Scale (~30% larger) ---- */
+@media (max-width: 640px) {
+  html {
+    font-size: 115%; /* 18.4px base — all rem-based text scales up */
+  }
+}

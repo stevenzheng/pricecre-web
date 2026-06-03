@@ -64,7 +64,7 @@ export default function MapView({ onSelectProperty }: MapViewProps) {
         position: [lng, lat],
         title: p.projectName,
         label: {
-          content: `<span style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--text-inverse);background:var(--accent);padding:1px 6px;border-radius:3px">¥${p.faceRent.toFixed(0)}</span>`,
+          content: `<span style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent)">¥${p.faceRent.toFixed(0)}</span>`,
           offset: new AMap.Pixel(0, -28),
         },
       });

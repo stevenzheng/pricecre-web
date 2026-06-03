@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface CreditPanelProps {
   credits: { referral: number; purchased: number };
   onClose: () => void;
@@ -9,6 +11,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
   const total = credits.referral + credits.purchased;
   const isExhausted = total === 0;
   const isLow = total <= 3 && total > 0;
+  const [showEye, setShowEye] = useState(false);
 
   return (
     <div className="w-80 rounded-xl border shadow-lg p-0 overflow-hidden" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>
@@ -26,17 +29,27 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
 
       {/* Header */}
       <div className="px-5 py-3 flex items-center gap-3" style={{ background: "var(--panel)" }}>
-        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{
-          background: isExhausted ? "var(--text-hint)" : isLow ? "var(--warning)" : "var(--positive)",
-          boxShadow: isExhausted ? "none" : `0 0 8px ${isLow ? "var(--warning)" : "var(--positive)"}44`,
-        }} />
+        <button
+          className="w-2.5 h-2.5 rounded-full flex-shrink-0 cursor-pointer transition-all"
+          style={{
+            background: isExhausted ? "var(--text-hint)" : isLow ? "var(--warning)" : "var(--positive)",
+            boxShadow: isExhausted ? "none" : `0 0 8px ${isLow ? "var(--warning)" : "var(--positive)"}44`,
+          }}
+          onClick={() => setShowEye(!showEye)}
+          aria-label={showEye ? "隐藏额度" : "显示额度"}
+        />
         <div>
           <div className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>
-            {isExhausted ? "额度已用完" : isLow ? "额度即将耗尽" : "额度已激活"}
+            {isExhausted ? "额度已用完" : isLow ? "额度即将耗尽" : showEye ? (
+              <span className="inline-flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                额度已激活
+              </span>
+            ) : "额度已激活"}
           </div>
           <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
             {isExhausted
-              ? "裂变与付费额度均已用完"
+              ? "邀约与付费额度均已用完"
               : isLow
               ? `剩余 ${total} 次确权额度 · 建议补充`
               : `可用额度：${total} 次`}
@@ -55,8 +68,8 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </div>
             <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>裂变池</div>
-              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>邀请好友获得 · 上限100次</div>
+              <div className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>邀约额度</div>
+              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>分享链接获取</div>
             </div>
           </div>
           <span className="text-lg font-bold" style={{ color: credits.referral > 0 ? "var(--positive)" : "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{credits.referral}</span>

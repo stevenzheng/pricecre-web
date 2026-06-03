@@ -257,7 +257,7 @@ export default function PropertyCard({
           {/* Quick-glance volatile indicators */}
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {property.dynamicIndicators.submarketVacancy != null && (
-              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{
+              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
                 background: "var(--negative-soft)",
                 color: "var(--negative)",
               }}>
@@ -265,7 +265,7 @@ export default function PropertyCard({
               </span>
             )}
             {property.dynamicIndicators.netCorporateMigration != null && (
-              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{
+              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
                 background: (property.dynamicIndicators.netCorporateMigration ?? 0) > 0 ? "var(--positive-soft)" : "var(--negative-soft)",
                 color: (property.dynamicIndicators.netCorporateMigration ?? 0) > 0 ? "var(--positive)" : "var(--negative)",
               }}>
@@ -273,7 +273,7 @@ export default function PropertyCard({
               </span>
             )}
             {property.dynamicIndicators.kolBuzzIndex != null && (
-              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{
+              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
                 background: "var(--accent-soft)",
                 color: "var(--accent)",
               }}>
@@ -296,7 +296,7 @@ export default function PropertyCard({
         {/* Face Rent + Status */}
         <div className="flex items-end justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-wider mb-1 font-medium" style={{ color: "var(--text-hint)" }}>
+            <div className="text-[11px] uppercase tracking-wider mb-1 font-medium" style={{ color: "var(--text-hint)" }}>
               挂牌面价
             </div>
             <div className="flex items-baseline gap-1">
@@ -342,7 +342,7 @@ export default function PropertyCard({
                     净有效租金
                   </span>
                   {!isUnlocked && (
-                    <span className="badge badge-negative text-[10px] gap-1">
+                    <span className="badge badge-negative text-[11px] gap-1">
                       <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
                         <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
@@ -402,7 +402,7 @@ export default function PropertyCard({
             <div className="section-title">
               附属精算指标
               {!isUnlocked && (
-                <span className="font-normal ml-2 text-[10px]" style={{ color: "var(--text-hint)" }}>解锁后查看</span>
+                <span className="font-normal ml-2 text-[11px]" style={{ color: "var(--text-hint)" }}>解锁后查看</span>
               )}
             </div>
             {/* Mobile: 3 cols, Desktop: 4 cols */}
@@ -419,11 +419,11 @@ export default function PropertyCard({
                     className={`metric-cell ${isFieldLocked ? "locked" : isUnlocked ? "unlocked" : ""}`}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>
+                      <span className="text-[11px] font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>
                         {field.label}
                       </span>
                       <span
-                        className="text-[8px] font-normal tracking-[0.06em] ml-1"
+                        className="text-[11px] font-normal tracking-[0.06em] ml-1"
                         style={{
                           opacity: 0.35,
                           fontFamily: "var(--font-mono)",

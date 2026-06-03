@@ -36,6 +36,7 @@ export default function Home() {
   // Geolocation — auto-detect user city
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDetected, setGeoDetected] = useState(false);
+  const [userCity, setUserCity] = useState<string>("");
 
   useEffect(() => {
     if (typeof window === "undefined" || geoDetected || !navigator.geolocation) return;
@@ -49,6 +50,7 @@ export default function Home() {
           .then((d) => {
             if (d.city) {
               const cityName = d.city.replace("市", "");
+              setUserCity(cityName);
               if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
                 setActiveCity(cityName);
               }
@@ -64,6 +66,7 @@ export default function Home() {
           .then((d) => {
             if (d.city) {
               const cityName = d.city.replace("市", "");
+              setUserCity(cityName);
               if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
                 setActiveCity(cityName);
               }
@@ -232,6 +235,12 @@ export default function Home() {
               <span className="badge-live-dot" />
               LIVE
             </span>
+            {userCity && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium ml-1" style={{ color: "var(--text-muted)" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {userCity}
+              </span>
+            )}
           </div>
 
           {/* Center: Search (Desktop) */}
@@ -491,34 +500,26 @@ export default function Home() {
       </main>
 
       {/* ====== Desktop Footer ====== */}
-      <footer className="hidden lg:block border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-[11px]" style={{ color: "var(--text-hint)" }}>
-            {/* Left: Copyright + Version */}
-            <div className="space-y-1">
-              <div style={{ color: "var(--text-muted)" }}>
-                <span className="font-semibold" style={{ color: "var(--text-strong)" }}>PriceCRE</span>
-                <span className="mx-1.5">·</span>
-                <span>商业地产量化精算资产终端</span>
-              </div>
-              <div className="flex items-center gap-3" style={{ fontFamily: "var(--font-mono)" }}>
-                <span>&copy; 2026 PriceCRE. All Rights Reserved.</span>
-                <span className="opacity-30">|</span>
-                <span>v3.0.0_MODULAR</span>
-              </div>
+      <footer className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
+        <div className="max-w-7xl mx-auto px-4 py-5">
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex items-center gap-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
+              <span className="font-semibold" style={{ color: "var(--text-strong)" }}>PriceCRE</span>
+              <span>·</span>
+              <span>商业地产量化精算资产终端</span>
             </div>
-
-            {/* Center: Data Disclaimer */}
-            <div className="space-y-1 max-w-md text-[10px] leading-relaxed" style={{ color: "var(--text-hint)" }}>
-              <p>本平台展示的商业地产租金及精算指标数据来源于公开市场信息、行业机构数据汇总及用户自愿提交。数据仅供参考，不构成任何投资、租赁或交易建议。</p>
-              <p>数据每日 8:00 自动更新。部分高阶精算指标需通过额度兑换或 VIP 订阅解锁查看。</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
+              <span>&copy; 2026 PriceCRE</span>
+              <span className="opacity-30 hidden sm:inline">|</span>
+              <span className="hidden sm:inline">v3.0.0_MODULAR</span>
             </div>
-
-            {/* Right: Links */}
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <a href="#" className="hover:underline transition-colors" style={{ color: "var(--text-muted)" }}>服务条款</a>
-              <a href="#" className="hover:underline transition-colors" style={{ color: "var(--text-muted)" }}>隐私政策</a>
-              <a href="#" className="hover:underline transition-colors" style={{ color: "var(--text-muted)" }}>联系我们</a>
+            <div className="text-[10px] leading-relaxed max-w-md" style={{ color: "var(--text-hint)" }}>
+              数据来源于公开市场信息与用户提交，仅供参考，不构成投资建议。每日 8:00 更新。
+            </div>
+            <div className="flex items-center gap-4 text-[10px]">
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
+              <a href="#" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
             </div>
           </div>
         </div>

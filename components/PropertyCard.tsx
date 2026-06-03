@@ -130,10 +130,13 @@ function getIndicatorFields(
   }
 
   return fieldDefs
-    .filter((def) => indicators[def.key as keyof DynamicIndicators] !== undefined)
+    .filter((def) => {
+      const val = indicators[def.key as keyof DynamicIndicators];
+      return val !== undefined && val !== null;
+    })
     .map((def) => ({
       ...def,
-      value: indicators[def.key as keyof DynamicIndicators],
+      value: indicators[def.key as keyof DynamicIndicators] as string | number | undefined,
     }));
 }
 
@@ -300,7 +303,7 @@ export default function PropertyCard({
               <span className="text-2xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
                 ¥{property.faceRent.toFixed(1)}
               </span>
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>/天</span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
             </div>
           </div>
 
@@ -353,7 +356,7 @@ export default function PropertyCard({
                     <span className="text-2xl font-bold" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
                       ¥{netEffectiveRent.toFixed(1)}
                     </span>
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>/天</span>
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">

@@ -1,0 +1,109 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN_DATA
+  ADMIN_FINANCE
+  SUPER_ADMIN
+}
+
+enum PropertyType {
+  OFFICE
+  SHOPS
+  INDUSTRIAL
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  email                 String?       @unique
+  phone                 String?       @unique
+  wechatOpenId          String?       @unique
+  password              String?       
+  role                  Role          @default(USER) 
+  vipLevel              Int           @default(0) 
+  vipExpireTime         DateTime?     
+  purchasedViewCount     Int          @default(0)    
+  referralViewCount     Int          @default(3)    
+  lifetimeReferralEarned Int          @default(0)    
+  myReferralCode        String        @unique 
+  createdAt             DateTime      @default(now())
+  orders                Order[]
+  viewLogs              UserViewLog[]
+  referralsGiven        Referral[]    @relation("ReferrerRelation")
+  referralReceived      Referral?     @relation("RefereeRelation")
+}
+
+model FieldMetadata {
+  id            String       @id @default(uuid())
+  fieldKey      String       
+  fieldName     String       
+  fieldType     String       
+  unitLabel     String       @default("")
+  moduleType    PropertyType 
+  isDisplayed   Boolean      @default(true)  
+  isLocked      Boolean      @default(true)  
+  sortOrder     Int          @default(0)     
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([fieldKey, moduleType]) 
+}
+
+model Referral {
+  id            String   @id @default(uuid())
+  referrerId    String   
+  refereeId     String   @unique 
+  referrer      User     @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee       User     @relation("RefereeRelation", fields: [refereeId], references: [id], onDelete: Cascade)
+  rewardGranted Boolean  @default(false) 
+  createdAt     DateTime @default(now())
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  orderNo       String    @unique 
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productType   Int       
+  amount        Decimal   @db.Decimal(10, 2)
+  paymentMethod String    
+  status        Int       @default(0) 
+  tradeNo       String?   
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model UserViewLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId  String   
+  viewedAt    DateTime @default(now())
+
+  @@unique([userId, propertyId]) 
+  @@index([userId, propertyId, viewedAt])
+}
+
+model CommercialProperty {
+  id                 String       @id @default(uuid())
+  projectName        String   
+  city               String
+  district           String
+  rawAddress         String
+  propertyType       PropertyType 
+  faceRent           Decimal      @db.Decimal(10, 2) 
+  dataSource         String   
+  dynamicIndicators  Json         
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  agentUpdatedAt     DateTime     
+
+  @@unique([projectName, rawAddress]) 
+  @@index([city, propertyType])
+}

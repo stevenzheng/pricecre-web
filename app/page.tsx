@@ -53,9 +53,8 @@ export default function Home() {
   const stats = useMemo(() => {
     const unlocked = mockProperties.filter((p) => p.isUnlocked).length;
     const cities = new Set(mockProperties.map((p) => p.city)).size;
-    const avgRent =
-      mockProperties.reduce((s, p) => s + p.faceRent, 0) / mockProperties.length;
-    return { total: mockProperties.length, unlocked, cities, avgRent };
+    const volume = unlocked * 8 + 12; // 模拟成交量
+    return { total: mockProperties.length, unlocked, cities, volume };
   }, []);
 
   // Handlers
@@ -279,11 +278,8 @@ export default function Home() {
                 <div className="stat-value">{stats.cities}</div>
               </div>
               <div className="stat-item">
-                <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>均价</div>
-                <div className="stat-value">
-                  ¥{stats.avgRent.toFixed(0)}
-                  <span className="text-[10px] ml-0.5 font-normal" style={{ color: "var(--text-muted)" }}>/天</span>
-                </div>
+                <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>成交量</div>
+                <div className="stat-value">{stats.volume}</div>
               </div>
             </div>
           </div>

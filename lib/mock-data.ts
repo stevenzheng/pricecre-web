@@ -308,6 +308,67 @@ export const mockProperties: CommercialProperty[] = [
     isUnlocked: true,
     updatedAt: "2026-06-01T09:00:00Z",
   },
+  // ===== 新增 10 资产 =====
+  {
+    id: "prop-006", projectName: "上海环球金融中心", city: "上海", district: "浦东新区", rawAddress: "上海市浦东新区世纪大道100号",
+    propertyType: PropertyType.OFFICE, faceRent: 20.0, dataSource: "贝壳商办 · 2026-06-02",
+    dynamicIndicators: { ...baseIndicators, faceRent: 20.0, netEffectiveRent: 16.8, capRate: 4.5, priceToRentRatio: 45, wale: 5.8, retentionRate: 86, tenantConcentration: 32, netAbsorption: 9500, reversionRate: 5.0, spaceUtilization: 84, esgCertification: "LEED Platinum", landFloorPrice: 52000, capexIntensity: 13500, npiMargin: 70, collectionRate: 97, compTxPrice: 98000, noiCagr3Y: 4.0, submarketVacancy: 10.2, policyIncentiveLevel: 3, yieldSpread: 2.0, kolBuzzIndex: 82, negativeSentimentRate: 2.8, employeeHappinessScore: 84, netCorporateMigration: 18, hqSupplyChainRatio: 48, corporateInquiryIndex: 90, ltvRatio: 50, debtYield: 9.0, cashOnCashReturn: 7.5, projectedIrr5Y: 13.0 },
+    isUnlocked: false, updatedAt: "2026-06-02T08:00:00Z",
+  },
+  {
+    id: "prop-007", projectName: "上海张江高科技园", city: "上海", district: "浦东新区", rawAddress: "上海市浦东新区祖冲之路1077号",
+    propertyType: PropertyType.INDUSTRIAL, faceRent: 3.2, dataSource: "好租 · 2026-06-01",
+    dynamicIndicators: { ...baseIndicators, faceRent: 3.2, netEffectiveRent: 2.6, capRate: 7.0, priceToRentRatio: 26, wale: 9.0, retentionRate: 94, tenantConcentration: 52, esgCertification: "国家级高新区", landFloorPrice: 3200, capexIntensity: 4800, npiMargin: 60, collectionRate: 98, compTxPrice: 16000, noiCagr3Y: 9.2, submarketVacancy: 5.5, policyIncentiveLevel: 5, yieldSpread: 4.8, kolBuzzIndex: 68, negativeSentimentRate: 0.8, employeeHappinessScore: 88, electricityOutputRatio: 95, taxCovenantRate: 110, loadingDockRatio: 1.8, netCorporateMigration: 35, hqSupplyChainRatio: 72, corporateInquiryIndex: 85, ltvRatio: 38, debtYield: 11.0, cashOnCashReturn: 9.8, projectedIrr5Y: 20.0 },
+    isUnlocked: false, updatedAt: "2026-06-01T10:00:00Z",
+  },
+  {
+    id: "prop-008", projectName: "北京三里屯太古里", city: "北京", district: "朝阳区", rawAddress: "北京市朝阳区三里屯路19号",
+    propertyType: PropertyType.SHOPS, faceRent: 42.0, dataSource: "贝壳商办 · 2026-06-02",
+    dynamicIndicators: { ...baseIndicators, faceRent: 42.0, netEffectiveRent: 35.0, capRate: 5.2, priceToRentRatio: 32, wale: 3.0, retentionRate: 80, tenantConcentration: 40, salesEfficiency: 18000, rentToSalesRatio: 14.0, footfallTicketSize: "1560元/客单", esgCertification: "LEED Gold", landFloorPrice: 55000, capexIntensity: 12000, npiMargin: 62, collectionRate: 93, compTxPrice: 95000, noiCagr3Y: 6.8, submarketVacancy: 4.0, policyIncentiveLevel: 4, yieldSpread: 3.5, kolBuzzIndex: 88, negativeSentimentRate: 1.8, employeeHappinessScore: 80, anchorDependency: 30, merchantChurnRate: 6.5, firstStoreRatio: 28, openToCloseRatio: 3.5, culturalRadianceLevel: 5, footfallPulseRate: 2.2, culturalPremiumScore: 88, tradeAreaPopulation: 4200000, demographicPremiumScore: 91 },
+    isUnlocked: false, updatedAt: "2026-06-02T11:00:00Z",
+  },
+  {
+    id: "prop-009", projectName: "北京望京SOHO", city: "北京", district: "朝阳区", rawAddress: "北京市朝阳区望京街10号",
+    propertyType: PropertyType.OFFICE, faceRent: 15.0, dataSource: "点点租 · 2026-06-03",
+    dynamicIndicators: { ...baseIndicators, faceRent: 15.0, netEffectiveRent: 12.0, capRate: 5.0, priceToRentRatio: 38, wale: 4.5, retentionRate: 82, tenantConcentration: 38, netAbsorption: 6800, reversionRate: 3.5, spaceUtilization: 78, esgCertification: "LEED Silver", landFloorPrice: 35000, capexIntensity: 10000, npiMargin: 64, collectionRate: 95, compTxPrice: 72000, noiCagr3Y: 3.2, submarketVacancy: 14.0, policyIncentiveLevel: 2, yieldSpread: 1.5, kolBuzzIndex: 72, negativeSentimentRate: 4.5, employeeHappinessScore: 75, netCorporateMigration: 8, hqSupplyChainRatio: 35, corporateInquiryIndex: 78, ltvRatio: 55, debtYield: 7.5, cashOnCashReturn: 6.8, projectedIrr5Y: 10.5 },
+    isUnlocked: false, updatedAt: "2026-06-03T07:00:00Z",
+  },
+  {
+    id: "prop-010", projectName: "深圳平安金融中心", city: "深圳", district: "福田区", rawAddress: "深圳市福田区益田路5033号",
+    propertyType: PropertyType.OFFICE, faceRent: 25.0, dataSource: "贝壳商办 · 2026-06-01",
+    dynamicIndicators: { ...baseIndicators, faceRent: 25.0, netEffectiveRent: 20.5, capRate: 4.0, priceToRentRatio: 48, wale: 7.0, retentionRate: 90, tenantConcentration: 25, netAbsorption: 15000, reversionRate: 6.0, spaceUtilization: 90, esgCertification: "LEED Platinum + WELL Platinum", landFloorPrice: 72000, capexIntensity: 18000, npiMargin: 75, collectionRate: 99, compTxPrice: 120000, noiCagr3Y: 5.0, submarketVacancy: 7.0, policyIncentiveLevel: 4, yieldSpread: 1.6, kolBuzzIndex: 90, negativeSentimentRate: 1.2, employeeHappinessScore: 90, netCorporateMigration: 28, hqSupplyChainRatio: 62, corporateInquiryIndex: 98, ltvRatio: 42, debtYield: 10.0, cashOnCashReturn: 8.5, projectedIrr5Y: 15.5 },
+    isUnlocked: false, updatedAt: "2026-06-01T09:30:00Z",
+  },
+  {
+    id: "prop-011", projectName: "深圳科技园", city: "深圳", district: "南山区", rawAddress: "深圳市南山区科技南路18号",
+    propertyType: PropertyType.INDUSTRIAL, faceRent: 4.5, dataSource: "好租 · 2026-06-02",
+    dynamicIndicators: { ...baseIndicators, faceRent: 4.5, netEffectiveRent: 3.8, capRate: 6.5, priceToRentRatio: 30, wale: 7.5, retentionRate: 88, tenantConcentration: 48, esgCertification: "国家级科技园", landFloorPrice: 5000, capexIntensity: 6000, npiMargin: 65, collectionRate: 96, compTxPrice: 22000, noiCagr3Y: 10.0, submarketVacancy: 8.0, policyIncentiveLevel: 5, yieldSpread: 4.0, kolBuzzIndex: 75, negativeSentimentRate: 2.0, employeeHappinessScore: 82, electricityOutputRatio: 88, taxCovenantRate: 98, loadingDockRatio: 1.2, netCorporateMigration: 25, hqSupplyChainRatio: 55, corporateInquiryIndex: 92, ltvRatio: 45, debtYield: 9.5, cashOnCashReturn: 8.8, projectedIrr5Y: 17.0 },
+    isUnlocked: false, updatedAt: "2026-06-02T14:00:00Z",
+  },
+  {
+    id: "prop-012", projectName: "苏州中心商场", city: "苏州", district: "工业园区", rawAddress: "苏州市工业园区苏雅路158号",
+    propertyType: PropertyType.SHOPS, faceRent: 18.0, dataSource: "贝壳商办 · 2026-06-03",
+    dynamicIndicators: { ...baseIndicators, faceRent: 18.0, netEffectiveRent: 14.5, capRate: 6.0, priceToRentRatio: 30, wale: 4.5, retentionRate: 82, tenantConcentration: 42, salesEfficiency: 8000, rentToSalesRatio: 20.0, footfallTicketSize: "420元/客单", esgCertification: "一星级绿色建筑", landFloorPrice: 18000, capexIntensity: 6000, npiMargin: 55, collectionRate: 92, compTxPrice: 45000, noiCagr3Y: 5.8, submarketVacancy: 7.5, policyIncentiveLevel: 3, yieldSpread: 3.0, kolBuzzIndex: 58, negativeSentimentRate: 3.5, employeeHappinessScore: 72, anchorDependency: 40, merchantChurnRate: 10.0, firstStoreRatio: 12, openToCloseRatio: 2.0, culturalRadianceLevel: 3, footfallPulseRate: 1.2, culturalPremiumScore: 65, tradeAreaPopulation: 1500000, demographicPremiumScore: 70 },
+    isUnlocked: false, updatedAt: "2026-06-03T08:00:00Z",
+  },
+  {
+    id: "prop-013", projectName: "苏州国际金融中心", city: "苏州", district: "工业园区", rawAddress: "苏州市工业园区苏州大道东265号",
+    propertyType: PropertyType.OFFICE, faceRent: 6.5, dataSource: "点点租 · 2026-06-02",
+    dynamicIndicators: { ...baseIndicators, faceRent: 6.5, netEffectiveRent: 5.2, capRate: 6.2, priceToRentRatio: 28, wale: 4.0, retentionRate: 78, tenantConcentration: 42, netAbsorption: 3500, reversionRate: 2.8, spaceUtilization: 72, esgCertification: "LEED Gold", landFloorPrice: 12000, capexIntensity: 7000, npiMargin: 58, collectionRate: 93, compTxPrice: 35000, noiCagr3Y: 3.5, submarketVacancy: 15.0, policyIncentiveLevel: 3, yieldSpread: 2.8, kolBuzzIndex: 45, negativeSentimentRate: 5.0, employeeHappinessScore: 68, netCorporateMigration: 5, hqSupplyChainRatio: 28, corporateInquiryIndex: 55, ltvRatio: 58, debtYield: 6.5, cashOnCashReturn: 5.8, projectedIrr5Y: 9.0 },
+    isUnlocked: true, updatedAt: "2026-06-02T15:00:00Z",
+  },
+  {
+    id: "prop-014", projectName: "成都天府软件园", city: "成都", district: "高新区", rawAddress: "成都市高新区天府大道中段599号",
+    propertyType: PropertyType.OFFICE, faceRent: 5.0, dataSource: "好租 · 2026-06-01",
+    dynamicIndicators: { ...baseIndicators, faceRent: 5.0, netEffectiveRent: 3.8, capRate: 7.5, priceToRentRatio: 22, wale: 3.5, retentionRate: 75, tenantConcentration: 48, netAbsorption: 5200, reversionRate: 2.5, spaceUtilization: 70, esgCertification: "省级科技园", landFloorPrice: 8000, capexIntensity: 5000, npiMargin: 55, collectionRate: 90, compTxPrice: 22000, noiCagr3Y: 5.5, submarketVacancy: 18.0, policyIncentiveLevel: 4, yieldSpread: 3.5, kolBuzzIndex: 52, negativeSentimentRate: 4.0, employeeHappinessScore: 70, netCorporateMigration: 12, hqSupplyChainRatio: 25, corporateInquiryIndex: 65, ltvRatio: 60, debtYield: 6.0, cashOnCashReturn: 5.5, projectedIrr5Y: 11.0 },
+    isUnlocked: false, updatedAt: "2026-06-01T16:00:00Z",
+  },
+  {
+    id: "prop-015", projectName: "成都高新西区产业园", city: "成都", district: "高新区", rawAddress: "成都市高新区西区大道599号",
+    propertyType: PropertyType.INDUSTRIAL, faceRent: 1.8, dataSource: "好租 · 2026-06-02",
+    dynamicIndicators: { ...baseIndicators, faceRent: 1.8, netEffectiveRent: 1.5, capRate: 8.0, priceToRentRatio: 20, wale: 10.0, retentionRate: 92, tenantConcentration: 60, esgCertification: "省级工业园", landFloorPrice: 2000, capexIntensity: 3800, npiMargin: 52, collectionRate: 95, compTxPrice: 10000, noiCagr3Y: 7.8, submarketVacancy: 9.5, policyIncentiveLevel: 4, yieldSpread: 5.2, kolBuzzIndex: 42, negativeSentimentRate: 2.5, employeeHappinessScore: 75, electricityOutputRatio: 85, taxCovenantRate: 88, loadingDockRatio: 2.2, netCorporateMigration: 28, hqSupplyChainRatio: 58, corporateInquiryIndex: 72, ltvRatio: 35, debtYield: 12.0, cashOnCashReturn: 10.5, projectedIrr5Y: 22.0 },
+    isUnlocked: false, updatedAt: "2026-06-02T12:00:00Z",
+  },
 ];
 
 export const cityList = ["上海", "北京", "深圳", "苏州", "成都"];

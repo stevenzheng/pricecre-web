@@ -80,7 +80,7 @@ export default function ShareCenter() {
             DATA_SUBMISSION
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 数据提报并网
+            // 提交租金成交真实数据
           </span>
         </div>
 
@@ -92,6 +92,19 @@ export default function ShareCenter() {
             onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
             className="input-search" style={{ paddingLeft: "12px" }}
           />
+          <select
+            className="input-search"
+            style={{ paddingLeft: '12px', color: 'var(--text-muted)' }}
+            defaultValue=""
+          >
+            <option value="">选择城市</option>
+            <option value="上海">上海</option>
+            <option value="北京">北京</option>
+            <option value="深圳">深圳</option>
+            <option value="苏州">苏州</option>
+            <option value="成都">成都</option>
+          </select>
+
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>¥</span>
@@ -168,7 +181,7 @@ export default function ShareCenter() {
             REFERRAL_NETWORK
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 社交裂变并网
+            // 分享转发获得查看额度
           </span>
         </div>
         <div className="mb-4">
@@ -199,7 +212,7 @@ export default function ShareCenter() {
             REDEMPTION_GATEWAY
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-            // 兑换码并网
+            // 激活兑换码
           </span>
         </div>
         <div className="flex gap-2 mb-2">

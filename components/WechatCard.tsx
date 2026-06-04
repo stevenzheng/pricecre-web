@@ -43,7 +43,8 @@ export default function WechatCard({ projectName, city, district, faceRent, prop
         </div>
 
         {/* Indicator Grid */}
-        {indicators.length > 0 && (
+        <div className="text-[10px] mb-2 px-5" style={{ color: "var(--text-hint)" }}>该资产共 {indicators.length} 项精算指标已展示</div>
+          {indicators.length > 0 && (
           <div className="px-5 pb-4">
             <div className="grid grid-cols-3 gap-1.5">
               {indicators.slice(0, 9).map((ind) => (
@@ -65,9 +66,10 @@ export default function WechatCard({ projectName, city, district, faceRent, prop
             style={{ background: "#fff", padding: 4 }}
           />
           <div className="text-[10px] leading-relaxed" style={{ color: "var(--text-hint)" }}>
-            <p>扫码查看完整数据</p>
+            <p>扫码查看完整数据 · 分享好友</p>
             <p className="mt-1">长按保存图片分享</p>
             <p className="mt-2 font-bold" style={{ color: "var(--text-strong)" }}>pricecre.com</p>
+            <p className="mt-0.5">数据来源：公开市场 · 2026-06-04</p>
           </div>
         </div>
 

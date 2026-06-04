@@ -84,13 +84,13 @@ export default function HamburgerMenu({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 z-[500] bg-black/30 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
 
       {/* Slide-in Panel */}
       <div
-        className="fixed inset-y-0 left-0 z-50 w-[300px] max-w-[85vw] overflow-y-auto"
+        className="fixed inset-y-0 left-0 z-[510] w-[300px] max-w-[85vw] overflow-y-auto"
         style={{
           backgroundColor: "var(--bg)",
           borderRight: "1px solid var(--line)",

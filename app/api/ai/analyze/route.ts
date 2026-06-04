@@ -1,0 +1,158 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const API_KEY = process.env.ANTHROPIC_API_KEY || "";
+const API_BASE = process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn";
+const MODEL = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
+
+interface AnalyzeRequest {
+  projectName: string;
+  city: string;
+  district: string;
+  propertyType: string;
+  faceRent: number;
+  netEffectiveRent: number | null;
+  indicators: { label: string; value: string; key: string }[];
+}
+
+function buildPrompt(data: AnalyzeRequest): string {
+  const rent = data.netEffectiveRent ?? data.faceRent;
+  const indicatorLines = data.indicators
+    .map((i) => `- ${i.label} (${i.key}): ${i.value}`)
+    .join("\n");
+
+  return `你是一位资深商业地产精算分析师。请基于以下资产数据，生成一份平衡客观的分析报告。
+
+资产信息：
+- 项目名称：${data.projectName}
+- 城市/区域：${data.city} · ${data.district}
+- 物业类型：${data.propertyType}
+- 挂牌面价：¥${data.faceRent}/㎡/天
+- 净有效租金：${rent}/㎡/天
+
+精算指标：
+${indicatorLines}
+
+请严格按以下 JSON 格式输出分析结果（只输出 JSON，不要其他文字）：
+{
+  "score": <0-100整数>,
+  "positives": ["利好1", "利好2", ...],
+  "negatives": ["风险1", ...],
+  "conclusion": "<80-120字总结>"
+}
+
+分析原则：实事求是，数据支撑，风险具体。
+评分参考：>=75优秀，50-74稳健，<50审慎。
+使用中文输出。`;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body: AnalyzeRequest = await request.json();
+
+    if (!body.projectName || !body.indicators?.length) {
+      return NextResponse.json({ error: "缺少必要参数" }, { status: 400 });
+    }
+
+    if (!API_KEY) {
+      return NextResponse.json({ error: "ANTHROPIC_API_KEY 未配置" }, { status: 500 });
+    }
+
+    const prompt = buildPrompt(body);
+
+    const response = await fetch(`${API_BASE}/v1/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1200,
+        temperature: 0.3,
+        system:
+          "你是一个商业地产精算AI。你必须严格输出纯JSON，不包含任何解释文字、markdown代码块或前后缀。直接输出JSON对象。",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Anthropic API error:", response.status, errText);
+      return NextResponse.json(
+        { error: `AI 服务暂时不可用 (${response.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = await response.json();
+
+    // Anthropic response format: content[0].text
+    const rawContent =
+      data.content?.[0]?.text || data.message?.content?.[0]?.text || "";
+
+    if (!rawContent) {
+      console.error("Empty Anthropic response:", JSON.stringify(data));
+      return NextResponse.json({ error: "AI 返回内容为空" }, { status: 502 });
+    }
+
+    // Parse JSON from response
+    let parsed: {
+      score?: number;
+      positives?: string[];
+      negatives?: string[];
+      conclusion?: string;
+    };
+
+    try {
+      // Try direct parse
+      parsed = JSON.parse(rawContent.trim());
+    } catch {
+      // Try to extract JSON from markdown code block
+      const match = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) {
+        try {
+          parsed = JSON.parse(match[1].trim());
+        } catch {
+          return NextResponse.json(
+            { error: "AI 返回格式异常" },
+            { status: 502 }
+          );
+        }
+      } else {
+        // Try to find any JSON object in the text
+        const objMatch = rawContent.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          try {
+            parsed = JSON.parse(objMatch[0]);
+          } catch {
+            return NextResponse.json(
+              { error: "AI 返回格式异常" },
+              { status: 502 }
+            );
+          }
+        } else {
+          return NextResponse.json(
+            { error: "AI 返回格式异常" },
+            { status: 502 }
+          );
+        }
+      }
+    }
+
+    const result = {
+      score: Math.max(0, Math.min(100, Number(parsed.score) || 50)),
+      positives: (parsed.positives || []).slice(0, 6),
+      negatives: (parsed.negatives || []).slice(0, 4),
+      conclusion: parsed.conclusion || "数据不足，无法生成有效分析。",
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("AI analyze error:", error);
+    return NextResponse.json(
+      { error: "服务器内部错误" },
+      { status: 500 }
+    );
+  }
+}

@@ -10,6 +10,7 @@ import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
 import Modal from "@/components/Toast";
 import WechatCard from "@/components/WechatCard";
+import AIAnalysis from "@/components/AIAnalysis";
 import { showModal } from "@/components/Toast";
 
 import MapView from "@/components/MapView";
@@ -30,11 +31,18 @@ export default function Home() {
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
   const [wechatCardData, setWechatCardData] = useState<any>(null);
+  const [aiAnalysisData, setAiAnalysisData] = useState<any>(null);
 
   useEffect(() => {
     const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
     document.addEventListener("open-wechat-card", h);
     return () => document.removeEventListener("open-wechat-card", h);
+  }, []);
+
+  useEffect(() => {
+    const h = (e: Event) => setAiAnalysisData((e as CustomEvent).detail);
+    document.addEventListener("open-ai-analysis", h);
+    return () => document.removeEventListener("open-ai-analysis", h);
   }, []);
 
   // Listen for hamburger menu nav events
@@ -389,7 +397,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Active Filter + Filter Button */}
+        {/* Active Filter + Type Chips + Filter Button */}
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -398,6 +406,30 @@ export default function Home() {
             <span className="text-xs" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
               · {filteredProperties.length} 资产
             </span>
+            {/* Property Type Filter Chips */}
+            <div className="flex items-center gap-1.5 ml-2">
+              {[
+                { key: "OFFICE", label: "写字楼" },
+                { key: "SHOPS", label: "商业" },
+                { key: "INDUSTRIAL", label: "产业园" },
+              ].map((t) => {
+                const isActive = activeType === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => handleTypeChange(t.key === activeType ? "ALL" : (t.key as PropertyType))}
+                    className={`text-[11px] px-2 py-0.5 rounded-md font-medium transition-all ${
+                      isActive
+                        ? "text-[var(--accent)] ring-1 ring-[var(--accent)]"
+                        : "text-[var(--text-muted)] hover:bg-[var(--panel)]"
+                    }`}
+                    style={isActive ? { background: "var(--accent-soft)" } : {}}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <button
             onClick={() => setMenuOpen(true)}
@@ -541,6 +573,7 @@ export default function Home() {
       {/* ====== Mobile Bottom Nav ====== */}
       <Modal />
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
+      {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

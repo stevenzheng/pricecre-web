@@ -77,9 +77,10 @@ export default function ProfilePanel() {
     setStep("done");
   };
 
-
-  /* ---- 分享/兑换/付费 (免登录) ---- */
-{/* 分享转发 */}
+  // Shared cards rendered in both logged-in and logged-out states
+  const publicCards = (
+    <div className="space-y-3">
+      {/* 分享转发 */}
       <div className="card p-3">
         <div className="section-title">分享转发获得查看额度</div>
         <div className="mb-3 text-center">
@@ -116,11 +117,14 @@ export default function ProfilePanel() {
           <button className="w-full py-2.5 rounded-xl text-sm font-medium" style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }} onClick={() => showModal("不限次包月即将上线")}>不限次包月 · 299元/月</button>
         </div>
       </div>
+    </div>
+  );
 
   /* ---- 登录 / 注册主界面 ---- */
   if (!loggedIn) {
     return (
-      <div className="max-w-sm mx-auto px-4 py-4">
+      <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
+        {publicCards}
         <div className="card p-6 space-y-5">
           {/* 标签 */}
           <div className="flex items-center gap-2 justify-center">
@@ -273,7 +277,8 @@ export default function ProfilePanel() {
 
   /* ---- 已登录 ---- */
   return (
-    <div className="max-w-sm mx-auto px-4 py-4 space-y-5">
+    <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
+      {publicCards}
       <div className="card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--panel)" }}>

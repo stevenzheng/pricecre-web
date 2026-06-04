@@ -54,6 +54,25 @@ export default function Home() {
     document.addEventListener("nav-to-tab", handler);
     return () => document.removeEventListener("nav-to-tab", handler);
   }, []);
+
+  // Referral detection — check for invite code on load
+  const [referralToast, setReferralToast] = useState<string | null>(null);
+  useEffect(() => {
+    // Check URL param first (fresh redirect from /r/[code])
+    const urlParams = new URLSearchParams(window.location.search);
+    const refFromUrl = urlParams.get("ref");
+    if (refFromUrl) {
+      setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 3 次查看额度`);
+    } else {
+      // Check localStorage for previously stored referral
+      try {
+        const stored = JSON.parse(localStorage.getItem("pricecre_referral") || "null");
+        if (stored?.code) {
+          setReferralToast(`你已通过邀请链接进入，注册后双方各得 3 次查看额度`);
+        }
+      } catch {}
+    }
+  }, []);
   const [copied, setCopied] = useState(false);
 
   // Credits
@@ -390,10 +409,23 @@ export default function Home() {
 
       {/* ====== Main Content ====== */}
       <main className="pt-[var(--nav-height)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+40px)] lg:pb-8">
+        {/* Referral Welcome Toast */}
+        {referralToast && (
+          <div className="max-w-7xl mx-auto px-4 pt-3">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium animate-slide-up"
+              style={{ background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent)", borderColor: "var(--accent)", opacity: 0.9 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/></svg>
+              {referralToast}
+              <button onClick={() => setReferralToast(null)} className="ml-auto text-[var(--text-hint)] hover:text-[var(--text)]">&times;</button>
+            </div>
+          </div>
+        )}
         {mobileTab === "market" && (
           <>
+        {/* Stats Bar + Filter Bar — sticky together */}
+        <div className="sticky top-[56px] z-20 border-b" style={{ borderColor: "var(--line)", background: "var(--bg)" }}>
         {/* Stats Bar */}
-        <div className="border-b" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
+        <div style={{ background: "var(--bg-surface)" }}>
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="grid grid-cols-4 gap-0">
               <div className="stat-item">
@@ -500,6 +532,7 @@ export default function Home() {
               筛选
             </button>
           </div>
+        </div>
         </div>
 
         {/* Property Cards */}

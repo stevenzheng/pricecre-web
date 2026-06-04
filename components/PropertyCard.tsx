@@ -563,7 +563,7 @@ export default function PropertyCard({
                     {/* Value or Lock */}
                     <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", flex: 1, paddingTop: 4 }}>
                       {isFieldLocked ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-hint)", flexShrink: 0 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-hint)", flexShrink: 0, opacity: 0.5 }}>
                           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                           <path d="M7 11V7a5 5 0 0110 0v4" />
                         </svg>
@@ -571,9 +571,10 @@ export default function PropertyCard({
                         <span
                           style={{
                             fontSize: field.format === "text" ? "10px" : "13px",
-                            fontWeight: field.format === "text" ? 400 : 600,
+                            fontWeight: field.format === "text" ? 400 : 500,
                             color: isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
                             fontFamily: field.format === "text" ? "var(--font-sans)" : "var(--font-mono)",
+                            lineHeight: 1,
                           }}
                         >
                           {displayValue}

@@ -30,11 +30,11 @@ const districtCoords: Record<string, [number, number]> = {
   "宝安区": [113.88, 22.57], "龙华区": [114.03, 22.65], "龙岗区": [114.25, 22.72],
   "光明区": [113.93, 22.75], "坪山区": [114.35, 22.69], "盐田区": [114.23, 22.56], "前海": [113.89, 22.51],
   // 苏州
-  "工业园区": [120.73, 31.32], "姑苏区": [120.62, 31.31], "高新区": [120.57, 31.33],
+  "苏州-工业园区": [120.73, 31.32], "苏州-姑苏区": [120.62, 31.31], "苏州-高新区": [120.57, 31.33],
   "吴中区": [120.63, 31.26], "相城区": [120.64, 31.41], "吴江区": [120.65, 31.14],
   "昆山市": [120.98, 31.38], "太仓市": [121.11, 31.46], "张家港市": [120.55, 31.88], "常熟市": [120.75, 31.65],
   // 成都
-  "锦江区": [104.08, 30.66], "高新区": [104.05, 30.59], "武侯区": [104.03, 30.63],
+  "锦江区": [104.08, 30.66], "成都-高新区": [104.05, 30.59], "武侯区": [104.03, 30.63],
   "青羊区": [104.02, 30.67], "金牛区": [104.05, 30.70], "成华区": [104.10, 30.67],
   "天府新区": [104.06, 30.49], "双流区": [103.92, 30.57], "龙泉驿区": [104.27, 30.56], "温江区": [103.83, 30.70],
   // 广州
@@ -90,7 +90,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       const usedCoords = new Set<string>();
       cityProps.forEach((p, i) => {
         // Use district coordinates with jitter to avoid overlap
-        const baseCoord = districtCoords[p.district] || cityCenter[activeCity] || [39.90, 116.41];
+        const baseCoord = districtCoords[`${p.city}-${p.district}`] || districtCoords[p.district] || cityCenter[activeCity] || [39.90, 116.41];
         const jitter = 0.005;
         let lat = baseCoord[0] + (Math.random() - 0.5) * jitter;
         let lng = baseCoord[1] + (Math.random() - 0.5) * jitter;

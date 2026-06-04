@@ -1,3 +1,4 @@
+// app/api/admin/properties/route.ts — 生产表 CommercialProperty 查询
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
@@ -10,32 +11,26 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const city = searchParams.get("city") || undefined;
     const type = searchParams.get("type") || undefined;
+    const search = searchParams.get("search") || undefined;
+    const sort = searchParams.get("sort") || "updatedAt";
+    const order = searchParams.get("order") || "desc";
 
     const where: any = {};
     if (city) where.city = city;
-    if (type) where.propertyType = type;
+    if (type && type !== "all") where.propertyType = type;
+    if (search) where.projectName = { contains: search, mode: "insensitive" };
+
+    const orderBy: any = { [sort]: order };
 
     const [properties, total] = await Promise.all([
       prisma.commercialProperty.findMany({
-        where,
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { updatedAt: "desc" },
-        select: {
-          id: true,
-          projectName: true,
-          city: true,
-          district: true,
-          propertyType: true,
-          faceRent: true,
-          dataSource: true,
-          updatedAt: true,
-        },
+        where, skip: (page - 1) * limit, take: limit, orderBy,
+        select: { id: true, projectName: true, city: true, district: true, propertyType: true, faceRent: true, dataSource: true, updatedAt: true, confidenceScore: true },
       }),
       prisma.commercialProperty.count({ where }),
     ]);
 
-    return NextResponse.json({ properties, total, page, limit });
+    return NextResponse.json({ items: properties, total, page, limit });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
   }

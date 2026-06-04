@@ -12,17 +12,16 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const type = searchParams.get("type");
+    const search = searchParams.get("search") || undefined;
     const status = searchParams.get("status") || "PENDING_REVIEW";
 
     const where: any = { status };
     if (type && type !== "all") where.propertyType = type;
+    if (search) where.projectName = { contains: search, mode: "insensitive" };
 
     const [items, total] = await Promise.all([
       prisma.agentReviewQueue.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
+        where, orderBy: { createdAt: "desc" }, skip: (page - 1) * limit, take: limit,
       }),
       prisma.agentReviewQueue.count({ where }),
     ]);

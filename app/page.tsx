@@ -74,11 +74,12 @@ export default function Home() {
   }, []);
   const [copied, setCopied] = useState(false);
 
-  // Credits
+  // Credits (initial mock, will sync from API on first unlock)
   const [credits, setCredits] = useState({
     referral: 3,
     purchased: 5,
   });
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
 
   const totalCredits = credits.referral + credits.purchased;
   const { lang } = useLanguage();
@@ -204,12 +205,34 @@ export default function Home() {
   }, []);
 
   // Handlers
-  const handleUnlock = useCallback((propertyId: string) => {
-    setCredits((prev) => {
-      if (prev.referral > 0) return { ...prev, referral: prev.referral - 1 };
-      if (prev.purchased > 0) return { ...prev, purchased: prev.purchased - 1 };
-      return prev;
-    });
+  const handleUnlock = useCallback(async (propertyId: string) => {
+    try {
+      const res = await fetch("/api/assets/unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId }),
+      });
+      const data = await res.json();
+      if (data.unlocked) {
+        setUnlockedIds((prev) => new Set(prev).add(propertyId));
+        // Sync credits from server response
+        setCredits((prev) => {
+          const total = data.remainingCredits ?? (prev.referral + prev.purchased - 1);
+          // Prefer referral pool deduction logic
+          if (prev.referral > 0) return { referral: prev.referral - 1, purchased: prev.purchased };
+          return { referral: 0, purchased: Math.max(0, total) };
+        });
+      } else if (data.error) {
+        showModal(data.error);
+      }
+    } catch {
+      // Fallback to local mock for demo
+      setCredits((prev) => {
+        if (prev.referral > 0) return { ...prev, referral: prev.referral - 1 };
+        if (prev.purchased > 0) return { ...prev, purchased: prev.purchased - 1 };
+        return prev;
+      });
+    }
   }, []);
 
   const handleCityChange = useCallback((city: string) => {
@@ -555,7 +578,7 @@ export default function Home() {
               {filteredProperties.map((property) => (
                 <PropertyCard
                   key={property.id}
-                  property={property}
+                  property={{ ...property, isUnlocked: property.isUnlocked || unlockedIds.has(property.id) }}
                   remainingCredits={totalCredits}
                   onUnlock={handleUnlock}
                   autoExpand={property.id === focusedPropertyId}

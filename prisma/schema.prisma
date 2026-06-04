@@ -98,12 +98,43 @@ model CommercialProperty {
   rawAddress         String
   propertyType       PropertyType 
   faceRent           Decimal      @db.Decimal(10, 2) 
+  area               Int?
   dataSource         String   
   dynamicIndicators  Json         
+  confidenceScore    Float        @default(1.0)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   agentUpdatedAt     DateTime     
 
   @@unique([projectName, rawAddress]) 
+  @@index([city, propertyType])
+}
+
+enum ReviewStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  CRITICAL_MISSING
+}
+
+model AgentReviewQueue {
+  id                 String       @id
+  projectName        String
+  city               String
+  district           String
+  rawAddress         String
+  propertyType       PropertyType
+  faceRent           Decimal      @db.Decimal(10, 2)
+  area               Int?
+  dataSource         String
+  dynamicIndicators  Json
+  status             ReviewStatus @default(PENDING_REVIEW)
+  confidenceScore    Float        @default(1.0)
+  agentTimestamp     DateTime
+  auditLog           String       @default("[]")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([status, createdAt])
   @@index([city, propertyType])
 }

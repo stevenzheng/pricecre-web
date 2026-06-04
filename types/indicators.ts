@@ -100,8 +100,10 @@ export interface CommercialProperty {
   rawAddress: string;
   propertyType: PropertyType;
   faceRent: number;
+  area?: number;
   dataSource: string;
   dynamicIndicators: DynamicIndicators;
+  confidenceScore?: number;
   isUnlocked: boolean;
   updatedAt: string;
 }

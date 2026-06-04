@@ -266,6 +266,47 @@ export default function ProfilePanel() {
           ))}
         </div>
       </div>
+
+
+      {/* 分享转发 */}
+      <div className="card p-3">
+        <div className="section-title">分享转发获得查看额度</div>
+        <div className="mb-3 text-center">
+          <div className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-2xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
+            <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>次</span>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>你的全局专属裂变链接</div>
+          <div className="flex gap-2">
+            <input type="text" readOnly value="pricecre.com/r/sz2026" className="input-search flex-1 text-xs" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} />
+            <button className="btn-secondary text-xs px-4 flex-shrink-0" onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); showModal("已复制邀约链接"); }}>一键邀约</button>
+          </div>
+        </div>
+      </div>
+
+      {/* 激活兑换码 */}
+      <div className="card p-3">
+        <div className="section-title">激活兑换码</div>
+        <div className="flex gap-2">
+          <input type="text" placeholder="输入 6 位兑换码" className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6} />
+          <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => showModal("兑换码已激活")}>激活</button>
+        </div>
+      </div>
+
+      {/* 商业付费直通车 */}
+      <div className="card p-3">
+        <div className="section-title">商业付费直通车</div>
+        <div className="space-y-2">
+          <button className="w-full py-3 rounded-xl text-sm font-medium" style={{ background: "var(--accent)", color: "var(--text-inverse)" }} onClick={() => showModal("购买成功 · 50次查看额度已到账")}>立即购买查看额度 · 99元 / 50次</button>
+          <button className="w-full py-2.5 rounded-xl text-sm font-medium" style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }} onClick={() => showModal("不限次包月即将上线")}>不限次包月 · 299元/月</button>
+        </div>
+      </div>
+
+
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实数据获取额度</button>}
         {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { setQuota((q) => q + 8); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}

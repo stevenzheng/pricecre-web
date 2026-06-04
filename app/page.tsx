@@ -247,9 +247,9 @@ export default function Home() {
       total: mockProperties.length,
       unlocked: unlockedIds.size,
       cities,
-      volume: serverStats.volume,
+      volume: serverStats.volume || 12,
     };
-  }, [unlockedIds, serverStats.volume]);
+  }, [unlockedIds, serverStats.volume, mockProperties.length]);
 
   // Fetch real stats from API
   useEffect(() => {
@@ -257,8 +257,7 @@ export default function Home() {
       .then((r) => r.json())
       .then((d) => setServerStats((prev) => ({
         ...prev,
-        volume: d.propertyCount || 12,
-        cities: d.cityCount || cities,
+        volume: d.viewCount || d.propertyCount || 12,
       })))
       .catch(() => {});
   }, []);

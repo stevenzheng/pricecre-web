@@ -210,10 +210,12 @@ export default function HamburgerMenu({
             <p>仅供参考，不构成投资建议。</p>
             <p>每日 8:00 更新。</p>
           </div>
-          <div className="flex items-center gap-4 text-[12px]">
+          <div className="space-y-1 text-[12px]">
             <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
-            <a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
-            <a href="/contact" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
+          </div>
+          <div><a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
+          </div>
+          <div><a href="/contact" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
           </div>
         </div>
 

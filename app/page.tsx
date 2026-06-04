@@ -532,7 +532,7 @@ export default function Home() {
       <footer className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
         <div className="max-w-7xl mx-auto px-4 py-3 text-center">
           <span className="text-[12px]" style={{ color: "var(--text-hint)" }}>
-            商业地产量化精算资产终端 &copy; 2026 PriceCRE
+            &copy; 2026 PriceCRE 商业地产量化精算资产终端
           </span>
         </div>
       </footer>

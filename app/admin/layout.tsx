@@ -1,14 +1,18 @@
-// app/admin/layout.tsx — 除登录页外所有管理页的侧边栏布局
-import type { Metadata } from "next";
+// app/admin/layout.tsx
+"use client";
+
 import "../globals.css";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "PriceCRE Admin · 数据管理中心",
-  robots: "noindex, nofollow",
-};
+import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // Login page — no sidebar
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen" style={{ background: "var(--bg)" }}>
       <aside className="w-52 shrink-0 border-r flex flex-col" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>

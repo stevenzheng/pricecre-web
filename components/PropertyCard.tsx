@@ -370,7 +370,7 @@ export default function PropertyCard({
       {/* ---- Expanded Detail ---- */}
       {state.isExpanded && (
         <div className="border-t animate-slide-up" style={{ borderColor: "var(--line)" }}>
-          {/* Net Effective Rent */}
+          {/* Net Effective Rent + Actions Row */}
           <div className="p-4 sm:p-5" style={{ background: "var(--panel)" }}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
@@ -403,31 +403,100 @@ export default function PropertyCard({
                 )}
               </div>
 
-              {!isUnlocked && (
+              {/* Right: AI Analysis + Share (moved up from bottom) */}
+              <div className="flex items-center gap-2">
+                {/* AI Analysis Button (unlocked only) — Gemini sparkle icon */}
+                {isUnlocked && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const aiEvent = new CustomEvent("open-ai-analysis", {
+                        detail: {
+                          projectName: property.projectName,
+                          city: property.city,
+                          district: property.district,
+                          propertyType: typeLabel,
+                          faceRent: property.faceRent,
+                          netEffectiveRent: netEffectiveRent,
+                          indicators: sortedFields.map(f => ({
+                            label: f.label,
+                            value: formatValue(f.value, f.format),
+                            key: f.key,
+                          })),
+                        },
+                      });
+                      document.dispatchEvent(aiEvent);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105"
+                    style={{
+                      background: "var(--accent)",
+                      color: "var(--text-inverse)",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/>
+                    </svg>
+                    AI 分析
+                  </button>
+                )}
+
+                {/* Share Button (always visible, 2x icon) */}
                 <button
-                  className="btn-primary text-sm"
-                  onClick={(e) => { e.stopPropagation(); handleUnlock(); }}
-                  disabled={state.isUnlocking || remainingCredits <= 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const evt = new CustomEvent("open-wechat-card", {
+                      detail: {
+                        projectName: property.projectName,
+                        city: property.city,
+                        district: property.district,
+                        faceRent: property.faceRent,
+                        propertyType: typeLabel,
+                        indicators: sortedFields
+                          .filter(f => !f.isLocked || isUnlocked)
+                          .slice(0, 9)
+                          .map(f => ({ label: f.label, value: isUnlocked ? formatValue(f.value, f.format) : "****" })),
+                      },
+                    });
+                    document.dispatchEvent(evt);
+                  }}
+                  className="p-2 rounded-lg transition-all duration-200 hover:bg-[var(--accent-soft)] hover:scale-110"
+                  aria-label="生成微信分享卡片"
+                  title="生成微信分享卡片"
                 >
-                  {state.isUnlocking ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      解锁中...
-                    </>
-                  ) : (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z" />
-                        <path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z" />
-                      </svg>
-                      {remainingCredits > 0 ? `解锁 (-1)` : "额度已用完"}
-                    </>
-                  )}
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
                 </button>
-              )}
+
+                {/* Unlock button when locked */}
+                {!isUnlocked && (
+                  <button
+                    className="btn-primary text-sm"
+                    onClick={(e) => { e.stopPropagation(); handleUnlock(); }}
+                    disabled={state.isUnlocking || remainingCredits <= 0}
+                  >
+                    {state.isUnlocking ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        解锁中...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z" />
+                          <path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z" />
+                        </svg>
+                        {remainingCredits > 0 ? `解锁 (-1)` : "额度已用完"}
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
             {remainingCredits <= 0 && !isUnlocked && (
               <p className="text-xs mt-2" style={{ color: "var(--text-hint)" }}>分享邀请链接给好友，双方各得额度</p>
@@ -504,78 +573,6 @@ export default function PropertyCard({
                   </div>
                 );
               })}
-            </div>
-
-            {/* Bottom Action Bar: Share + AI Analysis */}
-            <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex items-center justify-end gap-3 border-t pt-3" style={{ borderColor: "var(--line)" }}>
-              {/* AI Analysis Button (unlocked only) */}
-              {isUnlocked && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const aiEvent = new CustomEvent("open-ai-analysis", {
-                      detail: {
-                        projectName: property.projectName,
-                        city: property.city,
-                        district: property.district,
-                        propertyType: typeLabel,
-                        faceRent: property.faceRent,
-                        netEffectiveRent: netEffectiveRent,
-                        indicators: sortedFields.map(f => ({
-                          label: f.label,
-                          value: formatValue(f.value, f.format),
-                          key: f.key,
-                        })),
-                      },
-                    });
-                    document.dispatchEvent(aiEvent);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105"
-                  style={{
-                    background: "var(--accent)",
-                    color: "var(--text-inverse)",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a4 4 0 014 4c0 1.1-.4 2.1-1.2 2.8l1.2 1.2c1.5-1 3.5-1.2 5.2-.4-1.1 1.6-2.3 3.1-3.7 4.4A12 12 0 0121 17.6c-1.7-1-3.7-1.4-5.6-.8l-2.4 2.4V22h-2v-2.8l-2.4-2.4c-1.9-.6-3.9-.2-5.6.8A12 12 0 016.3 14c1.4-1.3 2.6-2.8 3.7-4.4 1.7-.8 3.7-.6 5.2.4l1.2-1.2A3.9 3.9 0 0112 6a4 4 0 010-4z"/>
-                    <circle cx="12" cy="4" r="1.5" fill="currentColor"/>
-                  </svg>
-                  AI 分析
-                </button>
-              )}
-
-              {/* Share Button (always visible in expanded state, 2x icon size) */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const evt = new CustomEvent("open-wechat-card", {
-                    detail: {
-                      projectName: property.projectName,
-                      city: property.city,
-                      district: property.district,
-                      faceRent: property.faceRent,
-                      propertyType: typeLabel,
-                      indicators: sortedFields
-                        .filter(f => !f.isLocked || isUnlocked)
-                        .slice(0, 9)
-                        .map(f => ({ label: f.label, value: isUnlocked ? formatValue(f.value, f.format) : "****" })),
-                    },
-                  });
-                  document.dispatchEvent(evt);
-                }}
-                className="p-2 rounded-lg transition-all duration-200 hover:bg-[var(--accent-soft)] hover:scale-110"
-                aria-label="生成微信分享卡片"
-                title="生成微信分享卡片"
-              >
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8">
-                  <circle cx="18" cy="5" r="3"/>
-                  <circle cx="6" cy="12" r="3"/>
-                  <circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                </svg>
-              </button>
             </div>
           </div>
         </div>

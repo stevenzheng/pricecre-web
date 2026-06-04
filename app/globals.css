@@ -10,28 +10,28 @@
 /* MiSans via jsDelivr CDN — weight 300/400/500/600/700 */
 @font-face {
   font-family: 'MiSans';
-  src: url('https://raw.githubusercontent.com/dsrkafuu/misans/main/lib/Normal/MiSans-Normal.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Normal.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'MiSans';
-  src: url('https://raw.githubusercontent.com/dsrkafuu/misans/main/lib/Normal/MiSans-Medium.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'MiSans';
-  src: url('https://raw.githubusercontent.com/dsrkafuu/misans/main/lib/Normal/MiSans-Semibold.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Semibold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'MiSans';
-  src: url('https://raw.githubusercontent.com/dsrkafuu/misans/main/lib/Normal/MiSans-Bold.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;

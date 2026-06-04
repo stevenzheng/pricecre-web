@@ -528,3 +528,6 @@ body {
     font-size: 120%; /* 18.4px base — all rem-based text scales up */
   }
 }
+
+/* Hide default Leaflet marker pin */
+.leaflet-marker-icon { background: transparent !important; border: none !important; box-shadow: none !important; }

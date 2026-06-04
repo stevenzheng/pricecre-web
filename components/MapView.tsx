@@ -47,9 +47,21 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
         const offset = 0.012;
         const lat = center[0] + Math.cos(i * 1.8) * offset * (i + 1);
         const lng = center[1] + Math.sin(i * 1.8) * offset * (i + 1);
-        L.marker([lat, lng])
+
+        // Custom label icon with project name + rent
+        const labelIcon = L.divIcon({
+          className: "",
+          html: `<div style="background:var(--bg-surface);border:1px solid var(--line);border-radius:8px;padding:3px 8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-size:11px;cursor:pointer">
+            <span style="font-weight:700;color:var(--text-strong)">${p.projectName}</span>
+            <span style="margin-left:6px;font-family:var(--font-mono);font-weight:600;color:var(--accent)">¥${p.faceRent.toFixed(0)}</span>
+            <span style="font-size:9px;color:var(--text-hint)">/㎡/天</span>
+          </div>`,
+          iconSize: [0, 0],
+          iconAnchor: [0, 12],
+        });
+
+        L.marker([lat, lng], { icon: labelIcon })
           .addTo(map)
-          .bindPopup(`<b>${p.projectName}</b><br/>挂牌租金面价 ¥${p.faceRent.toFixed(1)}/㎡/天`)
           .on("click", () => { setSelectedProperty(p.id); onSelectProperty?.(p.id); });
       });
     }

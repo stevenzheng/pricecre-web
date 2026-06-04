@@ -1,5 +1,6 @@
 "use client";
 import { showModal } from "@/components/Toast";
+import { indicatorExplanations } from "@/lib/indicator-explanations";
 
 import { useReducer, useMemo, useCallback } from "react";
 import {
@@ -438,7 +439,7 @@ export default function PropertyCard({
                     }}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                      <span className="text-[11px] font-medium cursor-help hover:underline decoration-dotted" style={{ color: "var(--text-muted)" }} onClick={(e) => { e.stopPropagation(); const expl = indicatorExplanations[field.key]; if (expl) showModal(expl); }}>
                         {field.label}
                       </span>
                       <span

@@ -550,3 +550,738 @@ body {
 .pricecre-map-marker > div {
   pointer-events: auto !important;
 }
+
+/* =============================================
+   ADMIN DESIGN SYSTEM — Stripe-Adapted
+   ============================================= */
+
+/* Admin Sidebar */
+.admin-sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: #1c1e54;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.admin-sidebar-brand {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar-brand h1 {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.16px;
+}
+
+.admin-sidebar-brand p {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 2px 0 0;
+  letter-spacing: 0.1px;
+}
+
+.admin-nav {
+  flex: 1;
+  padding: 12px 8px;
+}
+
+.admin-nav-section {
+  margin-bottom: 8px;
+}
+
+.admin-nav-label {
+  padding: 6px 12px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 1px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.admin-nav-item.active {
+  background: rgba(83, 58, 253, 0.2);
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.admin-nav-item svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.admin-nav-item.active svg {
+  opacity: 1;
+  color: #533afd;
+}
+
+.admin-sidebar-footer {
+  padding: 12px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar-footer a,
+.admin-sidebar-footer button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-sidebar-footer a:hover,
+.admin-sidebar-footer button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Admin Content Area */
+.admin-content {
+  flex: 1;
+  min-height: 100vh;
+  background: #f8f9fb;
+  overflow: auto;
+}
+
+.admin-content-inner {
+  max-width: 1200px;
+  padding: 32px;
+}
+
+/* Admin Page Title */
+.admin-page-title {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 300;
+  color: #061b31;
+  letter-spacing: -0.22px;
+  margin: 0;
+}
+
+.admin-page-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: #64748d;
+  margin: 4px 0 0;
+}
+
+/* Stripe Cards */
+.str-card {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
+  transition: all 0.2s ease;
+}
+
+.str-card:hover {
+  border-color: #b9b9f9;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+.str-card-static {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
+}
+
+/* Striped Stat Card */
+.str-stat-card {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  padding: 20px 24px;
+  box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
+  transition: all 0.2s ease;
+}
+
+.str-stat-card:hover {
+  border-color: #b9b9f9;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+.str-stat-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 300;
+  color: #64748d;
+  margin: 0 0 4px;
+  letter-spacing: 0.1px;
+}
+
+.str-stat-value {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 24px;
+  font-weight: 500;
+  color: #061b31;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.36px;
+  line-height: 1;
+}
+
+/* Stripe Buttons */
+.str-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: #533afd;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+
+.str-btn-primary:hover {
+  background: #4434d4;
+}
+
+.str-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.str-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #b9b9f9;
+  background: transparent;
+  color: #533afd;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.str-btn-ghost:hover {
+  background: rgba(83, 58, 253, 0.05);
+}
+
+.str-btn-neutral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #64748d;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.str-btn-neutral:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #061b31;
+}
+
+.str-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.str-btn-danger:hover {
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.str-btn-sm {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+/* Stripe Inputs */
+.str-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e5edf5;
+  background: #ffffff;
+  color: #061b31;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.str-input::placeholder {
+  color: #64748d;
+}
+
+.str-input:focus {
+  border-color: #533afd;
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+.str-input-mono {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 500;
+}
+
+.str-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e5edf5;
+  background: #ffffff;
+  color: #061b31;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23533afd' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  transition: all 0.15s ease;
+}
+
+.str-select:focus {
+  border-color: #533afd;
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+}
+
+.str-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: #273951;
+  margin-bottom: 4px;
+}
+
+/* Stripe Badges */
+.str-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 300;
+  white-space: nowrap;
+}
+
+.str-badge-success {
+  background: rgba(21, 190, 83, 0.2);
+  color: #108c3d;
+  border: 1px solid rgba(21, 190, 83, 0.4);
+}
+
+.str-badge-neutral {
+  background: #f1f3f5;
+  color: #64748d;
+  border: 1px solid #e5edf5;
+}
+
+.str-badge-accent {
+  background: rgba(83, 58, 253, 0.08);
+  color: #533afd;
+  border: 1px solid rgba(83, 58, 253, 0.2);
+}
+
+.str-badge-danger {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.str-badge-warning {
+  background: rgba(155, 104, 41, 0.08);
+  color: #9b6829;
+  border: 1px solid rgba(155, 104, 41, 0.2);
+}
+
+/* Stripe Status Dot */
+.str-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.str-status-dot-active {
+  background: #15be53;
+}
+
+.str-status-dot-inactive {
+  background: #64748d;
+}
+
+.str-status-dot-error {
+  background: #dc2626;
+}
+
+/* Stripe Divider */
+.str-divider {
+  height: 1px;
+  background: #e5edf5;
+  border: none;
+  margin: 0;
+}
+
+/* Stripe Toast */
+.str-toast {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: #061b31;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  cursor: pointer;
+}
+
+/* Stripe Data Table */
+.str-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.str-table thead th {
+  background: #f8f9fb;
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  color: #273951;
+  text-align: left;
+  border-bottom: 1px solid #e5edf5;
+  white-space: nowrap;
+}
+
+.str-table tbody td {
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: #061b31;
+  border-bottom: 1px solid #e5edf5;
+  vertical-align: middle;
+}
+
+.str-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.str-table tbody tr:hover {
+  background: #f8f9fb;
+}
+
+.str-table .str-td-mono {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 500;
+  font-size: 13px;
+  font-feature-settings: "tnum";
+}
+
+.str-table .str-td-muted {
+  color: #64748d;
+}
+
+.str-table .str-td-hint {
+  font-size: 12px;
+  color: #64748d;
+}
+
+/* Admin Empty State */
+.str-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: #ffffff;
+  border: 1px dashed #e5edf5;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.str-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #b9b9f9;
+  opacity: 0.5;
+}
+
+.str-empty-title {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 300;
+  color: #273951;
+  margin: 0;
+}
+
+.str-empty-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: #64748d;
+  margin: 4px 0 0;
+}
+
+/* Admin Loading Skeleton */
+@keyframes str-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.str-skeleton {
+  background: linear-gradient(90deg, #f1f3f5 25%, #e5edf5 50%, #f1f3f5 75%);
+  background-size: 200% 100%;
+  animation: str-shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* Admin Form Card */
+.str-form-card {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  padding: 20px 24px;
+  box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
+}
+
+/* Admin Action Bar */
+.str-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Admin Login Page */
+.admin-login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fb;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+/* Admin Page Header */
+.admin-page-header {
+  margin-bottom: 24px;
+}
+
+/* Quick Action Cards */
+.str-quick-card {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 6px;
+  padding: 20px;
+  text-decoration: none;
+  box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
+  transition: all 0.2s ease;
+}
+
+.str-quick-card:hover {
+  border-color: #b9b9f9;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
+              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+}
+
+.str-quick-card h3 {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 300;
+  color: #061b31;
+  margin: 0 0 6px;
+}
+
+.str-quick-card p {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: #64748d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Admin Filter Tabs */
+.str-filter-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.str-filter-tab {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  color: #64748d;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.str-filter-tab:hover {
+  background: rgba(83, 58, 253, 0.04);
+  color: #533afd;
+}
+
+.str-filter-tab.active {
+  background: rgba(83, 58, 253, 0.08);
+  color: #533afd;
+  border-color: rgba(83, 58, 253, 0.2);
+}
+
+/* Admin Responsive */
+@media (max-width: 1023px) {
+  .admin-sidebar {
+    width: 60px;
+  }
+  .admin-sidebar-brand h1,
+  .admin-sidebar-brand p,
+  .admin-nav-label,
+  .admin-nav-item span,
+  .admin-sidebar-footer span {
+    display: none;
+  }
+  .admin-nav-item {
+    justify-content: center;
+    padding: 10px;
+  }
+  .admin-nav-item svg {
+    margin: 0;
+  }
+  .admin-sidebar-brand {
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .admin-sidebar-footer a,
+  .admin-sidebar-footer button {
+    justify-content: center;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-sidebar {
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+  }
+  .admin-nav {
+    display: flex;
+    padding: 0;
+    gap: 2px;
+  }
+  .admin-nav-item {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .admin-sidebar-footer {
+    display: none;
+  }
+  .admin-content-inner {
+    padding: 16px;
+  }
+  .admin-login-card {
+    margin: 16px;
+    padding: 24px;
+  }
+}

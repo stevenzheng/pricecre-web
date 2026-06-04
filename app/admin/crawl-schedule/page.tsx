@@ -1,3 +1,4 @@
+// app/admin/crawl-schedule/page.tsx — Stripe-Adapted Crawl Management
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -15,6 +16,13 @@ interface CrawlJob {
   lastPipelineCount: number;
 }
 
+const typeLabels: Record<string, string> = {
+  OFFICE: "办公",
+  SHOP: "商业",
+  SHOPPING: "商业",
+  INDUSTRIAL: "产业园",
+};
+
 export default function CrawlSchedulePage() {
   const [jobs, setJobs] = useState<CrawlJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,34 +37,54 @@ export default function CrawlSchedulePage() {
       const res = await fetch("/api/agent/schedule");
       const data = await res.json();
       setJobs(Array.isArray(data) ? data : []);
-    } catch { setJobs([]); }
+    } catch {
+      setJobs([]);
+    }
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchJobs(); }, [fetchJobs]);
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editJob) return;
-    const url = editJob.id ? `/api/agent/schedule/${editJob.id}` : "/api/agent/schedule";
+    const url = editJob.id
+      ? `/api/agent/schedule/${editJob.id}`
+      : "/api/agent/schedule";
     const method = editJob.id ? "PUT" : "POST";
     try {
-      await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editJob) });
-      setActionMsg(editJob.id ? "已更新" : "已创建");
-      setShowForm(false); setEditJob(null); fetchJobs();
-    } catch { setActionMsg("操作失败"); }
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editJob),
+      });
+      if (res.ok) {
+        setActionMsg(editJob.id ? "已更新 Updated" : "已创建 Created");
+        setShowForm(false);
+        setEditJob(null);
+        fetchJobs();
+      }
+    } catch {
+      setActionMsg("操作失败");
+    }
   };
 
   const toggleActive = async (job: CrawlJob) => {
-    await fetch(`/api/agent/schedule/${job.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !job.isActive }) });
+    await fetch(`/api/agent/schedule/${job.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: !job.isActive }),
+    });
     fetchJobs();
   };
 
   const deleteJob = async (job: CrawlJob) => {
-    if (!confirm(`删除「${job.label}」？`)) return;
+    if (!confirm(`删除「${job.label}」？此操作不可撤销。`)) return;
     await fetch(`/api/agent/schedule/${job.id}`, { method: "DELETE" });
-    setJobs(prev => prev.filter(j => j.id !== job.id));
-    setActionMsg("已删除");
+    setJobs((prev) => prev.filter((j) => j.id !== job.id));
+    setActionMsg("已删除 Deleted");
   };
 
   const crawlAll = async () => {
@@ -65,119 +93,330 @@ export default function CrawlSchedulePage() {
     try {
       const res = await fetch("/api/agent/crawl-all", { method: "POST" });
       const data = await res.json();
-      setActionMsg(data.msg || "完成");
+      setActionMsg(data.msg || "完成 Completed");
       fetchJobs();
-    } catch { setActionMsg("抓取失败"); }
+    } catch {
+      setActionMsg("抓取失败");
+    }
     setCrawlingAll(false);
   };
 
-  const inputClass = "w-full px-3 py-1.5 text-sm rounded-sm border outline-none transition-colors focus:border-[var(--accent)]";
-  const inputStyle = { background: "var(--bg-input)", borderColor: "var(--line)", color: "var(--text)" } as const;
+  const activeCount = jobs.filter((j) => j.isActive).length;
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h1 className="text-lg font-semibold" style={{ color: "var(--text-strong)" }}>爬取计划管理</h1>
-          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-            管理目标站点列表，一键全量抓取
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => { setEditJob({ label: "", targetUrl: "", propertyType: "OFFICE", city: "shanghai", district: "pudong", isActive: true }); setShowForm(true); }}
-            className="btn-secondary text-xs rounded-sm px-3 py-1.5"
-          >
-            + 添加站点
-          </button>
-          <button
-            onClick={crawlAll}
-            disabled={crawlingAll || jobs.filter(j => j.isActive).length === 0}
-            className="btn-primary text-xs rounded-sm px-4 py-1.5 disabled:opacity-50"
-          >
-            {crawlingAll ? "抓取中..." : `全量抓取 (${jobs.filter(j => j.isActive).length})`}
-          </button>
-        </div>
+    <div className="admin-content-inner">
+      {/* Page Header */}
+      <div className="admin-page-header">
+        <h1 className="admin-page-title">爬取计划管理</h1>
+        <p className="admin-page-desc">
+          管理目标站点列表，按城市与业态自动化调度数据采集
+        </p>
       </div>
 
+      {/* Action Bar */}
+      <div className="str-action-bar">
+        <button
+          onClick={() => {
+            setEditJob({
+              label: "",
+              targetUrl: "",
+              propertyType: "OFFICE",
+              city: "shanghai",
+              district: "pudong",
+              isActive: true,
+            });
+            setShowForm(true);
+          }}
+          className="str-btn-primary"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          添加站点
+        </button>
+
+        <button
+          onClick={crawlAll}
+          disabled={crawlingAll || activeCount === 0}
+          className="str-btn-ghost"
+        >
+          {crawlingAll ? (
+            "抓取中..."
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+              </svg>
+              全量抓取 ({activeCount})
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Toast */}
       {actionMsg && (
-        <div className="mb-4 px-4 py-2 card-dark rounded text-sm cursor-pointer" onClick={() => setActionMsg("")}>
+        <div
+          className="str-toast"
+          style={{ marginBottom: 16 }}
+          onClick={() => setActionMsg("")}
+        >
           {actionMsg}
         </div>
       )}
 
+      {/* Form */}
       {showForm && editJob && (
-        <form onSubmit={handleSubmit} className="card-dark p-4 rounded mb-5 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>站点名称</label>
-              <input className={inputClass} style={inputStyle} value={editJob.label || ""} onChange={e => setEditJob({ ...editJob, label: e.target.value })} placeholder="例：前滩太古里" required />
-            </div>
-            <div>
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>目标 URL</label>
-              <input className={inputClass} style={{ ...inputStyle, fontFamily: "var(--font-mono)" }} value={editJob.targetUrl || ""} onChange={e => setEditJob({ ...editJob, targetUrl: e.target.value })} placeholder="https://..." required />
-            </div>
-            <div>
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>业态</label>
-              <select className={inputClass} style={inputStyle} value={editJob.propertyType} onChange={e => setEditJob({ ...editJob, propertyType: e.target.value as any })}>
-                <option value="OFFICE">办公 OFFICE</option>
-                <option value="SHOPS">商业 SHOPS</option>
-                <option value="INDUSTRIAL">产业园 INDUSTRIAL</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>城市 / 区域</label>
-              <div className="flex gap-2">
-                <input className={inputClass + " flex-1"} style={inputStyle} value={editJob.city || ""} onChange={e => setEditJob({ ...editJob, city: e.target.value })} placeholder="shanghai" />
-                <input className={inputClass + " flex-1"} style={inputStyle} value={editJob.district || ""} onChange={e => setEditJob({ ...editJob, district: e.target.value })} placeholder="jing_an" />
+        <div className="str-form-card" style={{ marginBottom: 16 }}>
+          <form onSubmit={handleSubmit}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "16px 12px",
+              }}
+            >
+              <div>
+                <label className="str-label">站点名称 Site Name</label>
+                <input
+                  className="str-input"
+                  value={editJob.label || ""}
+                  onChange={(e) =>
+                    setEditJob({ ...editJob, label: e.target.value })
+                  }
+                  placeholder="例：前滩太古里"
+                  required
+                />
+              </div>
+              <div>
+                <label className="str-label">目标 URL Target URL</label>
+                <input
+                  className="str-input str-input-mono"
+                  value={editJob.targetUrl || ""}
+                  onChange={(e) =>
+                    setEditJob({ ...editJob, targetUrl: e.target.value })
+                  }
+                  placeholder="https://..."
+                  required
+                />
+              </div>
+              <div>
+                <label className="str-label">业态 Asset Type</label>
+                <select
+                  className="str-select"
+                  value={editJob.propertyType}
+                  onChange={(e) =>
+                    setEditJob({
+                      ...editJob,
+                      propertyType: e.target.value as CrawlJob["propertyType"],
+                    })
+                  }
+                >
+                  <option value="OFFICE">写字楼 Office</option>
+                  <option value="SHOPS">商业零售 Retail</option>
+                  <option value="INDUSTRIAL">产业园 Industrial</option>
+                </select>
+              </div>
+              <div>
+                <label className="str-label">城市 / 区域 City / District</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    className="str-input"
+                    value={editJob.city || ""}
+                    onChange={(e) =>
+                      setEditJob({ ...editJob, city: e.target.value })
+                    }
+                    placeholder="shanghai"
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    className="str-input"
+                    value={editJob.district || ""}
+                    onChange={(e) =>
+                      setEditJob({ ...editJob, district: e.target.value })
+                    }
+                    placeholder="jing_an"
+                    style={{ flex: 1 }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex gap-2 pt-1">
-            <button type="submit" className="btn-primary text-xs rounded-sm px-4 py-1.5">{editJob.id ? "保存" : "添加"}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEditJob(null); }} className="btn-secondary text-xs rounded-sm px-3 py-1.5">取消</button>
-          </div>
-        </form>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginTop: 20,
+                paddingTop: 16,
+                borderTop: "1px solid #e5edf5",
+              }}
+            >
+              <button type="submit" className="str-btn-primary">
+                {editJob.id ? "保存 Save" : "添加 Create"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditJob(null);
+                }}
+                className="str-btn-neutral"
+              >
+                取消 Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      {loading ? (
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>加载中...</p>
-      ) : jobs.length === 0 ? (
-        <div className="card-dark p-8 text-center rounded">
-          <p style={{ color: "var(--text-muted)", fontSize: 13 }}>暂无目标站点</p>
-          <p className="text-[11px] mt-1" style={{ color: "var(--text-hint)" }}>点击「+ 添加站点」添加第一个爬取目标</p>
+      {/* Loading */}
+      {loading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="str-skeleton"
+              style={{ height: 64, borderRadius: 6 }}
+            />
+          ))}
         </div>
-      ) : (
-        <div className="space-y-1.5">
-          {jobs.map(job => (
-            <div key={job.id} className={`card-dark p-3 rounded flex items-center justify-between gap-3 ${job.isActive ? "" : "opacity-50"}`}>
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: job.isActive ? "var(--positive)" : "var(--text-hint)" }} />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>{job.label}</span>
-                    <span className="badge badge-accent text-[10px]">{job.propertyType}</span>
+      )}
+
+      {/* Empty */}
+      {!loading && jobs.length === 0 && (
+        <div className="str-empty">
+          <svg className="str-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+          <p className="str-empty-title">暂无目标站点</p>
+          <p className="str-empty-desc">
+            点击「添加站点」创建第一个爬取目标
+          </p>
+        </div>
+      )}
+
+      {/* Job List */}
+      {!loading && jobs.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {jobs.map((job) => (
+            <div key={job.id} className="str-card-static" style={{ padding: "16px 20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
+              >
+                {/* Left: info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}
+                  >
+                    <span
+                      className={`str-badge ${
+                        job.isActive ? "str-badge-success" : "str-badge-neutral"
+                      }`}
+                    >
+                      {job.isActive ? "Active" : "Inactive"}
+                    </span>
+                    <span className="str-badge str-badge-accent">
+                      {typeLabels[job.propertyType] || job.propertyType}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 14,
+                        fontWeight: 400,
+                        color: "#061b31",
+                      }}
+                    >
+                      {job.label}
+                    </span>
                   </div>
-                  <p className="text-[11px] truncate" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>{job.targetUrl}</p>
-                  <div className="flex gap-3 mt-0.5 text-[10px]" style={{ color: "var(--text-hint)" }}>
-                    <span>{job.city} / {job.district}</span>
+
+                  <p
+                    style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: "#64748d",
+                      margin: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {job.targetUrl}
+                  </p>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      marginTop: 4,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 11,
+                        fontWeight: 300,
+                        color: "#64748d",
+                      }}
+                    >
+                      {job.city} / {job.district}
+                    </span>
                     {job.lastRunAt && (
-                      <span>
-                        上次: {new Date(job.lastRunAt).toLocaleString("zh-CN")}
-                        <span className={`badge ml-1 text-[10px] ${job.lastRunStatus === "SUCCESS" ? "badge-positive" : "badge-negative"}`}>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 11,
+                          fontWeight: 300,
+                          color: "#64748d",
+                        }}
+                      >
+                        上次: {new Date(job.lastRunAt).toLocaleString("zh-CN")}{" "}
+                        <span
+                          className={`str-badge ${
+                            job.lastRunStatus === "SUCCESS"
+                              ? "str-badge-success"
+                              : "str-badge-danger"
+                          }`}
+                        >
                           {job.lastRunStatus}
                         </span>
                       </span>
                     )}
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => toggleActive(job)} className="btn-secondary text-[10px] rounded-sm px-2 py-1">
-                  {job.isActive ? "停用" : "启用"}
-                </button>
-                <button onClick={() => { setEditJob({ ...job }); setShowForm(true); }} className="btn-secondary text-[10px] rounded-sm px-2 py-1">编辑</button>
-                <button onClick={() => deleteJob(job)} className="btn-secondary text-[10px] rounded-sm px-2 py-1" style={{ color: "var(--negative)" }}>删除</button>
+
+                {/* Right: actions */}
+                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                  <button
+                    onClick={() => toggleActive(job)}
+                    className="str-btn-neutral str-btn-sm"
+                  >
+                    {job.isActive ? "停用" : "启用"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditJob({ ...job });
+                      setShowForm(true);
+                    }}
+                    className="str-btn-neutral str-btn-sm"
+                  >
+                    编辑
+                  </button>
+                  <button
+                    onClick={() => deleteJob(job)}
+                    className="str-btn-danger str-btn-sm"
+                  >
+                    删除
+                  </button>
+                </div>
               </div>
             </div>
           ))}

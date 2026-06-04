@@ -65,49 +65,77 @@ export default function Home() {
   const totalCredits = credits.referral + credits.purchased;
   const { lang, t, toggleLang } = useLanguage();
 
-  // Geolocation — auto-detect user city
+  // Geolocation — auto-detect user city on initial load
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDetected, setGeoDetected] = useState(false);
   const [userCity, setUserCity] = useState<string>("");
+  const [geoLoading, setGeoLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window === "undefined" || geoDetected || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        setUserCoords({ lat, lng });
-        // Simple reverse geocode using Amap IP API
-        fetch(`https://restapi.amap.com/v3/ip?key=c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5`)
-          .then((r) => r.json())
-          .then((d) => {
-            if (d.city) {
-              const cityName = d.city.replace("市", "");
-              setUserCity(cityName);
-              if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
-                setActiveCity(cityName);
-              }
-            }
-          })
-          .catch(() => {});
-        setGeoDetected(true);
-      },
-      () => {
-        // Fallback: IP-based city detection without coords
-        fetch(`https://restapi.amap.com/v3/ip?key=c3a6d9e8f7b5a4c3d2e1f0a9b8c7d6e5`)
-          .then((r) => r.json())
-          .then((d) => {
-            if (d.city) {
-              const cityName = d.city.replace("市", "");
-              setUserCity(cityName);
-              if (["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
-                setActiveCity(cityName);
-              }
-            }
-          })
-          .catch(() => {});
-        setGeoDetected(true);
+    if (typeof window === "undefined" || geoDetected) return;
+
+    const detectByIP = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (!res.ok) throw new Error("ipapi failed");
+        const d = await res.json();
+        const cityName = d.city || "";
+        setUserCity(cityName);
+        if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
+          setActiveCity(cityName);
+        }
+      } catch {
+        // Fallback: try ip-api.com
+        try {
+          const res = await fetch("http://ip-api.com/json/?lang=zh-CN");
+          const d = await res.json();
+          const cityName = (d.city || "").replace("市", "");
+          setUserCity(cityName);
+          if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
+            setActiveCity(cityName);
+          }
+        } catch {
+          // Silently fail — show all cities
+        }
       }
-    );
+      setGeoDetected(true);
+      setGeoLoading(false);
+    };
+
+    // Try browser GPS first (more accurate), fall back to IP
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          // Use Nominatim reverse geocode (free, no key)
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&zoom=10&accept-language=zh`
+          )
+            .then((r) => r.json())
+            .then((d) => {
+              const city =
+                d.address?.city || d.address?.town || d.address?.county || "";
+              const cityName = city.replace("市", "");
+              setUserCity(cityName);
+              if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
+                setActiveCity(cityName);
+              }
+              setGeoDetected(true);
+              setGeoLoading(false);
+            })
+            .catch(() => {
+              detectByIP();
+            });
+        },
+        () => {
+          // GPS denied → fall back to IP
+          detectByIP();
+        },
+        { timeout: 5000, enableHighAccuracy: false }
+      );
+    } else {
+      detectByIP();
+    }
   }, [geoDetected]);
 
   // Filtered data
@@ -430,6 +458,36 @@ export default function Home() {
                 );
               })}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Geo location indicator */}
+            {userCity && activeCity === userCity && (
+              <button
+                onClick={() => { setActiveCity("全部"); }}
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors hover:bg-[var(--panel)]"
+                style={{ color: "var(--accent)" }}
+                title="点击查看全部城市"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                {userCity} · 查看全部
+              </button>
+            )}
+            {geoLoading && !geoDetected && (
+              <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-hint)" }}>
+                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                定位中
+              </span>
+            )}
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-[var(--panel)]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+              筛选
+            </button>
           </div>
           <button
             onClick={() => setMenuOpen(true)}

@@ -202,6 +202,26 @@ export default function HamburgerMenu({
           </div>
         </div>
 
+        
+        {/* Links */}
+        <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
+          <div className="flex items-center gap-4 text-[12px]">
+            <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
+            <a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
+            <a href="/contact" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
+          </div>
+        </div>
+
+        
+        {/* Links */}
+        <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
+          <div className="flex items-center gap-4 text-[12px]">
+            <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
+            <a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
+            <a href="/contact" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
+          </div>
+        </div>
+
         {/* Version */}
         <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
           <div className="flex items-center justify-between">

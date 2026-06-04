@@ -9,7 +9,16 @@ import HamburgerMenu from "@/components/HamburgerMenu";
 import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
 import Modal from "@/components/Toast";
+import WechatCard from "@/components/WechatCard";
 import { showModal } from "@/components/Toast";
+
+  const [wechatCardData, setWechatCardData] = useState<any>(null);
+
+  useEffect(() => {
+    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
+    document.addEventListener("open-wechat-card", h);
+    return () => document.removeEventListener("open-wechat-card", h);
+  }, []);
 import MapView from "@/components/MapView";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
@@ -538,17 +547,14 @@ export default function Home() {
               仅供参考，不构成投资建议。
               每日 8:00 更新。
             </div>
-            <div className="flex items-center gap-4 text-[12px]">
-              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>服务条款</a>
-              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>隐私政策</a>
-              <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)", fontSize: "12px" }}>联系我们</a>
-            </div>
+            
           </div>
         </div>
       </footer>
 
       {/* ====== Mobile Bottom Nav ====== */}
       <Modal />
+      {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

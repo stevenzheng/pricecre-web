@@ -312,13 +312,6 @@ export default function PropertyCard({
                 <span className="text-base font-normal">¥</span>{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
-              <button
-                className="ml-2 p-1.5 rounded-lg hover:bg-[var(--panel)] transition-colors"
-                onClick={(e) => { e.stopPropagation(); showModal('即将上线：生成微信卡片图片'); }}
-                aria-label="微信分享"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-              </button>
             </div>
           </div>
 
@@ -329,8 +322,8 @@ export default function PropertyCard({
                 已解锁
               </span>
             ) : (
-              <span className="badge badge-negative gap-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--negative)" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="var(--negative)"/></svg>
+              <span className="badge badge-locked gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-hint)" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="var(--text-hint)"/></svg>
                 待解锁
               </span>
             )}
@@ -357,7 +350,7 @@ export default function PropertyCard({
                     净有效租金
                   </span>
                   {!isUnlocked && (
-                    <span className="badge badge-negative text-[11px] gap-1">
+                    <span className="badge badge-locked text-[11px] gap-1">
                       <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
                         <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
@@ -377,6 +370,7 @@ export default function PropertyCard({
                   <div className="flex items-center gap-3">
                     <span className="text-xl font-medium" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>**.**</span>
                     <span className="text-xs" style={{ color: "var(--text-hint)" }}>解锁查看真实市价</span>
+                <button onClick={(e) => { e.stopPropagation(); if (typeof window !== "undefined") { const evt = new CustomEvent("open-wechat-card", { detail: { projectName: property.projectName, city: property.city, district: property.district, faceRent: property.faceRent, propertyType: typeLabel, indicators: sortedFields.filter(f => !f.isLocked).slice(0, 9).map(f => ({ label: f.label, value: formatValue(f.value, f.format) })) }}); document.dispatchEvent(evt); }}} className="ml-auto p-1.5 rounded-lg hover:bg-[var(--panel)]" aria-label="微信分享"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
                   </div>
                 )}
               </div>

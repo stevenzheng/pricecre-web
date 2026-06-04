@@ -209,7 +209,12 @@ body {
     color: var(--positive);
     border: 1px solid var(--positive-border);
   }
-  .badge-negative {
+  .badge-locked {
+  background: var(--panel);
+  color: var(--text-muted);
+  border: 1px solid var(--line);
+}
+.badge-negative {
     background: var(--negative-soft);
     color: var(--negative);
     border: 1px solid var(--negative-border);

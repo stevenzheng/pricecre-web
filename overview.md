@@ -1,37 +1,107 @@
-# Pricecre 后台 Stripe 风格重构 — 完成概览
+# PriceCRE 本地抓取Agent 全量开发完成
 
-## 完成内容
+**日期**: 2026-06-04 | **版本**: v5.0
 
-基于 **Stripe 设计体系** 全面重构了 PriceCRE 后台管理系统，共涉及 **8 个文件**。
+---
 
-### 新建文件
-| 文件 | 说明 |
-|------|------|
-| `DESIGN.md` | 完整 Stripe 适配设计体系文档（9 模块：色彩、字体、组件、阴影、布局等） |
-| `app/admin/data-review/page.tsx` | 新建审核队列页面（筛选标签、数据表格、批量操作） |
+## 第一部分：Agent 核心模块（9/9 完成）
 
-### 重构文件
-| 文件 | 改动 |
-|------|------|
-| `app/globals.css` | 新增 50+ Stripe 风格组件类（按钮、输入、徽章、卡片、表格、侧边栏等） |
-| `app/admin/layout.tsx` | 深色品牌侧边栏（`#1c1e54`），SVG 导航图标，激活态紫色强调 |
-| `app/admin/login/page.tsx` | 纯白卡片登录，紫色品牌 logo，精密间距 |
-| `app/admin/page.tsx` | 四栏统计卡片 + 三栏快速入口，Stripe 阴影卡片 |
-| `app/admin/crawl-schedule/page.tsx` | 精密表单布局、状态徽章、毛玻璃 Toast、骨架屏加载 |
-| `app/admin/pipeline-log/page.tsx` | 过滤标签、状态指示灯动画、统计摘要卡片、数据表格 |
+### geo-gis-scraper.ts（415行）— GIS地理数据爬虫
+- 高德地图API：地理编码 + 逆地理编码
+- 9城32商圈知识库（空置率/密度/交通/商圈等级）
+- 地址标准化 + 坐标验证 + 向后兼容
 
-## 核心设计决策
+### ssr-hydration-scraper.ts（997行）— 4平台SSR爬虫
+- 贝壳/好租/安居客/点点租 完整爬虫引擎
+- JSON-LD + meta标签 + 通用HTML正则提取
+- axios重试 + UA伪装 + 间隔冷却 + GIS整合
 
-- **字体**: MiSans (weight 300 标题，400 按钮/标签) + Geist Mono (tabular nums 数据)
-- **主色**: `#533afd` (Stripe Purple) CTA + `#061b31` (Deep Navy) 标题
-- **圆角**: 严格 4px-8px 范围，无胶囊形
-- **阴影**: 蓝色调多层阴影 `rgba(50,50,93,0.25)` — Stripe 视觉 DNA
-- **侧边栏**: 深色 `#1c1e54`，内容区 `#f8f9fb`
-- **兼容性**: 前台样式完全不受影响，后台独立 CSS 类名前缀 `str-` / `admin-`
+### data-quality.ts（323行）— 数据质量校验
+- 8项校验规则 + 三级严重度（OK/WARN/CRITICAL）
+- 面价范围/面积/免租期/9城白名单
+- ProcessedAsset交叉验证 + Top缺陷排名
 
-## 后续建议
+### run-pipeline.ts（212行）— 全链路启动脚本
+- 15预置任务 + 4阶段管线 + dry-run模式
+- CLI参数：`--city/--platforms/--limit/--dry-run`
 
-- 接入真实统计数据替换仪表盘的 "—"
-- `data-review` 页面对接审核 API 替换 mock 数据
-- `pipeline-log` 页面对接管线运行 API
-- 可考虑为部分列表添加分页组件
+---
+
+## 第二部分：跨平台调用层 🆕
+
+### server.ts — HTTP API 服务端
+```
+启动: npx tsx agent/server.ts [--port=3456]
+端点:
+  GET  /api/agent/v1/status            — 健康检查
+  POST /api/agent/v1/crawl              — 单城市/单平台爬取
+  POST /api/agent/v1/pipeline           — 全链路 dry-run
+  POST /api/agent/v1/trigger-pipeline   — 生产执行
+鉴权: Bearer Token (AGENT_SYNC_TOKEN)
+```
+
+### mcp-server.ts — MCP 协议服务
+```
+Stdio: npx tsx agent/mcp-server.ts           (供AI客户端)
+HTTP:  npx tsx agent/mcp-server.ts --mode=http --port=3457
+提供3个工具: crawl / pipeline / status
+```
+
+### tools.ts — 4种标准工具定义
+- OpenAI Function Calling 格式
+- Claude Tool Use 格式
+- LangChain Tool 格式
+- OpenAPI 3.0 Swagger 规范
+
+### platforms.md — 7平台对接指南
+| 平台 | 对接方式 |
+|------|---------|
+| **OpenClaw** | HTTP Action / Stdio MCP |
+| **Hermes** | MCP / 自定义Plugin YAML |
+| **Dify** | OpenAPI / 自定义工具 |
+| **Coze** | OpenAPI 插件 + ngrok |
+| **Claude Desktop** | Stdio MCP 配置 |
+| **Cursor/Windsurf** | Stdio MCP 配置 |
+| **LangChain/CrewAI** | langchainTools() / requests |
+
+---
+
+## Agent 模块全景
+
+```
+agent/
+├── schemas.ts              ✅ Zod契约（6份Schema,47字段）
+├── financial-engine.ts     ✅ 投行级精算（IRR/NOI/CAP）
+├── master-pipeline.ts      ✅ Exa→MiniMax→精算管线
+├── submarket-benchmarks.ts ✅ 子市场基准
+├── uploader.ts             ✅ Supabase+API双通道
+├── review-queue.ts         ✅ Prisma读写层
+├── data-quality.ts         🆕 数据质检
+├── run-pipeline.ts         🆕 全链路脚本
+├── server.ts               🆕 HTTP API
+├── mcp-server.ts           🆕 MCP协议
+├── tools.ts                🆕 工具定义
+├── platforms.md            🆕 对接指南
+└── scrapers/
+    ├── geo-gis-scraper.ts  🆕 高德GIS
+    └── ssr-hydration-scraper.ts 🆕 4平台爬虫
+```
+
+---
+
+## 快速启动
+
+```bash
+# 1. 本地管线
+npx tsx agent/run-pipeline.ts --dry-run --limit=10
+
+# 2. API 服务（供其他平台调用）
+npx tsx agent/server.ts &
+curl http://localhost:3456/api/agent/v1/status
+
+# 3. MCP 服务（供AI客户端）
+npx tsx agent/mcp-server.ts
+
+# 4. 公网暴露（供云平台调用）
+ngrok http 3456
+```

@@ -57,7 +57,7 @@ export function verificationEmailTemplate(code: string): string {
 <html><head><meta charset="utf-8"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#F8F9FA;padding:40px 0">
 <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:40px;border:1px solid #E5E7EB">
-<div style="font-size:20px;font-weight:700;color:#1A1A2E;margin-bottom:8px">PriceCRE</div>
+<div style="font-size:20px;font-weight:700;color:#1A1A2E;margin-bottom:8px">PriceCRE · 地产价值</div>
 <div style="font-size:12px;color:#9CA3AF;margin-bottom:28px;letter-spacing:0.1em">EMAIL VERIFICATION</div>
 <p style="font-size:15px;color:#374151;line-height:1.6;margin-bottom:24px">感谢注册 PriceCRE。请使用以下验证码完成邮箱验证：</p>
 <div style="text-align:center;margin-bottom:28px">
@@ -74,7 +74,7 @@ export function activationEmailTemplate(code: string): string {
 <html><head><meta charset="utf-8"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#F8F9FA;padding:40px 0">
 <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:40px;border:1px solid #E5E7EB">
-<div style="font-size:20px;font-weight:700;color:#1A1A2E;margin-bottom:8px">PriceCRE</div>
+<div style="font-size:20px;font-weight:700;color:#1A1A2E;margin-bottom:8px">PriceCRE · 地产价值</div>
 <div style="font-size:12px;color:#9CA3AF;margin-bottom:28px;letter-spacing:0.1em">ACTIVATION CODE</div>
 <p style="font-size:15px;color:#374151;line-height:1.6;margin-bottom:24px">感谢您提交的租金数据！数据已通过核验，请使用以下激活码兑换查看额度：</p>
 <div style="text-align:center;margin-bottom:28px">

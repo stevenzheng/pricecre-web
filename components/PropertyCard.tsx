@@ -380,11 +380,7 @@ export default function PropertyCard({
                     净有效租金
                   </span>
                   {!isUnlocked && (
-                    <span className="badge badge-locked text-[11px] gap-1">
-                      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
-                        <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
-                      </svg>
+                    <span className="badge badge-locked text-[11px]">
                       额度解锁
                     </span>
                   )}
@@ -487,13 +483,7 @@ export default function PropertyCard({
                         解锁中...
                       </>
                     ) : (
-                      <>
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z" />
-                          <path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z" />
-                        </svg>
-                        {remainingCredits > 0 ? `解锁 (-1)` : "额度已用完"}
-                      </>
+                      <>{remainingCredits > 0 ? "解锁" : "额度已用完"}</>
                     )}
                   </button>
                 )}

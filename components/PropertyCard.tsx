@@ -313,6 +313,14 @@ export default function PropertyCard({
                 <span className="text-base font-normal">¥</span>{property.faceRent.toFixed(1)}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); const evt = new CustomEvent("open-wechat-card", { detail: { projectName: property.projectName, city: property.city, district: property.district, faceRent: property.faceRent, propertyType: typeLabel, indicators: sortedFields.filter(f => !f.isLocked).slice(0, 9).map(f => ({ label: f.label, value: formatValue(f.value, f.format) })) }}); document.dispatchEvent(evt); }}
+                className="ml-1.5 p-1 rounded-lg hover:bg-[var(--panel)]"
+                aria-label="微信分享"
+                title="生成微信卡片"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </button>
             </div>
           </div>
 

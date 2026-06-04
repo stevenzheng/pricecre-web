@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       success: true,
       message: "邮箱验证成功",
       token: `pk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      referralCode: user.myReferralCode,
       referralBonus,
       totalCredits: userData.referralViewCount + referralBonus,
     });

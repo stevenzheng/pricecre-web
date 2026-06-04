@@ -81,6 +81,18 @@ export default function Home() {
   });
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const [unlockedData, setUnlockedData] = useState<Record<string, any>>({});
+  const [myReferralCode, setMyReferralCode] = useState("sz2026");
+
+  // Load referral code from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pricecre_user");
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user.referralCode) setMyReferralCode(user.referralCode);
+      }
+    } catch {}
+  }, []);
 
   const totalCredits = credits.referral + credits.purchased;
   const { lang } = useLanguage();
@@ -663,7 +675,7 @@ export default function Home() {
                   fontFamily: "var(--font-mono)",
                 }}
               >
-                https://pricecre.com/r/sz2026
+                https://pricecre.com/r/{myReferralCode}
               </code>
               <button
                 className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95"

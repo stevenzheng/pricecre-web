@@ -87,6 +87,16 @@ export default function ProfilePanel({ credits, totalCredits }: {
         setToken(data.token);
         setLoggedIn(true);
         setStep("done");
+        // Save referral code to localStorage for dynamic sharing
+        if (data.referralCode) {
+          try {
+            localStorage.setItem("pricecre_user", JSON.stringify({
+              email: form.email,
+              referralCode: data.referralCode,
+              registeredAt: Date.now(),
+            }));
+          } catch {}
+        }
         fetchHistory();
       } else {
         setError(data.error || "验证失败");

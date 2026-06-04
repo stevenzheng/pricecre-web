@@ -1,328 +1,308 @@
-# Design System: PriceCRE Admin (Blue-Adapted)
+# Design System: PriceCRE Admin (Ghost-Adapted)
 
-> 与价格 CRE 首页前端蓝色调（`#2563EB`）完全一致的后台设计系统。
-> 字体策略：汉字使用 MiSans Medium (500) 和 Regular (400)，确保中文笔画清晰可读。
+> 完全对标 Ghost CMS Admin 的设计语言与交互模型。
+> Ghost Admin 的特征：极暗侧边栏 + 浅灰内容区 + 米白卡片 + 精确排版 + 毫秒级客户端面板切换。
 
 ---
 
 ## 1. Visual Theme & Atmosphere
 
-PriceCRE Admin 采用与首页一致的蓝色调金融美学。后台以纯白 (`#ffffff`) 为画布，深色文字 (`#1A1A2E`) 为标题色，首页蓝 (`#2563EB`) 作为品牌锚点和交互强调。蓝色传递出专业、可信赖和精确感，与「地产价值」品牌定位一致。
+PriceCRE 后台采用 Ghost Admin 的编辑型 CMS 美学——冷静、克制、以内容为中心。Ghost Admin 不是仪表盘，它是出版工具。这种设计哲学决定了它不依赖花哨的阴影或渐变，而是用高对比度的色彩系统和精确排版建立信息层级。
 
-左侧导航栏使用深蓝色区域 (`#0f2b4a`)，形成前台与后台的视觉分野，与首页暗色模式导航暗区形成统一。
+- **极暗侧边栏** (`#15171A`)：接近纯黑但不刺眼，为内容区创造干净的心理分隔。
+- **浅灰内容区** (`#F0F0F1`)：比纯白柔和，减少长时间操作的视觉疲劳。
+- **米白卡片** (`#FFFFFF`)：在浅灰背景上自然抬升，形成清晰的操作面。
+- **精确排版**：Inter 字体 + 严格控制的行高和字间距，不靠装饰靠比例。
 
-**核心特征：**
-- MiSans Medium (500) 为标题和强文本，Regular (400) 用于正文和辅助文字
-- Geist Mono (500) 用于数据数字和代码标签
-- 中等线体汉字：中文笔画清晰，兼顾金融终端的精密感
-- 简洁阴影——干净、清爽，与首页风格统一
-- 保守圆角 (4px-8px)——无胶囊形，无锋利直角
-- 蓝色 CTA + 幽灵按钮组合
-- 深色文字 (`#1A1A2E`) 替代纯黑标题——与首页文字色系统一
+**核心理念**：Ghost Admin 把"管理"当成"编辑"——每一个后台操作都是内容生产流程的一环。交互节奏快、确认少、乐观更新。
 
 ---
 
-## 2. Color Palette & Roles
+## 2. Color Palette
 
-### Primary
-- **Pricecre Blue** (`#2563EB`): 主品牌色，CTA 背景，链接文字，交互高亮。与首页 `--accent` CSS 变量一致。
-- **Deep Text** (`#1A1A2E`): 主标题色。与首页 `--text-strong` CSS 变量一致。
-- **Pure White** (`#ffffff`): 页面背景，卡片表面，深色背景上的按钮文字。
-
-### Brand & Dark
-- **Sidebar Bg** (`#0f2b4a`): 深蓝色，用于侧边栏背景，与首页暗色主题呼应。
-- **Sidebar Text** (`rgba(255,255,255,0.7)`): 侧边栏主要文字。
-- **Sidebar Muted** (`rgba(255,255,255,0.4)`): 侧边栏次要文字。
-
-### Interactive
-- **Primary Blue** (`#2563EB`): 主链接色，激活态，选中元素。
-- **Blue Hover** (`#1d4ed8`): 主元素悬停态深蓝色。
-- **Blue Light** (`#93c5fd`): 用于 subdued hover 边框和空状态图标的柔和浅蓝色。
-- **Blue Soft** (`rgba(37,99,235,0.08)`): 过滤标签和徽章背景。
-- **Focus Ring** (`rgba(37,99,235,0.1)`): 输入框聚焦发光。
-
-### Neutral Scale
-- **Heading** (`#1A1A2E`): 主标题，导航文字，强标签。
-- **Label** (`#374151`): 表单标签，次级标题。
-- **Body** (`#64748d`): 次要文字，描述，说明。
-- **Success Green** (`#059669`): 状态徽章，成功指示器。
-- **Warning Amber** (`#D97706`): 警告和提示强调。
-
-### Surface & Borders
-- **Border Default** (`#e5edf5`): 标准边框色，用于卡片、分割线和容器。
-- **Border Blue** (`#93c5fd`): 按钮和输入焦点/选中态边框。
-- **Sidebar Active** (`rgba(37,99,235,0.25)`): 侧边栏激活项背景。
-- **Sidebar Hover** (`rgba(255,255,255,0.06)`): 侧边栏悬停背景。
+| Token | Hex | Role |
+|-------|-----|------|
+| `black` | `#15171A` | 侧边栏背景、主标题文字 |
+| `white` | `#FFFFFF` | 卡片背景、按钮区域 |
+| `bg-content` | `#F0F0F1` | 内容区域背景 |
+| `bg-hover` | `#F5F6F7` | 表格行悬停、鼠标经过态 |
+| `bg-sidebar-hover` | `#1E2026` | 侧边栏项目悬停 |
+| `text-primary` | `#15171A` | 主文字、标题 |
+| `text-secondary` | `#738A94` | 辅助文字、描述、标签 |
+| `text-tertiary` | `#A5B4BF` | 占位符、非活跃文字 |
+| `text-sidebar` | `#738A94` | 侧边栏导航文字 |
+| `text-sidebar-active` | `#FFFFFF` | 侧边栏激活项文字 |
+| `accent` | `#3EB0EF` | 主交互色、链接、CTA 按钮背景 |
+| `accent-hover` | `#33A1DE` | 按钮悬停态 |
+| `accent-soft` | `rgba(62,176,239,0.08)` | 过滤标签、选中背景 |
+| `accent-border` | `rgba(62,176,239,0.3)` | 选中态边框 |
+| `success` | `#30CF43` | 成功状态、Ghost 标志绿 |
+| `success-text` | `#1A9E2F` | 成功文字色 |
+| `success-soft` | `rgba(48,207,67,0.1)` | 成功徽章背景 |
+| `error` | `#E64C4C` | 错误、删除操作 |
+| `error-soft` | `rgba(230,76,76,0.08)` | 错误徽章背景 |
+| `warning` | `#F0A830` | 警告状态 |
+| `warning-soft` | `rgba(240,168,48,0.08)` | 警告徽章背景 |
+| `border` | `#E5E7EB` | 卡片边框、分割线、输入框边框 |
+| `border-dark` | `#D1D5DB` | 加深边框（焦点态） |
+| `shadow-card` | `0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04)` | 卡片阴影 |
+| `shadow-elevated` | `0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08)` | 弹窗/浮层阴影 |
 
 ---
 
-## 3. Typography Rules
+## 3. Typography
 
-### Font Family
-- **Primary**: `MiSans`, fallback: `-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif`
-- **Monospace**: `Geist Mono`, fallback: `SF Mono, ui-monospace, Consolas, monospace`
-- **Numeric Display**: Monospace with `font-feature-settings: "tnum"` for tabular numbers
+### Font Stack
+- **UI**: `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`
+- **Mono**: `"JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace`
+- **Data numerals**: Always `"tnum"` feature for tabular alignment
 
-### Hierarchy (Admin Panel)
+### Hierarchy
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Page Title | MiSans | 22px | 500 | 1.10 | -0.22px | Section headings |
-| Section Heading | MiSans | 18px | 500 | 1.15 | -0.18px | Subsection titles |
-| Card Title | MiSans | 16px | 500 | 1.20 | normal | Card headings |
-| Body | MiSans | 14px | 400 | 1.50 | normal | Standard text |
-| Button | MiSans | 14px | 500 | 1.00 | normal | Button text |
-| Button Small | MiSans | 12px | 500 | 1.00 | normal | Compact buttons |
-| Label | MiSans | 13px | 500 | 1.00 | normal | Form labels |
-| Caption | MiSans | 12px | 400 | 1.40 | normal | Secondary descriptions |
-| Caption Small | MiSans | 11px | 400 | 1.33 | normal | Timestamps, metadata |
-| Stat Value | Geist Mono | 24px | 500 | 1.00 | -0.36px | Dashboard numbers, tabular nums |
-| Stat Label | MiSans | 11px | 400 | 1.00 | 0.1px | Stat card labels |
-| Badge Text | MiSans | 10px | 400 | 1.00 | normal | Status badges |
-| Nav Link | MiSans | 14px | 400 | 1.00 | normal | Sidebar navigation |
-| Nav Link Active | MiSans | 14px | 500 | 1.00 | normal | Active nav item |
-| Sidebar Title | MiSans | 16px | 500 | 1.00 | normal | Sidebar brand name |
-| Sidebar Caption | MiSans | 10px | 400 | 1.15 | 0.1px | Sidebar subtitle |
-| Code Inline | Geist Mono | 12px | 500 | 1.50 | normal | Inline code, technical labels |
-| Code Block | Geist Mono | 12px | 500 | 2.00 | normal | Code blocks |
+| Role | Size | Weight | Line | Color | Notes |
+|------|------|--------|------|-------|-------|
+| Page Title | 22px | 600 | 1.15 | `#15171A` | 页面主标题 |
+| Section Title | 15px | 600 | 1.25 | `#15171A` | 分区标题 |
+| Card Title | 14px | 600 | 1.3 | `#15171A` | 卡片内标题 |
+| Body | 14px | 400 | 1.5 | `#15171A` | 正文 |
+| Body Secondary | 13px | 400 | 1.5 | `#738A94` | 辅助文字 |
+| Button | 14px | 500 | 1.0 | 白/蓝 | 按钮文字 |
+| Button Small | 13px | 500 | 1.0 | 可变 | 紧凑按钮 |
+| Label | 12px | 600 | 1.0 | `#738A94` | 表单标签、栏目标题 |
+| Caption | 12px | 400 | 1.4 | `#738A94` | 说明文字 |
+| Stat Value | 28px | 600 | 1.0 | `#15171A` | 仪表盘数字 (tnum) |
+| Stat Label | 11px | 500 | 1.0 | `#738A94` | 数字标签 |
+| Badge | 10px | 500 | 1.0 | 可变 | 状态徽章 |
+| Nav Item | 14px | 500 | 1.0 | `#738A94` | 侧边栏导航 |
+| Nav Active | 14px | 600 | 1.0 | `#FFFFFF` | 激活导航项 |
+| Code/API | 12px | 500 | 1.6 | `#15171A` | 代码块 (JetBrains Mono) |
 
 ### Principles
-- **中等线体汉字**: MiSans Medium (500) 用于标题和强文本，Regular (400) 用于正文——确保中文笔画清晰、粗细均匀。
-- **两者统一**: 系统使用两个 MiSans 权重——400 (正文/辅助) 和 500 (标题/按钮/标签)，与首页前端字重体系一致。
-- **负字间距**: 标题按比例收紧: -0.22px at 22px, -0.18px at 18px, normal at 14px and below。
-- **数字用 tnum**: 所有表格/财务数字显示使用 `font-feature-settings: "tnum"`。
+- **高对比度**: 主文字 `#15171A` 在白色/浅灰上，清晰锐利。
+- **权重精准**: 600 用于标题/激活态，500 用于按钮/导航/徽章，400 用于正文。
+- **中文适配**: PingFang SC + Microsoft YaHei 作为中文字体 fallback，确保汉字笔画清晰。
+- **数字 tnum**: 所有仪表盘数值和表格数字使用 `font-feature-settings: "tnum"`。
 
 ---
 
 ## 4. Component Stylings
 
+### Sidebar
+- Background: `#15171A`
+- Width: 240px
+- User section: top, with avatar placeholder
+- Nav items: 14px/500 Inter, `#738A94`, 8px 16px padding, 6px radius
+- Nav hover: background `#1E2026`
+- Nav active: background `rgba(62,176,239,0.15)`, left 3px `#3EB0EF` accent bar, text `#FFFFFF`
+- Nav icons: 20px, `#738A94` / `#FFFFFF` active
+- Footer: Ghost version + link to frontend, bottom of sidebar
+
 ### Buttons
 
-**Primary Blue**
-- Background: `#2563EB`
-- Text: `#ffffff`
-- Padding: 8px 16px
-- Radius: 4px
-- Font: 14px MiSans weight 500
-- Hover: `#1d4ed8` background
-- Use: Primary CTA
+**Primary (Blue)**
+- Background: `#3EB0EF`, text: `#FFFFFF`
+- Padding: 8px 20px, radius: 6px
+- Font: 14px Inter weight 500
+- Hover: `#33A1DE`
+- Use: Primary CTA, form submit
 
-**Ghost / Outlined**
-- Background: transparent
-- Text: `#2563EB`
-- Padding: 8px 16px
-- Radius: 4px
-- Border: `1px solid #93c5fd`
-- Font: 14px MiSans weight 500
-- Hover: background `rgba(37,99,235,0.05)`
+**Ghost (hollow/outlined)**
+- Background: transparent, text: `#3EB0EF`
+- Padding: 7px 19px, radius: 6px
+- Border: `1px solid #D1D5DB`
+- Font: 14px Inter weight 500
+- Hover: background `rgba(62,176,239,0.04)`, border `#3EB0EF`
 - Use: Secondary actions
 
-**Danger**
-- Background: transparent
-- Text: `#dc2626`
-- Padding: 6px 12px
-- Radius: 4px
-- Border: none
-- Font: 12px MiSans weight 500
-- Hover: background `rgba(220,38,38,0.05)`
-- Use: Delete actions
+**Danger/Text Button**
+- Background: transparent, text: `#E64C4C`
+- Padding: 6px 12px, radius: 6px
+- Font: 13px Inter weight 500
+- Hover: background `rgba(230,76,76,0.04)`
+- Use: Delete, destructive actions
 
-**Neutral Ghost**
-- Background: transparent
-- Text: `#64748d`
-- Padding: 6px 12px
-- Radius: 4px
-- Font: 12px MiSans weight 500
-- Hover: background `rgba(0,0,0,0.04)`
-- Use: Tertiary/muted actions
+### Cards
+- Background: `#FFFFFF`
+- Border: `1px solid #E5E7EB`
+- Radius: 8px
+- Shadow: `0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04)`
+- Padding: 20px (content cards) / 24px (form cards)
+- Hover: border shifts to `#D1D5DB`
 
-### Cards & Containers
-- Background: `#ffffff`
-- Border: `1px solid #e5edf5`
-- Radius: 6px (standard)
-- Shadow: `rgba(23,23,23,0.06) 0px 3px 6px`
-- Hover: border shifts to `#93c5fd`, shadow intensifies
+### Dashboard Stat Cards
+- Background: `#FFFFFF`
+- No border (background is `#F0F0F1` providing contrast automatically)
+- Radius: 8px, padding: 20px 24px
+- Shadow: card shadow
+- Stat value: 28px/600 Inter, `#15171A`, tnum
+- Stat label: 11px/500 Inter, `#738A94`, uppercase tracking
 
-### Dashboard Stats Card
-- Background: `#ffffff`
-- Border: `1px solid #e5edf5`
-- Radius: 6px
-- Shadow: ambient level
-- Hover: border shifts to `#93c5fd`
+### Badges / Tags
 
-### Badges / Tags / Pills
-**Success Badge**
-- Background: `rgba(5,150,105,0.12)`
-- Text: `#059669`
-- Padding: 1px 6px
-- Radius: 4px
-- Border: `1px solid rgba(5,150,105,0.25)`
-- Font: 10px MiSans weight 400
+**Status Badge Base**
+- Padding: 2px 8px, radius: 4px
+- Font: 10px Inter weight 600, uppercase tracking 0.5px
 
-**Neutral Badge**
-- Background: `#f1f3f5`
-- Text: `#64748d`
-- Padding: 1px 6px
-- Radius: 4px
-- Border: `1px solid #e5edf5`
-- Font: 10px MiSans weight 400
+**Active/Success**
+- Background: `rgba(48,207,67,0.1)`, text: `#1A9E2F`
+- Use: Enabled, Success, Active
 
-**Blue Accent Badge**
-- Background: `rgba(37,99,235,0.08)`
-- Text: `#2563EB`
-- Padding: 1px 6px
-- Radius: 4px
-- Border: `1px solid rgba(37,99,235,0.2)`
-- Font: 10px MiSans weight 400
+**Accent**
+- Background: `rgba(62,176,239,0.08)`, text: `#2090CC`
+- Use: In Progress, Selected
 
-**Danger Badge**
-- Background: `rgba(220,38,38,0.08)`
-- Text: `#dc2626`
-- Padding: 1px 6px
-- Radius: 4px
-- Border: `1px solid rgba(220,38,38,0.2)`
-- Font: 10px MiSans weight 400
+**Neutral**
+- Background: `#F0F0F1`, text: `#738A94`
+- Use: Disabled, Archived, Draft
+
+**Error**
+- Background: `rgba(230,76,76,0.08)`, text: `#E64C4C`
+- Use: Failed, Rejected, Error
 
 ### Inputs & Forms
-- Background: `#ffffff`
-- Border: `1px solid #e5edf5`
-- Radius: 4px
+- Background: `#FFFFFF`
+- Border: `1px solid #E5E7EB`, radius: 6px
 - Padding: 8px 12px
-- Focus: `1px solid #2563EB`, shadow `0 0 0 3px rgba(37,99,235,0.1)`
-- Label: `#374151`, 13px MiSans weight 500
-- Text: `#1A1A2E`, 14px MiSans weight 400
-- Placeholder: `#64748d`
+- Font: 14px Inter weight 400, text `#15171A`
+- Placeholder: `#A5B4BF`
+- Focus: border `#3EB0EF`, no shadow ring
+- Label: 12px/600 Inter, `#738A94`, uppercase tracking 0.3px
 
 ### Select
-- Same as Input styling
-- Custom chevron icon in blue (`#2563EB`)
+- Same as input styling
+- Custom chevron icon matching `#738A94`
+- Focus: border `#3EB0EF`
 
-### Sidebar Navigation
-- Background: `#0f2b4a`
-- Width: 220px
-- Nav items: 14px MiSans weight 400, `rgba(255,255,255,0.7)` text
-- Active item: `rgba(37,99,235,0.25)` background, icon color `#60a5fa`
-- Hover: `rgba(255,255,255,0.06)` background
-- Radius: 6px on items
+### Data Table
+- Container: `#FFFFFF` card with border/radius/shadow
+- Header: 12px/600 Inter, `#738A94`, uppercase tracking 0.3px
+- Header bg: transparent, bottom border `1px solid #E5E7EB`
+- Cell: 14px/400 Inter, `#15171A`, padding 12px 16px
+- Row: bottom border `1px solid #E5E7EB`
+- Row hover: background `#F5F6F7`
+- Row last: no bottom border
+- Numeric cells: JetBrains Mono 13px/500, tnum, right-aligned
 
-### Data Tables
-- Header: `#f8f9fb` background, 11px MiSans weight 500, `#374151` text
-- Row: 1px `#e5edf5` bottom border
-- Cell: 14px MiSans weight 400, `#1A1A2E` text, 12px 16px padding
-- Hover row: `#f8f9fb` background
-- Numeric cells: Geist Mono 14px weight 500, tnum
+### Empty State
+- Centered, padding 80px 24px
+- Icon: 48px, color `#738A94`, opacity 0.4
+- Title: 16px/600 Inter, `#15171A`
+- Description: 14px/400 Inter, `#738A94`
+
+### Toast / Notification
+- Background: `#FFFFFF`, border: `1px solid #E5E7EB`
+- Radius: 8px, padding: 12px 16px
+- Font: 13px/400 Inter, `#15171A`
+- Shadow: elevated
+- Auto-dismiss 3s
+
+### Filter Tabs / Pills
+- Container: inline-flex, gap 4px
+- Tab: 12px/500 Inter, padding 4px 10px, radius 4px
+- Inactive: text `#738A94`, background transparent
+- Hover: background `#F5F6F7`
+- Active: background `rgba(62,176,239,0.1)`, text `#3EB0EF`
 
 ---
 
 ## 5. Layout Principles
 
-### Spacing System
+### Spacing
 - Base unit: 4px
-- Admin scale: 4, 8, 12, 16, 20, 24, 32, 40, 48
-- Content area padding: 32px
-- Card gap: 12px (compact) / 16px (standard)
+- Content padding: 40px 48px
+- Section gap: 32px
+- Card gap: 12px (compact grid) / 16px (standard grid)
 
-### Grid & Container
-- Admin content: max 1200px, centered with 32px padding
-- Dashboard stats: 4-column grid (2-col tablet, 1-col mobile)
-- Quick actions: 3-column grid (1-col mobile)
-- Data tables: full-width with horizontal scroll on mobile
+### Grid
+- Content area: centered, max 1280px
+- Dashboard: 4-column grid → 2-col tablet → 1-col mobile
+- Form: 2-column grid for field pairs
 
-### Whitespace Philosophy
-- **精密间距**: 每个间隙都是经过计算的字体选择，不是随意留白。
-- **数据密集，界面慷慨**: 数据展示紧凑有序，但UI外壳周围空间充裕。像精心组织在精美框架中的电子表格。
-- **Section 节奏**: 内容区域与侧边栏形成明暗交替，防止单调。
+### Ghost Admin Layout Signature
+```
++-------------------+----------------------------------------+
+|                   |                                        |
+|   Sidebar         |   Content Area                        |
+|   240px           |                                        |
+|   #15171A         |   #F0F0F1                              |
+|                   |                                        |
+|   - Brand         |   [Page Title]                         |
+|   - Navigation    |   [Description]                        |
+|   - Footer        |                                        |
+|                   |   [Stats Grid]                         |
+|                   |                                        |
+|                   |   [Content / Table]                    |
+|                   |                                        |
++-------------------+----------------------------------------+
+```
 
-### Border Radius Scale
-- Standard (4px): Buttons, inputs, badges
-- Comfortable (6px): Cards, nav items, table containers
-- Relaxed (8px): Featured/prominent elements
+### Border Radius
+- Buttons, inputs, badges: 6px (slightly rounded)
+- Cards, panels: 8px
+- Checkboxes, radios: 3px (sharp)
 
 ---
 
 ## 6. Depth & Elevation
 
+Ghost Admin uses minimal elevation. The main depth cue is color contrast, not shadow.
+
 | Level | Treatment | Use |
 |-------|-----------|-----|
-| Flat (Level 0) | No shadow | Page background, inline text |
-| Ambient (Level 1) | `rgba(23,23,23,0.06) 0px 3px 6px` | Subtle card lift |
-| Elevated (Level 2) | `0 4px 16px rgba(0,0,0,0.06)` | Featured cards, dropdowns |
-| Ring (Accessibility) | `2px solid #2563EB` outline | Keyboard focus |
-
-**Shadow Philosophy**: 简洁干净，与首页前端风格统一。以微妙灰色阴影提供层级区分，不过度使用蓝色调多层阴影。
+| Base | No shadow, `#F0F0F1` bg | Content background |
+| Surface | `0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04)` | Cards, tables |
+| Elevated | `0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08)` | Modals, dropdowns, toast |
+| Focus Ring | `2px solid #3EB0EF`, `outline-offset: 1px` | Keyboard accessibility |
 
 ---
 
 ## 7. Do's and Don'ts
 
 ### Do
-- Use MiSans weight 500 for all headings and strong text
-- Use MiSans weight 400 for body text and auxiliary copy
-- Use `#1A1A2E` (frontend `--text-strong`) for headings
-- Keep border-radius between 4px-8px
-- Use Geist Mono with `"tnum"` for all dashboard numbers
-- Use `#2563EB` blue as primary CTA color (same as `--accent`)
-- Sidebar dark (`#0f2b4a`), content area light (`#f8f9fb`)
-- Align with frontend CSS variables where possible (`--text-strong`, `--text`, `--text-muted`)
+- Use `#15171A` for primary text — it's near-black but not #000
+- Use Inter with weight 600 for headings, 500 for UI, 400 for body
+- Keep sidebar dark (`#15171A`), content light (`#F0F0F1`)
+- Use minimal shadows — rely on color contrast for depth
+- Label filter states clearly with count badges
+- Provide empty states with actionable CTA
 
 ### Don't
-- Don't use weight 300 for MiSans Chinese text — too thin for readability
-- Don't use large border-radius (12px+, pill shapes) on admin components
-- Don't use pure black (`#000000`) for headings
-- Don't add unnecessary hover animations — keep it precise
-- Don't use the dark mode green accent (`#00C570`) in admin
+- Don't use pure black (#000) or pure white text on light
+- Don't use neon/bright colors outside of accent/success/error
+- Don't use weight 300 or below — Ghost Admin text is always readable
+- Don't add unnecessary hover animations
+- Don't use large border-radius (>8px)
+- Don't layer multiple shadows
 
 ---
 
 ## 8. Responsive Behavior
 
-### Breakpoints
-| Name | Width | Key Changes |
-|------|-------|-------------|
-| Mobile | <640px | Single column, sidebar collapses to top bar, reduced padding |
-| Tablet | 640-1024px | Compact sidebar (icons only or collapsible), 2-col grids |
-| Desktop | 1024-1280px | Full sidebar (220px), 3-col grids, standard padding |
-| Large Desktop | >1280px | Centered content with max-width 1200px |
-
-### Touch Targets
-- Buttons: minimum 32px height (8px vertical padding × 2 + 16px text)
-- Nav items: 36px minimum height
-- Form inputs: 36px minimum height
-
-### Collapsing Strategy
-- Sidebar: 220px → collapsed icons (52px) → top bar on mobile
-- Dashboard stats: 4-col → 2-col → 1-col
-- Quick actions: 3-col → 1-col
-- Data tables: horizontal scroll, sticky first column
+| Breakpoint | Behavior |
+|------------|----------|
+| < 900px | Sidebar collapses to top bar, content fills full width |
+| < 600px | Single column, reduced padding (16px), simplified tables |
 
 ---
 
 ## 9. Agent Prompt Guide
 
-### Quick Color Reference
-- Primary CTA: Pricecre Blue (`#2563EB`)
-- CTA Hover: Blue Dark (`#1d4ed8`)
-- Background: Pure White (`#ffffff`)
-- Content Area Background: (`#f8f9fb`)
-- Heading text: (`#1A1A2E`)
-- Body text: Slate (`#64748d`)
-- Label text: (`#374151`)
-- Border: Soft Blue (`#e5edf5`)
-- Sidebar: Dark Blue (`#0f2b4a`)
-- Success: Green (`#059669`)
-- Danger: Red (`#dc2626`)
+### Quick Reference
+- Sidebar bg: `#15171A`
+- Content bg: `#F0F0F1`
+- Card bg: `#FFFFFF`
+- Primary text: `#15171A`
+- Secondary text: `#738A94`
+- Accent: `#3EB0EF`
+- Success: `#30CF43`
+- Error: `#E64C4C`
+- Border: `#E5E7EB`
+- Card shadow: `0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04)`
+- Font: Inter, weights 400/500/600
+- Mono: JetBrains Mono for data
 
-### Example Component Prompts
-- "Create an admin sidebar: 220px wide, #0f2b4a background. Brand name at top in white 16px MiSans weight 500. Nav links at 14px weight 400 in rgba(255,255,255,0.7) with 6px radius, active state with rgba(37,99,235,0.25) background, icon color #60a5fa."
-- "Design a stats card: white background, 1px solid #e5edf5, 6px radius, ambient shadow. Stat value in 24px Geist Mono weight 500 color #1A1A2E with tnum. Label in 11px MiSans weight 400 color #64748d. Hover: border shifts to #93c5fd."
-- "Build a data table: header row with #f8f9fb background, 11px MiSans weight 500 #374151. Rows with 1px #e5edf5 bottom border. Cell text 14px MiSans weight 400 #1A1A2E. Hover row #f8f9fb. Numeric columns use Geist Mono weight 500 with tnum."
-- "Create a success badge: rgba(5,150,105,0.12) background, #059669 text, 4px radius, 1px 6px padding, 10px MiSans weight 400."
-
-### Iteration Guide
-1. Heading color is `#1A1A2E` (text-strong), body is `#64748d` (slate)
-2. Weight 500 for headings/buttons/labels; 400 for body/caption/auxiliary
-3. Border-radius stays in 4px-8px range
-4. Use `"tnum"` for dashboard stats and financial numbers
-5. Sidebar is dark (`#0f2b4a`), content area is light (`#ffffff` / `#f8f9fb`)
-6. MiSans for text, Geist Mono for data numbers
-7. Align with frontend CSS variable system (`--accent`, `--text-strong`, `--text`, `--text-muted`)
+### Architecture
+- Panel switcher: `useState` in layout, not Next.js pages
+- Data fetching: `useSWR` with kv cache
+- Mutations: optimistic update + background sync + rollback on failure
+- Code splitting: `React.lazy` per panel

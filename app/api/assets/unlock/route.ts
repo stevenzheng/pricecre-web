@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, projectName, city, userId } = await request.json();
+    const { propertyId, projectName, city, userId, email } = await request.json();
 
     if (!propertyId) {
       return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
@@ -28,17 +28,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "资产不存在" }, { status: 404 });
     }
 
+    // Look up user by ID or email
+    let dbUser = null;
+    if (userId) {
+      dbUser = await prisma.user.findUnique({ where: { id: userId } });
+    } else if (email) {
+      dbUser = await prisma.user.findUnique({ where: { email } });
+    }
+
     // If user is authenticated, handle credit deduction
-    let remainingCredits = 99; // default for anonymous
+    let remainingCredits = 99;
     let unlocked = true;
 
-    if (userId) {
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) {
-        return NextResponse.json({ error: "用户不存在" }, { status: 404 });
-      }
-
-      const totalCredits = user.referralViewCount + user.purchasedViewCount;
+    if (dbUser) {
+      const totalCredits = dbUser.referralViewCount + dbUser.purchasedViewCount;
       if (totalCredits <= 0) {
         return NextResponse.json(
           { error: "额度不足", remainingCredits: 0 },
@@ -48,27 +51,27 @@ export async function POST(request: NextRequest) {
 
       // Deduct credits: referral pool first
       await prisma.$transaction(async (tx) => {
-        if (user.referralViewCount > 0) {
+        if (dbUser.referralViewCount > 0) {
           await tx.user.update({
-            where: { id: userId },
+            where: { id: dbUser.id },
             data: { referralViewCount: { decrement: 1 } },
           });
         } else {
           await tx.user.update({
-            where: { id: userId },
+            where: { id: dbUser.id },
             data: { purchasedViewCount: { decrement: 1 } },
           });
         }
 
         // Record unlock view
         await tx.userViewLog.upsert({
-          where: { userId_propertyId: { userId, propertyId } },
-          create: { userId, propertyId },
+          where: { userId_propertyId: { userId: dbUser.id, propertyId: property!.id } },
+          create: { userId: dbUser.id, propertyId: property!.id },
           update: { viewedAt: new Date() },
         });
       });
 
-      const updatedUser = await prisma.user.findUnique({ where: { id: userId } });
+      const updatedUser = await prisma.user.findUnique({ where: { id: dbUser.id } });
       remainingCredits = (updatedUser?.referralViewCount ?? 0) + (updatedUser?.purchasedViewCount ?? 0);
       unlocked = true;
     }

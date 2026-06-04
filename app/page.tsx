@@ -74,22 +74,50 @@ export default function Home() {
   }, []);
   const [copied, setCopied] = useState(false);
 
-  // Credits (initial mock, will sync from API on first unlock)
-  const [credits, setCredits] = useState({
-    referral: 3,
-    purchased: 5,
-  });
-  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
-  const [unlockedData, setUnlockedData] = useState<Record<string, any>>({});
-  const [myReferralCode, setMyReferralCode] = useState("sz2026");
+  // Persistent state via localStorage
+  const loadPersisted = <T,>(key: string, fallback: T): T => {
+    try {
+      const stored = localStorage.getItem(`pricecre_${key}`);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return fallback;
+  };
+  const savePersisted = (key: string, value: any) => {
+    try { localStorage.setItem(`pricecre_${key}`, JSON.stringify(value)); } catch {}
+  };
 
-  // Load referral code from localStorage on mount
+  // Credits + user state
+  const [credits, setCredits] = useState(() =>
+    loadPersisted("credits", { referral: 3, purchased: 5 })
+  );
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => {
+    const arr = loadPersisted<string[]>("unlockedIds", []);
+    return new Set(arr);
+  });
+  const [myReferralCode, setMyReferralCode] = useState(() =>
+    loadPersisted("referralCode", "sz2026")
+  );
+  const [userEmail, setUserEmail] = useState(() =>
+    loadPersisted<string | null>("userEmail", null)
+  );
+
+  // Persist on change
+  useEffect(() => { savePersisted("credits", credits); }, [credits]);
+  useEffect(() => { savePersisted("unlockedIds", [...unlockedIds]); }, [unlockedIds]);
+  useEffect(() => { savePersisted("referralCode", myReferralCode); }, [myReferralCode]);
+
+  // Load user state from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem("pricecre_user");
       if (stored) {
         const user = JSON.parse(stored);
         if (user.referralCode) setMyReferralCode(user.referralCode);
+        if (user.email) setUserEmail(user.email);
+        // Sync credits if stored from registration
+        if (user.totalCredits) {
+          setCredits({ referral: user.totalCredits, purchased: 0 });
+        }
       }
     } catch {}
   }, []);
@@ -227,6 +255,7 @@ export default function Home() {
         body: JSON.stringify({ 
           propertyId,
           ...(prop ? { projectName: prop.projectName, city: prop.city } : {}),
+          ...(userEmail ? { email: userEmail } : {}),
         }),
       });
       const data = await res.json();

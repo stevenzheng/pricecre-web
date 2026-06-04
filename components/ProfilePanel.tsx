@@ -25,6 +25,28 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const [viewHistory, setViewHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
+  // Restore login state from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pricecre_user");
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user.email && user.referralCode) {
+          setForm((prev) => ({ ...prev, email: user.email }));
+          setLoggedIn(true);
+          setStep("done");
+          if (user.totalCredits) setQuota(user.totalCredits);
+          setActivated(true);
+          fetchHistory();
+          if (user.referralCode) {
+            // Update page-level referral code
+            try { localStorage.setItem("pricecre_referralCode", JSON.stringify(user.referralCode)); } catch {}
+          }
+        }
+      }
+    } catch {}
+  }, []);
+
   // Sync credits from parent page state
   useEffect(() => {
     if (credits) {
@@ -93,6 +115,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
             localStorage.setItem("pricecre_user", JSON.stringify({
               email: form.email,
               referralCode: data.referralCode,
+              totalCredits: data.totalCredits || 3,
               registeredAt: Date.now(),
             }));
           } catch {}

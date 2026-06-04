@@ -1,5 +1,5 @@
 # 最高刚性红线与安全约束规约 (CONSTRAINTS.md)
-# 版本：v3.9.5-CORE
+# 版本：v5.0 — 2026年6月4日 | 全字段词典对齐版
 
 ## 1. 鉴权与账户隔离红线
 - 当且仅当 password === null AND wechatOpenId === null AND phone === null AND email === null 时，系统判定为非法爆破账户并拦截熔断。

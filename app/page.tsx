@@ -238,12 +238,29 @@ export default function Home() {
     });
   }, [activeCity, activeType, searchQuery]);
 
-  // Stats
+  // Stats (reactive to unlocks)
+  const [serverStats, setServerStats] = useState({ total: mockProperties.length, cities: 0, volume: 0 });
+
   const stats = useMemo(() => {
-    const unlocked = mockProperties.filter((p) => p.isUnlocked).length;
     const cities = new Set(mockProperties.map((p) => p.city)).size;
-    const volume = unlocked * 8 + 12; // 模拟成交量
-    return { total: mockProperties.length, unlocked, cities, volume };
+    return {
+      total: mockProperties.length,
+      unlocked: unlockedIds.size,
+      cities,
+      volume: serverStats.volume,
+    };
+  }, [unlockedIds, serverStats.volume]);
+
+  // Fetch real stats from API
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((d) => setServerStats((prev) => ({
+        ...prev,
+        volume: d.propertyCount || 12,
+        cities: d.cityCount || cities,
+      })))
+      .catch(() => {});
   }, []);
 
   // Handlers

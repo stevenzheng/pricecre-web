@@ -28,3 +28,16 @@ export function redeemActivationCode(code: string): number | null {
   store.delete(`activation:${code}`);
   return credits;
 }
+
+// For referral tracking during registration
+const referralStore = new Map<string, string>();
+
+export function setReferral(email: string, referralCode: string) {
+  referralStore.set(email, referralCode);
+}
+
+export function getReferral(email: string): string | null {
+  const code = referralStore.get(email);
+  referralStore.delete(email);
+  return code || null;
+}

@@ -22,6 +22,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const [paymentProduct, setPaymentProduct] = useState<"single" | "monthly">("single");
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
   const [buying, setBuying] = useState(false);
+  const [viewHistory, setViewHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // Sync credits from parent page state
   useEffect(() => {
@@ -31,6 +33,15 @@ export default function ProfilePanel({ credits, totalCredits }: {
       setQuota(total);
     }
   }, [credits]);
+
+  const fetchHistory = async () => {
+    if (!form.email) return;
+    try {
+      const res = await fetch(`/api/user/history?email=${encodeURIComponent(form.email)}`);
+      const data = await res.json();
+      setViewHistory(data.history || []);
+    } catch {}
+  };
 
   /* ---- 注册：发送验证码 ---- */
   const handleRegister = async (e: React.FormEvent) => {
@@ -76,6 +87,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
         setToken(data.token);
         setLoggedIn(true);
         setStep("done");
+        fetchHistory();
       } else {
         setError(data.error || "验证失败");
       }
@@ -452,7 +464,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
       <div className="card p-5">
         <div className="section-title">账户统计</div>
         <div className="grid grid-cols-3 gap-3">
-          {[{ label: "提交", value: 0 }, { label: "购买", value: 0 }, { label: "查看", value: 0 }].map((s) => (
+          {[{ label: "提交", value: 0 }, { label: "购买", value: 0 }, { label: "查看", value: viewHistory.length }].map((s) => (
             <div key={s.label} className="text-center py-2 rounded-lg" style={{ background: "var(--panel)" }}>
               <div className="text-lg font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{s.label}</div>
@@ -460,6 +472,31 @@ export default function ProfilePanel({ credits, totalCredits }: {
           ))}
         </div>
       </div>
+
+      {/* 查看记录 */}
+      {viewHistory.length > 0 && (
+        <div className="card p-5">
+          <div className="section-title" onClick={() => setShowHistory(!showHistory)} style={{ cursor: "pointer" }}>
+            查看记录 ({viewHistory.length})
+            <span className="ml-2 text-[10px]" style={{ color: "var(--text-hint)" }}>{showHistory ? "收起 ▲" : "展开 ▼"}</span>
+          </div>
+          {showHistory && (
+            <div className="space-y-1.5 mt-3">
+              {viewHistory.map((p, i) => (
+                <div key={p.id || i} className="flex items-center justify-between py-2 px-2 rounded-lg" style={{ background: "var(--panel)" }}>
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-medium truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div>
+                    <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.city} · {p.district}</div>
+                  </div>
+                  <div className="text-xs font-mono font-medium ml-2 flex-shrink-0" style={{ color: "var(--accent)" }}>
+                    ¥{Number(p.faceRent).toFixed(1)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 3. 付费 + 分享 + 公众号 */}
       {publicCards}

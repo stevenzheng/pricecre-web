@@ -14,7 +14,7 @@ import { setCode } from "@/lib/codeStore";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { email, password, referralCode } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "邮箱和密码不能为空" }, { status: 400 });
@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
     // 生成验证码
     const code = generateVerificationCode();
     setCode(email, code);
+
+    // Store referral code alongside email verification
+    if (referralCode) {
+      const { setReferral } = await import("@/lib/codeStore");
+      setReferral(email, referralCode);
+    }
 
     // 发送邮件
     const result = await sendEmail({

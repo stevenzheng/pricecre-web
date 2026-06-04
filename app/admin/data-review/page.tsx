@@ -64,9 +64,9 @@ export default function DataReviewPage() {
         {["all", "OFFICE", "SHOPS", "INDUSTRIAL"].map((t) => (
           <button key={t} onClick={() => { setTypeFilter(t); setPage(1); }} style={{
             padding: "6px 14px", borderRadius: 6, border: "1px solid",
-            borderColor: typeFilter === t ? "#533afd" : "#e2e4ea",
+            borderColor: typeFilter === t ? "#2563EB" : "#e2e4ea",
             background: typeFilter === t ? "rgba(83,58,253,0.08)" : "#fff",
-            color: typeFilter === t ? "#533afd" : "#64748d",
+            color: typeFilter === t ? "#2563EB" : "#64748d",
             fontSize: 12, fontWeight: 500, cursor: "pointer",
           }}>
             {t === "all" ? "全部" : typeLabel[t]}
@@ -76,7 +76,7 @@ export default function DataReviewPage() {
 
       {loading ? (
         <div style={{ textAlign: "center", padding: 60, color: "#64748d", fontSize: 14 }}>
-          <div style={{ width: 24, height: 24, border: "2px solid #e2e4ea", borderTopColor: "#533afd", borderRadius: "50%", animation: "spin 0.6s linear infinite", margin: "0 auto 12px" }} />
+          <div style={{ width: 24, height: 24, border: "2px solid #e2e4ea", borderTopColor: "#2563EB", borderRadius: "50%", animation: "spin 0.6s linear infinite", margin: "0 auto 12px" }} />
           加载中...
         </div>
       ) : items.length === 0 ? (
@@ -103,7 +103,7 @@ export default function DataReviewPage() {
               <tbody>
                 {items.map((p) => (
                   <tr key={p.id} style={{ cursor: "pointer" }} onClick={() => window.location.href = `/admin/data-review/${p.id}`}>
-                    <td style={{ fontWeight: 500, color: "#533afd" }}>{p.projectName}</td>
+                    <td style={{ fontWeight: 500, color: "#2563EB" }}>{p.projectName}</td>
                     <td>{p.city}</td>
                     <td>{p.district}</td>
                     <td>{typeLabel[p.propertyType] || p.propertyType}</td>

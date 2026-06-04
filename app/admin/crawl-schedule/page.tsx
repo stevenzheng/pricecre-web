@@ -330,7 +330,7 @@ export default function CrawlSchedulePage() {
                         fontFamily: "var(--font-sans)",
                         fontSize: 14,
                         fontWeight: 400,
-                        color: "#061b31",
+                        color: "#1A1A2E",
                       }}
                     >
                       {job.label}
@@ -363,7 +363,7 @@ export default function CrawlSchedulePage() {
                       style={{
                         fontFamily: "var(--font-sans)",
                         fontSize: 11,
-                        fontWeight: 300,
+                        fontWeight: 400,
                         color: "#64748d",
                       }}
                     >
@@ -374,7 +374,7 @@ export default function CrawlSchedulePage() {
                         style={{
                           fontFamily: "var(--font-sans)",
                           fontSize: 11,
-                          fontWeight: 300,
+                          fontWeight: 400,
                           color: "#64748d",
                         }}
                       >

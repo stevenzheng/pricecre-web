@@ -39,7 +39,7 @@ const statusDot = (s: PipelineRun["status"]) => {
         <span
           className="str-status-dot"
           style={{
-            background: "#533afd",
+            background: "#2563EB",
             animation: "str-pulse 1.5s ease-in-out infinite",
           }}
         />
@@ -105,7 +105,7 @@ export default function PipelineLogPage() {
           </div>
           <div className="str-stat-card">
             <p className="str-stat-label">新增资产</p>
-            <p className="str-stat-value" style={{ color: "#533afd" }}>
+            <p className="str-stat-value" style={{ color: "#2563EB" }}>
               {mockRuns.reduce((s, r) => s + r.recordsNew, 0) || "—"}
             </p>
           </div>

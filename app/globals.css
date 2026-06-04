@@ -552,14 +552,14 @@ body {
 }
 
 /* =============================================
-   ADMIN DESIGN SYSTEM — Stripe-Adapted
+   ADMIN DESIGN SYSTEM — Blue-Adapted (Pricecre Frontend)
    ============================================= */
 
 /* Admin Sidebar */
 .admin-sidebar {
   width: 220px;
   min-height: 100vh;
-  background: #1c1e54;
+  background: #0f2b4a;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -573,7 +573,7 @@ body {
 .admin-sidebar-brand h1 {
   font-family: var(--font-sans);
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   color: #ffffff;
   margin: 0;
   letter-spacing: -0.16px;
@@ -582,7 +582,7 @@ body {
 .admin-sidebar-brand p {
   font-family: var(--font-sans);
   font-size: 10px;
-  font-weight: 300;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.4);
   margin: 2px 0 0;
   letter-spacing: 0.1px;
@@ -601,7 +601,7 @@ body {
   padding: 6px 12px;
   font-family: var(--font-sans);
   font-size: 10px;
-  font-weight: 400;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -616,7 +616,7 @@ body {
   border-radius: 6px;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   transition: all 0.15s ease;
@@ -629,9 +629,9 @@ body {
 }
 
 .admin-nav-item.active {
-  background: rgba(83, 58, 253, 0.2);
+  background: rgba(37, 99, 235, 0.25);
   color: #ffffff;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .admin-nav-item svg {
@@ -643,7 +643,7 @@ body {
 
 .admin-nav-item.active svg {
   opacity: 1;
-  color: #533afd;
+  color: #60a5fa;
 }
 
 .admin-sidebar-footer {
@@ -663,7 +663,7 @@ body {
   background: none;
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
   cursor: pointer;
@@ -693,8 +693,8 @@ body {
 .admin-page-title {
   font-family: var(--font-sans);
   font-size: 22px;
-  font-weight: 300;
-  color: #061b31;
+  font-weight: 500;
+  color: #1A1A2E;
   letter-spacing: -0.22px;
   margin: 0;
 }
@@ -702,12 +702,12 @@ body {
 .admin-page-desc {
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: #64748d;
   margin: 4px 0 0;
 }
 
-/* Stripe Cards */
+/* Cards */
 .str-card {
   background: #ffffff;
   border: 1px solid #e5edf5;
@@ -717,9 +717,8 @@ body {
 }
 
 .str-card:hover {
-  border-color: #b9b9f9;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
-              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
 }
 
 .str-card-static {
@@ -729,7 +728,7 @@ body {
   box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
 }
 
-/* Striped Stat Card */
+/* Stat Card */
 .str-stat-card {
   background: #ffffff;
   border: 1px solid #e5edf5;
@@ -740,15 +739,14 @@ body {
 }
 
 .str-stat-card:hover {
-  border-color: #b9b9f9;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
-              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
 }
 
 .str-stat-label {
   font-family: var(--font-sans);
   font-size: 11px;
-  font-weight: 300;
+  font-weight: 400;
   color: #64748d;
   margin: 0 0 4px;
   letter-spacing: 0.1px;
@@ -758,13 +756,13 @@ body {
   font-family: var(--font-geist-mono), monospace;
   font-size: 24px;
   font-weight: 500;
-  color: #061b31;
+  color: #1A1A2E;
   font-feature-settings: "tnum";
   letter-spacing: -0.36px;
   line-height: 1;
 }
 
-/* Stripe Buttons */
+/* Buttons */
 .str-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -773,18 +771,18 @@ body {
   padding: 8px 16px;
   border-radius: 4px;
   border: none;
-  background: #533afd;
+  background: #2563EB;
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.15s ease;
   text-decoration: none;
 }
 
 .str-btn-primary:hover {
-  background: #4434d4;
+  background: #1d4ed8;
 }
 
 .str-btn-primary:disabled {
@@ -799,19 +797,19 @@ body {
   gap: 6px;
   padding: 8px 16px;
   border-radius: 4px;
-  border: 1px solid #b9b9f9;
+  border: 1px solid #93c5fd;
   background: transparent;
-  color: #533afd;
+  color: #2563EB;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   text-decoration: none;
 }
 
 .str-btn-ghost:hover {
-  background: rgba(83, 58, 253, 0.05);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .str-btn-neutral {
@@ -826,14 +824,14 @@ body {
   color: #64748d;
   font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .str-btn-neutral:hover {
   background: rgba(0, 0, 0, 0.04);
-  color: #061b31;
+  color: #1A1A2E;
 }
 
 .str-btn-danger {
@@ -848,7 +846,7 @@ body {
   color: #dc2626;
   font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -862,17 +860,17 @@ body {
   padding: 4px 10px;
 }
 
-/* Stripe Inputs */
+/* Inputs */
 .str-input {
   width: 100%;
   padding: 8px 12px;
   border-radius: 4px;
   border: 1px solid #e5edf5;
   background: #ffffff;
-  color: #061b31;
+  color: #1A1A2E;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   outline: none;
   transition: all 0.15s ease;
 }
@@ -882,8 +880,8 @@ body {
 }
 
 .str-input:focus {
-  border-color: #533afd;
-  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .str-input-mono {
@@ -897,14 +895,14 @@ body {
   border-radius: 4px;
   border: 1px solid #e5edf5;
   background: #ffffff;
-  color: #061b31;
+  color: #1A1A2E;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   outline: none;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23533afd' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%232563EB' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 32px;
@@ -912,20 +910,20 @@ body {
 }
 
 .str-select:focus {
-  border-color: #533afd;
-  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.1);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .str-label {
   display: block;
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 400;
-  color: #273951;
+  font-weight: 500;
+  color: #374151;
   margin-bottom: 4px;
 }
 
-/* Stripe Badges */
+/* Badges */
 .str-badge {
   display: inline-flex;
   align-items: center;
@@ -933,14 +931,14 @@ body {
   border-radius: 4px;
   font-family: var(--font-sans);
   font-size: 10px;
-  font-weight: 300;
+  font-weight: 400;
   white-space: nowrap;
 }
 
 .str-badge-success {
-  background: rgba(21, 190, 83, 0.2);
-  color: #108c3d;
-  border: 1px solid rgba(21, 190, 83, 0.4);
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
 .str-badge-neutral {
@@ -950,9 +948,9 @@ body {
 }
 
 .str-badge-accent {
-  background: rgba(83, 58, 253, 0.08);
-  color: #533afd;
-  border: 1px solid rgba(83, 58, 253, 0.2);
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563EB;
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .str-badge-danger {
@@ -962,12 +960,12 @@ body {
 }
 
 .str-badge-warning {
-  background: rgba(155, 104, 41, 0.08);
-  color: #9b6829;
-  border: 1px solid rgba(155, 104, 41, 0.2);
+  background: rgba(217, 119, 6, 0.08);
+  color: #D97706;
+  border: 1px solid rgba(217, 119, 6, 0.2);
 }
 
-/* Stripe Status Dot */
+/* Status Dots */
 .str-status-dot {
   display: inline-block;
   width: 6px;
@@ -977,7 +975,7 @@ body {
 }
 
 .str-status-dot-active {
-  background: #15be53;
+  background: #059669;
 }
 
 .str-status-dot-inactive {
@@ -988,7 +986,7 @@ body {
   background: #dc2626;
 }
 
-/* Stripe Divider */
+/* Divider */
 .str-divider {
   height: 1px;
   background: #e5edf5;
@@ -996,7 +994,7 @@ body {
   margin: 0;
 }
 
-/* Stripe Toast */
+/* Toast */
 .str-toast {
   background: #ffffff;
   border: 1px solid #e5edf5;
@@ -1004,14 +1002,13 @@ body {
   padding: 10px 16px;
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
-  color: #061b31;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
-              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  font-weight: 400;
+  color: #1A1A2E;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   cursor: pointer;
 }
 
-/* Stripe Data Table */
+/* Data Table */
 .str-table {
   width: 100%;
   border-collapse: separate;
@@ -1026,8 +1023,8 @@ body {
   padding: 10px 16px;
   font-family: var(--font-sans);
   font-size: 11px;
-  font-weight: 400;
-  color: #273951;
+  font-weight: 500;
+  color: #374151;
   text-align: left;
   border-bottom: 1px solid #e5edf5;
   white-space: nowrap;
@@ -1037,8 +1034,8 @@ body {
   padding: 10px 16px;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 300;
-  color: #061b31;
+  font-weight: 400;
+  color: #1A1A2E;
   border-bottom: 1px solid #e5edf5;
   vertical-align: middle;
 }
@@ -1067,7 +1064,7 @@ body {
   color: #64748d;
 }
 
-/* Admin Empty State */
+/* Empty State */
 .str-empty {
   display: flex;
   flex-direction: column;
@@ -1084,27 +1081,27 @@ body {
   width: 48px;
   height: 48px;
   margin-bottom: 12px;
-  color: #b9b9f9;
+  color: #93c5fd;
   opacity: 0.5;
 }
 
 .str-empty-title {
   font-family: var(--font-sans);
   font-size: 15px;
-  font-weight: 300;
-  color: #273951;
+  font-weight: 500;
+  color: #374151;
   margin: 0;
 }
 
 .str-empty-desc {
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: #64748d;
   margin: 4px 0 0;
 }
 
-/* Admin Loading Skeleton */
+/* Loading Skeleton */
 @keyframes str-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -1117,7 +1114,7 @@ body {
   border-radius: 4px;
 }
 
-/* Admin Form Card */
+/* Form Card */
 .str-form-card {
   background: #ffffff;
   border: 1px solid #e5edf5;
@@ -1126,7 +1123,7 @@ body {
   box-shadow: rgba(23, 23, 23, 0.06) 0px 3px 6px;
 }
 
-/* Admin Action Bar */
+/* Action Bar */
 .str-action-bar {
   display: flex;
   align-items: center;
@@ -1136,7 +1133,7 @@ body {
   gap: 12px;
 }
 
-/* Admin Login Page */
+/* Login Page */
 .admin-login-bg {
   min-height: 100vh;
   display: flex;
@@ -1152,11 +1149,10 @@ body {
   border: 1px solid #e5edf5;
   border-radius: 8px;
   padding: 32px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
-              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
 }
 
-/* Admin Page Header */
+/* Page Header */
 .admin-page-header {
   margin-bottom: 24px;
 }
@@ -1174,29 +1170,28 @@ body {
 }
 
 .str-quick-card:hover {
-  border-color: #b9b9f9;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 45px -30px,
-              rgba(0, 0, 0, 0.1) 0px 18px 36px -18px;
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
 }
 
 .str-quick-card h3 {
   font-family: var(--font-sans);
   font-size: 16px;
-  font-weight: 300;
-  color: #061b31;
+  font-weight: 500;
+  color: #1A1A2E;
   margin: 0 0 6px;
 }
 
 .str-quick-card p {
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: #64748d;
   margin: 0;
   line-height: 1.5;
 }
 
-/* Admin Filter Tabs */
+/* Filter Tabs */
 .str-filter-tabs {
   display: flex;
   gap: 4px;
@@ -1210,21 +1205,21 @@ body {
   background: transparent;
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: #64748d;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .str-filter-tab:hover {
-  background: rgba(83, 58, 253, 0.04);
-  color: #533afd;
+  background: rgba(37, 99, 235, 0.04);
+  color: #2563EB;
 }
 
 .str-filter-tab.active {
-  background: rgba(83, 58, 253, 0.08);
-  color: #533afd;
-  border-color: rgba(83, 58, 253, 0.2);
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563EB;
+  border-color: rgba(37, 99, 235, 0.2);
 }
 
 /* Admin Responsive */

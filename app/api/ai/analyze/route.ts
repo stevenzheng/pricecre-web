@@ -87,12 +87,16 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
 
-    // Anthropic response format: content[0].text
-    const rawContent =
-      data.content?.[0]?.text || data.message?.content?.[0]?.text || "";
+    // MiniMax-M2.7 returns content as array: [thinking, text, ...]
+    // Find the text-type block, skip thinking blocks
+    const contentList = data.content || data.message?.content || [];
+    const textBlock = Array.isArray(contentList)
+      ? contentList.find((c: any) => c.type === "text")
+      : null;
+    const rawContent = textBlock?.text || "";
 
     if (!rawContent) {
-      console.error("Empty Anthropic response:", JSON.stringify(data));
+      console.error("No text content in response:", JSON.stringify(data).slice(0, 500));
       return NextResponse.json({ error: "AI 返回内容为空" }, { status: 502 });
     }
 

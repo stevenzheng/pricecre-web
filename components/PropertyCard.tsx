@@ -260,7 +260,7 @@ export default function PropertyCard({
           {/* Quick-glance volatile indicators */}
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {property.dynamicIndicators.submarketVacancy != null && (
-              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{
                 background: "var(--negative-soft)",
                 color: "var(--negative)",
               }}>
@@ -268,7 +268,7 @@ export default function PropertyCard({
               </span>
             )}
             {property.dynamicIndicators.netCorporateMigration != null && (
-              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{
                 background: (property.dynamicIndicators.netCorporateMigration ?? 0) > 0 ? "var(--positive-soft)" : "var(--negative-soft)",
                 color: (property.dynamicIndicators.netCorporateMigration ?? 0) > 0 ? "var(--positive)" : "var(--negative)",
               }}>
@@ -276,7 +276,7 @@ export default function PropertyCard({
               </span>
             )}
             {property.dynamicIndicators.kolBuzzIndex != null && (
-              <span className="text-[12px] font-medium px-2 py-0.5 rounded" style={{
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{
                 background: "var(--accent-soft)",
                 color: "var(--accent)",
               }}>

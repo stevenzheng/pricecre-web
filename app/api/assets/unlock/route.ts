@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, projectName, city } = await request.json();
+    const { propertyId, projectName, city, userId } = await request.json();
 
     if (!propertyId) {
       return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
     }
 
     // If user is authenticated, handle credit deduction
-    let remainingCredits = 8; // default for anonymous
-    let unlocked = false;
+    let remainingCredits = 99; // default for anonymous
+    let unlocked = true;
 
     if (userId) {
       const user = await prisma.user.findUnique({ where: { id: userId } });

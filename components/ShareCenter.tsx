@@ -164,7 +164,47 @@ export default function ShareCenter() {
           ) : (
             <button type="submit" className="btn-primary w-full text-sm">提交真实成交数据</button>
           )}
+          {!submitted && (
+            <p className="text-[10px] text-center leading-relaxed px-2" style={{ color: "var(--text-hint)" }}>
+              提交数据后需经平台核验，验证通过后通过您的注册邮箱发送激活码。请确保提交的信息真实有效，虚假数据将被驳回且不予发放额度。
+            </p>
+          )}
         </form>
+      </div>
+
+      {/* 激活码兑换卡片 */}
+      <div className="card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 9v4M12 16h.01"/>
+          </svg>
+          <span className="text-xs font-medium" style={{ color: "var(--accent)" }}>激活码兑换</span>
+        </div>
+        <p className="text-[10px] mb-3" style={{ color: "var(--text-hint)" }}>
+          通过邮箱收到的 6 位激活码在此兑换，激活后额度自动到账
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="输入 6 位激活码"
+            className="input-search flex-1 text-center tracking-[0.2em] text-sm"
+            style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }}
+            maxLength={6}
+            onChange={(e) => {
+              const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+              e.target.value = val;
+            }}
+          />
+          <button
+            className="btn-primary text-sm px-5 flex-shrink-0"
+            onClick={() => showModal("激活码验证通过！8 次查看额度已到账")}
+          >
+            激活
+          </button>
+        </div>
+        <p className="text-[9px] mt-2 text-center" style={{ color: "var(--text-hint)" }}>
+          激活码为一次性使用，激活后绑定至当前账户
+        </p>
       </div>
     </div>
   );

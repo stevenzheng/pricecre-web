@@ -40,6 +40,11 @@ export const metadata: Metadata = {
       "基于金融终端美学的商业地产量化精算平台。47项精算指标，AI智能分析，实时行情。",
     images: ["https://pricecre.com/og-image.png"],
   },
+  other: {
+    "og:image:type": "image/png",
+    "og:image:width": "1200",
+    "og:image:height": "630",
+  },
 };
 
 export const viewport = {

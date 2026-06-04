@@ -77,7 +77,7 @@ export default function Home() {
   };
   const resolveCity = (raw: string) => {
     const c = raw.replace("市", "");
-    const covered = ["上海", "北京", "深圳", "苏州", "成都"];
+    const covered = ["上海", "北京", "深圳", "苏州", "成都", "广州", "杭州", "长沙", "西安"];
     if (covered.includes(c)) return c;
     return NEARBY_CITY[c] || NEARBY_CITY[raw] || "";
   };
@@ -439,17 +439,20 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Active Filter + Type Chips + Filter Button */}
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Active Filter + Type Chips + Filter Button — sticky */}
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between sticky top-[56px] z-20" style={{ background: "var(--bg)", borderBottom: "1px solid var(--line)" }}>
           <div className="flex items-center gap-2">
             {/* Property Type Filter Chips */}
-            <div className="flex items-center gap-1.5 ml-2">
+            <div className="flex items-center gap-2">
               {[
                 { key: "OFFICE", label: "写字楼" },
                 { key: "SHOPS", label: "商业零售" },
                 { key: "INDUSTRIAL", label: "产业园" },
               ].map((t) => {
                 const isActive = activeType === t.key;
+                const count = mockProperties.filter(p =>
+                  (activeCity === "全部" || p.city === activeCity) && p.propertyType === t.key
+                ).length;
                 return (
                   <button
                     key={t.key}
@@ -461,7 +464,7 @@ export default function Home() {
                     }`}
                     style={isActive ? { background: "var(--accent-soft)" } : {}}
                   >
-                    {t.label}
+                    {t.label} <span style={{ color: "var(--text-strong)", fontWeight: 700 }}>{count}</span>
                   </button>
                 );
               })}

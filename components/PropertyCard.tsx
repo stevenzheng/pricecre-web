@@ -372,10 +372,10 @@ export default function PropertyCard({
       {state.isExpanded && (
         <div className="border-t animate-slide-up" style={{ borderColor: "var(--line)" }}>
           {/* Net Effective Rent + Actions Row */}
-          <div className="p-4 sm:p-5" style={{ background: "var(--panel)" }}>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="p-3 sm:p-5" style={{ background: "var(--panel)" }}>
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5 mb-1.5">
                   <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                     净有效租金
                   </span>
@@ -387,15 +387,15 @@ export default function PropertyCard({
                 </div>
                 {netEffectiveRent !== null ? (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-medium" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
+                    <span className="text-2xl sm:text-3xl font-medium" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
                       ¥{netEffectiveRent.toFixed(1)}
                     </span>
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
+                    <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl font-medium" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>**.**</span>
-                    <span className="text-xs" style={{ color: "var(--text-hint)" }}>解锁查看更多价值数据</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg sm:text-xl font-medium" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>**.**</span>
+                    <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-hint)" }}>解锁查看更多</span>
                   </div>
                 )}
               </div>
@@ -424,7 +424,7 @@ export default function PropertyCard({
                       });
                       document.dispatchEvent(aiEvent);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 hover:scale-105"
                     style={{
                       background: "var(--accent)",
                       color: "var(--text-inverse)",

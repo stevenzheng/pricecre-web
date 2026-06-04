@@ -17,7 +17,7 @@
   "crons": [
     {
       "path": "/api/agent/pipeline",
-      "schedule": "0 2 * * *"
+      "schedule": "*/30 * * * *"
     }
   ]
 }

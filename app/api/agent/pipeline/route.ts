@@ -2,11 +2,15 @@
 // ============================================================
 // Agent 管线手动触发入口
 // POST /api/agent/pipeline — 手动下发资产抓取+精算
-// GET  /api/agent/pipeline — Vercel Cron 触发定时任务
+// GET  /api/agent/pipeline — Vercel Cron 定时任务（从 DB 读取计划）
 // ============================================================
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
+import { SsrHydrationScraper } from "@/agent/scrapers/ssr-hydration-scraper";
 import { batchUploadAssets } from "@/agent/uploader";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -67,38 +71,108 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  console.log("[Pipeline] Vercel Cron 触发 — 开始定时扫描...");
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const windowMinutes = 30;
 
-  const monitorSites = [
-    { projectName: "前滩太古里", city: "shanghai", district: "qiantan", propertyType: "SHOPS" as const },
-    { projectName: "上海中心大厦", city: "shanghai", district: "jing_an", propertyType: "OFFICE" as const },
-  ];
-
-  const rawItems: any[] = [];
-  for (const site of monitorSites) {
-    rawItems.push({
-      projectName: site.projectName,
-      city: site.city,
-      district: site.district,
-      roughAddress: site.projectName,
-      propertyType: site.propertyType,
-      rawPriceText: "0",
-      freeRentMonthsText: "0",
-      leaseTotalMonths: 60,
-      macroSubmarketVacancy: 0.15,
-      inputLtv: 0.6,
-      noiCagr3Y: 0.02,
-    });
-  }
+  console.log(
+    `[Cron] ${now.toISOString()} — 检查计划任务 (窗口: ${currentHour}:${currentMinute} ± ${windowMinutes}min)`
+  );
 
   try {
-    const processed = await LocalAgentMasterOrchestrator.executeFullPipeline(rawItems);
-    await batchUploadAssets(processed);
+    const jobs = await prisma.scheduledCrawlJob.findMany({
+      where: { isActive: true },
+    });
+
+    const dueJobs = jobs.filter((job) => {
+      const jobTotalMinutes = job.scheduleHour * 60 + job.scheduleMinute;
+      const currentTotalMinutes = currentHour * 60 + currentMinute;
+      const diff = Math.abs(currentTotalMinutes - jobTotalMinutes);
+      const diffWrapped = Math.min(diff, 1440 - diff);
+      return diffWrapped <= windowMinutes;
+    });
+
+    if (dueJobs.length === 0) {
+      console.log(`[Cron] 无到期任务，当前 ${jobs.length} 个活跃计划`);
+      return NextResponse.json({
+        success: true,
+        msg: `无到期任务。活跃计划: ${jobs.length}`,
+        activeJobs: jobs.length,
+        dueJobs: 0,
+      });
+    }
+
+    console.log(`[Cron] ${dueJobs.length} 个到期任务，开始执行...`);
+    const results: any[] = [];
+
+    for (const job of dueJobs) {
+      console.log(`[Cron] → ${job.label} (${job.targetUrl})`);
+      try {
+        const ssrRaw = await SsrHydrationScraper.dehydratePropertyPage(job.targetUrl);
+        const rawItems = [
+          {
+            projectName: ssrRaw?.projectName ?? job.label,
+            city: job.city,
+            district: job.district,
+            roughAddress: ssrRaw?.projectName ?? job.label,
+            propertyType: job.propertyType,
+            rawPriceText: ssrRaw ? `${ssrRaw.faceRent}` : "0",
+            freeRentMonthsText:
+              ssrRaw?.indicatorsBag.freeRentMonthsText ?? "0",
+            leaseTotalMonths: 60,
+            macroSubmarketVacancy:
+              ssrRaw?.indicatorsBag.submarketVacancy ?? 0.15,
+            inputLtv: 0.6,
+            noiCagr3Y: 0.02,
+          },
+        ];
+
+        const processed =
+          await LocalAgentMasterOrchestrator.executeFullPipeline(rawItems);
+        await batchUploadAssets(processed);
+
+        await prisma.scheduledCrawlJob.update({
+          where: { id: job.id },
+          data: {
+            lastRunAt: now,
+            lastRunStatus: "SUCCESS",
+            lastPipelineCount: processed.length,
+            lastRunError: null,
+          },
+        });
+
+        results.push({
+          jobId: job.id,
+          label: job.label,
+          status: "SUCCESS",
+          pipelineCount: processed.length,
+        });
+      } catch (err: any) {
+        await prisma.scheduledCrawlJob.update({
+          where: { id: job.id },
+          data: {
+            lastRunAt: now,
+            lastRunStatus: "FAILED",
+            lastRunError: err.message?.slice(0, 500),
+          },
+        });
+        results.push({
+          jobId: job.id,
+          label: job.label,
+          status: "FAILED",
+          error: err.message,
+        });
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      msg: `Cron 定时任务完成，${processed.length} 条资产已入审核队列`,
+      msg: `定时任务完成。${results.length} 个计划已执行`,
+      results,
     });
   } catch (err: any) {
+    console.error("[Cron] 执行失败:", err);
     return NextResponse.json(
       { error: "CRON_PIPELINE_ERROR", msg: err.message },
       { status: 500 }

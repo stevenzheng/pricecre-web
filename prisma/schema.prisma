@@ -138,3 +138,23 @@ model AgentReviewQueue {
   @@index([status, createdAt])
   @@index([city, propertyType])
 }
+
+model ScheduledCrawlJob {
+  id                String    @id @default(uuid())
+  label             String
+  targetUrl         String
+  propertyType      PropertyType
+  city              String    @default("shanghai")
+  district          String    @default("pudong")
+  scheduleHour      Int       @default(2)
+  scheduleMinute    Int       @default(0)
+  isActive          Boolean   @default(true)
+  lastRunAt         DateTime?
+  lastRunStatus     String    @default("PENDING")
+  lastRunError      String?
+  lastPipelineCount Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([isActive, scheduleHour, scheduleMinute])
+}

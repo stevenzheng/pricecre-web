@@ -1,152 +1,157 @@
-// app/admin/layout.tsx — DESIGN.md Blue-Adapted Admin Shell
+// app/admin/layout.tsx — Ghost Admin Shell: client-side panel switcher
 "use client";
 
+import "../globals.css";
+import SWRProvider from "@/lib/swr-config";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback, Suspense, lazy } from "react";
 
-const navItems = [
-  { label: "概览", href: "/admin", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> },
-  { label: "审核队列", href: "/admin/data-review", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> },
-  { label: "爬取计划", href: "/admin/crawl-schedule", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> },
-  { label: "管线日志", href: "/admin/pipeline-log", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
-  { label: "数据源", href: "/admin/data-sources", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> },
-  { label: "字段管理", href: "/admin/field-settings", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> },
-  { label: "用户管理", href: "/admin/users", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> },
+/* ---------- panel component map ---------- */
+type Panel = "overview" | "data-review" | "crawl-schedule" | "pipeline-log";
+
+const PANEL_COMPONENTS: Record<Panel, React.LazyExoticComponent<React.ComponentType>> = {
+  overview: lazy(() => import("./page")),
+  "data-review": lazy(() => import("./data-review/page")),
+  "crawl-schedule": lazy(() => import("./crawl-schedule/page")),
+  "pipeline-log": lazy(() => import("./pipeline-log/page")),
+};
+
+const PANEL_LABELS: Record<Panel, string> = {
+  overview: "概览",
+  "data-review": "审核队列",
+  "crawl-schedule": "爬取计划",
+  "pipeline-log": "管线日志",
+};
+
+/* ---------- sidebar nav definition ---------- */
+const NAV_ITEMS: { panel: Panel; icon: JSX.Element }[] = [
+  {
+    panel: "overview",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="9" rx="2" /><rect x="14" y="3" width="7" height="5" rx="2" /><rect x="14" y="12" width="7" height="9" rx="2" /><rect x="3" y="16" width="7" height="5" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    panel: "data-review",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12l2 2 4-4" /><path d="M8 4H5a2 2 0 00-2 2v12a2 2 0 002 2h3" /><path d="M16 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3" />
+      </svg>
+    ),
+  },
+  {
+    panel: "crawl-schedule",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+      </svg>
+    ),
+  },
+  {
+    panel: "pipeline-log",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+      </svg>
+    ),
+  },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+/* ---------- panel loading fallback ---------- */
+const PanelSkeleton = () => (
+  <div style={{ padding: "40px 48px" }}>
+    <div className="gh-skeleton" style={{ width: 200, height: 24, marginBottom: 12 }} />
+    <div className="gh-skeleton" style={{ width: 320, height: 16 }} />
+  </div>
+);
 
-  if (pathname === "/admin/login") return <>{children}</>;
+/* ---------- main layout ---------- */
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  /*
+   * If the React tree originated from a hard navigation (e.g. visiting
+   * /admin/login directly), children will be an actual React element —
+   * in that case we render them as-is so the login page still works.
+   *
+   * After the user logs in and the sidebar mounts for the first time,
+   * this layout captures the active panel in useState and all subsequent
+   * "navigations" are just local state transitions — zero network
+   * requests, zero route changes, instant panel swap.
+   */
+  const [activePanel, setActivePanel] = useState<Panel | null>(null);
+
+  const switchTo = useCallback((panel: Panel) => setActivePanel(panel), []);
+
+  const PanelComponent = activePanel ? PANEL_COMPONENTS[activePanel] : null;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f8f9fb" }}>
-      {/* Mobile toggle */}
-      <button className="admin-mobile-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2">
-          <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-      </button>
+    <SWRProvider>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+        {/* ---- Sidebar ---- */}
+        <aside className="gh-sidebar">
+          {/* Brand */}
+          <div className="gh-sidebar-brand">
+            <Link href="/admin" onClick={() => setActivePanel("overview")} style={{ textDecoration: "none", display: "block" }}>
+              <div className="gh-sidebar-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+                </svg>
+              </div>
+              <h2 className="gh-sidebar-title">PriceCRE</h2>
+              <p className="gh-sidebar-subtitle">数据管理中心</p>
+            </Link>
+          </div>
 
-      {/* Sidebar */}
-      <aside className={`admin-sidebar${sidebarOpen ? " open" : ""}`}>
-        <div className="admin-sidebar-brand">
-          <Link href="/admin" style={{ color: "#ffffff", textDecoration: "none" }}>
-            PriceCRE Admin
-          </Link>
-          <p className="admin-sidebar-caption">数据管理中心</p>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`admin-nav-item${isActive ? " active" : ""}`}
-                onClick={() => setSidebarOpen(false)}
+          {/* Navigation */}
+          <nav className="gh-sidebar-nav">
+            <div className="gh-nav-label">管理</div>
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.panel}
+                className={`gh-nav-item${activePanel === item.panel ? " active" : ""}`}
+                onClick={() => switchTo(item.panel)}
+                onMouseEnter={() => {
+                  /* prefetch panel code */
+                  PANEL_COMPONENTS[item.panel].preload?.();
+                }}
               >
-                <span className="admin-nav-icon">{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+                {item.icon}
+                <span>{PANEL_LABELS[item.panel]}</span>
+              </button>
+            ))}
+          </nav>
 
-        <div className="admin-sidebar-footer">
-          <Link href="/" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none", fontSize: 12 }}>
-            ← 返回前台
-          </Link>
-          <form action="/api/auth/signout" method="POST">
-            <button style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: 12, cursor: "pointer", padding: 0, marginTop: 4 }}>
-              退出登录
-            </button>
-          </form>
-        </div>
-      </aside>
+          {/* Footer */}
+          <div className="gh-sidebar-footer">
+            <Link href="/" className="gh-sidebar-footer-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span>返回前台</span>
+            </Link>
+            <form action="/api/auth/signout" method="POST">
+              <button type="submit" className="gh-sidebar-footer-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                </svg>
+                <span>退出</span>
+              </button>
+            </form>
+          </div>
+        </aside>
 
-      {/* Main content */}
-      <main className="admin-content">{children}</main>
-
-      {/* Sidebar CSS-in-JS to match DESIGN.md */}
-      <style jsx global>{`
-        .admin-mobile-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 100; background: #fff; border: 1px solid #e5edf5; border-radius: 4px; padding: 6px 8px; cursor: pointer; }
-        .admin-sidebar {
-          width: 220px; min-height: 100vh; background: #0f2b4a; display: flex; flex-direction: column; flex-shrink: 0;
-          font-family: MiSans, -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-        }
-        .admin-sidebar-brand { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .admin-sidebar-brand a { font-size: 16px; font-weight: 500; }
-        .admin-sidebar-caption { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; letter-spacing: 0.1px; }
-        .admin-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
-        .admin-nav-item {
-          display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px;
-          font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.7); text-decoration: none;
-          transition: background 0.15s;
-        }
-        .admin-nav-item:hover { background: rgba(255,255,255,0.06); }
-        .admin-nav-item.active { background: rgba(37,99,235,0.25); font-weight: 500; color: #ffffff; }
-        .admin-nav-icon { display: flex; align-items: center; width: 20px; height: 20px; color: inherit; }
-        .admin-nav-item.active .admin-nav-icon { color: #60a5fa; }
-        .admin-sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-        .admin-content { flex: 1; padding: 32px; overflow: auto; min-width: 0; }
-        .admin-content-inner { max-width: 1200px; }
-        .admin-page-header { margin-bottom: 24px; }
-        .admin-page-title { font-size: 22px; font-weight: 500; color: #1A1A2E; line-height: 1.1; letter-spacing: -0.22px; margin: 0 0 4px; }
-        .admin-page-desc { font-size: 14px; font-weight: 400; color: #64748d; margin: 0; }
-        .str-table { width: 100%; border-collapse: collapse; font-family: MiSans, sans-serif; }
-        .str-table thead th {
-          background: #f8f9fb; font-size: 11px; font-weight: 500; color: #374151; text-align: left;
-          padding: 10px 16px; border-bottom: 1px solid #e5edf5;
-        }
-        .str-table tbody td {
-          font-size: 14px; font-weight: 400; color: #1A1A2E; padding: 12px 16px;
-          border-bottom: 1px solid #e5edf5;
-        }
-        .str-table tbody tr:hover { background: #f8f9fb; }
-        .str-td-mono { font-family: "Geist Mono", SF Mono, ui-monospace, monospace; font-weight: 500; font-feature-settings: "tnum"; }
-        .str-td-hint { font-size: 12px; color: #64748d; }
-        .btn-primary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-          padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 500;
-          background: #2563EB; color: #ffffff; border: none; cursor: pointer;
-          font-family: MiSans, sans-serif; transition: background 0.15s;
-        }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-secondary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-          padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 500;
-          background: transparent; color: #2563EB; border: 1px solid #93c5fd; cursor: pointer;
-          font-family: MiSans, sans-serif; transition: background 0.15s;
-        }
-        .btn-secondary:hover { background: rgba(37,99,235,0.05); }
-        .btn-danger {
-          display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px;
-          border-radius: 4px; font-size: 12px; font-weight: 500; background: transparent;
-          color: #dc2626; border: none; cursor: pointer; font-family: MiSans, sans-serif;
-        }
-        .btn-danger:hover { background: rgba(220,38,38,0.05); }
-        .btn-ghost {
-          display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px;
-          border-radius: 4px; font-size: 12px; font-weight: 500; background: transparent;
-          color: #64748d; border: none; cursor: pointer; font-family: MiSans, sans-serif;
-        }
-        .btn-ghost:hover { background: rgba(0,0,0,0.04); }
-
-        @media (max-width: 1024px) {
-          .admin-sidebar { position: fixed; left: -220px; top: 0; bottom: 0; z-index: 99; transition: left 0.2s; }
-          .admin-sidebar.open { left: 0; }
-          .admin-mobile-toggle { display: block; }
-          .admin-content { padding: 20px; }
-        }
-        @media (max-width: 640px) {
-          .admin-content { padding: 16px; }
-          .admin-page-title { font-size: 18px; }
-        }
-      `}</style>
-    </div>
+        {/* ---- Content ---- */}
+        <main className="gh-content">
+          {PanelComponent ? (
+            <Suspense fallback={<PanelSkeleton />}>
+              <PanelComponent />
+            </Suspense>
+          ) : (
+            children
+          )}
+        </main>
+      </div>
+    </SWRProvider>
   );
 }

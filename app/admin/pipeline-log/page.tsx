@@ -1,78 +1,144 @@
-// app/admin/pipeline-log/page.tsx — DESIGN.md with real data
+// app/admin/pipeline-log/page.tsx — Ghost Admin Pipeline Log
 "use client";
 
-import { useState, useEffect } from "react";
+import useSWR from "swr";
+import { useState } from "react";
 
-interface LogEntry {
-  id: string; label: string; targetUrl: string;
-  lastRunAt: string | null; lastRunStatus: string;
-  lastRunError: string | null; lastPipelineCount: number;
+interface PipelineRun {
+  id: string;
+  jobLabel: string;
+  status: "SUCCESS" | "FAILED" | "RUNNING";
+  startTime: string;
+  endTime: string | null;
+  duration: string | null;
+  recordsProcessed: number;
+  recordsNew: number;
+  error: string | null;
 }
 
+const STATUS_OPTIONS = [
+  { label: "全部", value: "all" },
+  { label: "成功", value: "SUCCESS" },
+  { label: "失败", value: "FAILED" },
+  { label: "运行中", value: "RUNNING" },
+] as const;
+
+type FilterStatus = (typeof STATUS_OPTIONS)[number]["value"];
+
 export default function PipelineLogPage() {
-  const [entries, setEntries] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterStatus>("all");
+  const { data: runs = [], isLoading } = useSWR<PipelineRun[]>("/api/agent/schedule", { fallbackData: [] });
 
-  useEffect(() => {
-    fetch("/api/agent/schedule").then(r => r.json()).then(data => {
-      setEntries(Array.isArray(data) ? data.filter((d: any) => d.lastRunAt) : []);
-    }).finally(() => setLoading(false));
-  }, []);
+  const filtered = filter === "all" ? runs : runs.filter((r) => r.status === filter);
 
-  const successCount = entries.filter(e => e.lastRunStatus === "SUCCESS").length;
-  const failCount = entries.filter(e => e.lastRunStatus === "FAILED").length;
-  const totalListings = entries.reduce((s, e) => s + (e.lastPipelineCount || 0), 0);
+  const statusBadge = (s: PipelineRun["status"]) => {
+    switch (s) {
+      case "SUCCESS": return <span className="gh-badge gh-badge-success">Success</span>;
+      case "FAILED": return <span className="gh-badge gh-badge-danger">Failed</span>;
+      case "RUNNING": return <span className="gh-badge gh-badge-accent">Running</span>;
+    }
+  };
+
+  const statusDot = (s: PipelineRun["status"]) => {
+    switch (s) {
+      case "SUCCESS": return <span className="gh-dot gh-dot-success" />;
+      case "FAILED": return <span className="gh-dot gh-dot-error" />;
+      case "RUNNING": return <span className="gh-dot gh-dot-accent" style={{ animation: "gh-pulse 1.5s ease-in-out infinite" }} />;
+    }
+  };
 
   return (
-    <div className="admin-content-inner">
-      <div className="admin-page-header">
-        <h1 className="admin-page-title">管线日志</h1>
-        <p className="admin-page-desc">
-          Agent 爬取管线运行历史 · 成功 {successCount} / 失败 {failCount} · 累计 {totalListings} 条房源
-        </p>
+    <div className="gh-content-inner">
+      <div className="gh-page-header">
+        <h1 className="gh-page-title">管线运行日志</h1>
+        <p className="gh-page-desc">ScheduledCrawlJob 执行记录 — 监控运行结果与产出数量</p>
       </div>
 
-      {loading ? (
-        <p style={{ fontSize: 14, color: "#64748d" }}>加载中...</p>
-      ) : entries.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 60, background: "#fff", border: "1px solid #e5edf5", borderRadius: 6 }}>
-          <p style={{ fontSize: 16, color: "#64748d" }}>暂无运行记录</p>
-          <p style={{ fontSize: 13, color: "#64748d" }}>触发全量抓取后，运行记录将显示在此处</p>
+      {/* Summary (when data exists) */}
+      {runs.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+          <div className="gh-stat-card">
+            <p className="gh-stat-value">{runs.length}</p>
+            <p className="gh-stat-label">总运行次数</p>
+          </div>
+          <div className="gh-stat-card">
+            <p className="gh-stat-value" style={{ color: "#30CF43" }}>
+              {runs.filter((r) => r.status === "SUCCESS").length > 0
+                ? `${Math.round((runs.filter((r) => r.status === "SUCCESS").length / runs.length) * 100)}%`
+                : "—"}
+            </p>
+            <p className="gh-stat-label">成功率</p>
+          </div>
+          <div className="gh-stat-card">
+            <p className="gh-stat-value">{runs.reduce((s, r) => s + r.recordsProcessed, 0) || "—"}</p>
+            <p className="gh-stat-label">处理记录</p>
+          </div>
+          <div className="gh-stat-card">
+            <p className="gh-stat-value" style={{ color: "#3EB0EF" }}>{runs.reduce((s, r) => s + r.recordsNew, 0) || "—"}</p>
+            <p className="gh-stat-label">新增资产</p>
+          </div>
+        </div>
+      )}
+
+      {/* Filter */}
+      <div style={{ marginBottom: 20 }}>
+        <div className="gh-filter-tabs">
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              className={`gh-filter-tab${filter === opt.value ? " active" : ""}`}
+              onClick={() => setFilter(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="gh-card-static" style={{ display: "flex", flexDirection: "column", gap: 8, padding: 16 }}>
+          {[1, 2, 3, 4].map((i) => <div key={i} className="gh-skeleton" style={{ height: 48, borderRadius: 6 }} />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="gh-empty">
+          <svg className="gh-empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p className="gh-empty-title">暂无运行记录</p>
+          <p className="gh-empty-desc">创建爬取计划并触发后，运行记录将显示在此处</p>
         </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="str-table">
+        <div className="gh-table-wrap">
+          <table className="gh-table">
             <thead>
               <tr>
-                <th>站点</th>
-                <th style={{ textAlign: "center" }}>状态</th>
-                <th style={{ textAlign: "right" }}>产量(条)</th>
-                <th>运行时间</th>
-                <th>错误信息</th>
+                <th style={{ width: 24 }} />
+                <th>任务</th>
+                <th>状态</th>
+                <th>开始</th>
+                <th style={{ textAlign: "right" }}>处理</th>
+                <th style={{ textAlign: "right" }}>新增</th>
+                <th style={{ textAlign: "right" }}>耗时</th>
               </tr>
             </thead>
             <tbody>
-              {entries.map(e => (
-                <tr key={e.id}>
-                  <td style={{ fontWeight: 500 }}>{e.label}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <span style={{
-                      display: "inline-block", padding: "1px 8px", borderRadius: 4, fontSize: 10,
-                      background: e.lastRunStatus === "SUCCESS" ? "rgba(5,150,105,0.12)" : "rgba(220,38,38,0.08)",
-                      color: e.lastRunStatus === "SUCCESS" ? "#059669" : "#dc2626",
-                    }}>{e.lastRunStatus}</span>
-                  </td>
-                  <td className="str-td-mono" style={{ textAlign: "right" }}>{e.lastPipelineCount || 0}</td>
-                  <td className="str-td-hint">{e.lastRunAt ? new Date(e.lastRunAt).toLocaleString("zh-CN") : "—"}</td>
-                  <td className="str-td-hint" style={{ maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {e.lastRunError || "—"}
-                  </td>
+              {filtered.map((run) => (
+                <tr key={run.id}>
+                  <td>{statusDot(run.status)}</td>
+                  <td style={{ fontWeight: 600 }}>{run.jobLabel}</td>
+                  <td>{statusBadge(run.status)}</td>
+                  <td className="gh-td-hint">{run.startTime}</td>
+                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{run.recordsProcessed.toLocaleString()}</td>
+                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{run.recordsNew.toLocaleString()}</td>
+                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{run.duration || "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <style>{`@keyframes gh-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
     </div>
   );
 }

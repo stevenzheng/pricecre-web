@@ -3,7 +3,7 @@
 // Creates the initial admin user for the management dashboard
 
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 

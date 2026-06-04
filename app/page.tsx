@@ -12,13 +12,6 @@ import Modal from "@/components/Toast";
 import WechatCard from "@/components/WechatCard";
 import { showModal } from "@/components/Toast";
 
-  const [wechatCardData, setWechatCardData] = useState<any>(null);
-
-  useEffect(() => {
-    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
-    document.addEventListener("open-wechat-card", h);
-    return () => document.removeEventListener("open-wechat-card", h);
-  }, []);
 import MapView from "@/components/MapView";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
@@ -36,6 +29,13 @@ export default function Home() {
   const [mobileTab, setMobileTab] = useState<"market" | "map" | "share" | "profile">("market");
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
+  const [wechatCardData, setWechatCardData] = useState<any>(null);
+
+  useEffect(() => {
+    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
+    document.addEventListener("open-wechat-card", h);
+    return () => document.removeEventListener("open-wechat-card", h);
+  }, []);
   const [wechatCardData, setWechatCardData] = useState<any>(null);
 
   useEffect(() => {

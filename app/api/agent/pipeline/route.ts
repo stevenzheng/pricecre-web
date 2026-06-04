@@ -109,24 +109,28 @@ export async function GET() {
     for (const job of dueJobs) {
       console.log(`[Cron] → ${job.label} (${job.targetUrl})`);
       try {
-        const ssrRaw = await SsrHydrationScraper.dehydratePropertyPage(job.targetUrl);
-        const rawItems = [
-          {
-            projectName: ssrRaw?.projectName ?? job.label,
-            city: job.city,
-            district: job.district,
-            roughAddress: ssrRaw?.projectName ?? job.label,
-            propertyType: job.propertyType,
-            rawPriceText: ssrRaw ? `${ssrRaw.faceRent}` : "0",
-            freeRentMonthsText:
-              ssrRaw?.indicatorsBag.freeRentMonthsText ?? "0",
-            leaseTotalMonths: 60,
-            macroSubmarketVacancy:
-              ssrRaw?.indicatorsBag.submarketVacancy ?? 0.15,
-            inputLtv: 0.6,
-            noiCagr3Y: 0.02,
-          },
-        ];
+        const crawlResults = await SsrHydrationScraper.crawlJob({
+          targetUrl: job.targetUrl,
+          label: job.label,
+          propertyType: job.propertyType as any,
+          city: job.city,
+          district: job.district,
+          maxResults: 3,
+        });
+        const rawItems = crawlResults.map((item) => ({
+          projectName: item.projectName,
+          city: item.cityKeystring,
+          district: item.district,
+          roughAddress: item.address || item.projectName,
+          propertyType: item.propertyType,
+          rawPriceText: item.rawPriceText || `${item.pricePerDay ?? 0}元/㎡/天`,
+          freeRentMonthsText: item.freeRentMonthsText || "0",
+          leaseTotalMonths: 60,
+          macroSubmarketVacancy: 0.15,
+          inputLtv: 0.6,
+          noiCagr3Y: 0.02,
+          area: item.area > 0 ? item.area : undefined,
+        }));
 
         const processed =
           await LocalAgentMasterOrchestrator.executeFullPipeline(rawItems);

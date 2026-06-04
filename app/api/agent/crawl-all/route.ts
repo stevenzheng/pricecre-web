@@ -23,48 +23,77 @@ export async function POST() {
 
     const results: any[] = [];
     const allRawItems: any[] = [];
+    let totalListings = 0;
 
     for (const job of jobs) {
       console.log(`[CrawlAll] → ${job.label}`);
       try {
-        const ssrRaw = await SsrHydrationScraper.dehydratePropertyPage(job.targetUrl);
-        allRawItems.push({
-          projectName: ssrRaw?.projectName ?? job.label,
+        const crawlResults = await SsrHydrationScraper.crawlJob({
+          targetUrl: job.targetUrl,
+          label: job.label,
+          propertyType: job.propertyType as any,
           city: job.city,
           district: job.district,
-          roughAddress: ssrRaw?.projectName ?? job.label,
-          propertyType: job.propertyType,
-          rawPriceText: ssrRaw ? `${ssrRaw.faceRent}` : "0",
-          freeRentMonthsText: ssrRaw?.indicatorsBag.freeRentMonthsText ?? "0",
-          leaseTotalMonths: 60,
-          macroSubmarketVacancy: ssrRaw?.indicatorsBag.submarketVacancy ?? 0.15,
-          inputLtv: 0.6,
-          noiCagr3Y: 0.02,
         });
+
+        for (const item of crawlResults) {
+          allRawItems.push({
+            projectName: item.projectName,
+            city: item.cityKeystring,
+            district: item.district,
+            roughAddress: item.address || item.projectName,
+            propertyType: item.propertyType,
+            rawPriceText: item.rawPriceText || `${item.pricePerDay ?? 0}元/㎡/天`,
+            freeRentMonthsText: item.freeRentMonthsText || "0",
+            leaseTotalMonths: 36,
+            macroSubmarketVacancy: 0.15,
+            inputLtv: 0.6,
+            noiCagr3Y: 0.02,
+            area: item.area > 0 ? item.area : undefined,
+          });
+        }
+
+        totalListings += crawlResults.length;
 
         await prisma.scheduledCrawlJob.update({
           where: { id: job.id },
-          data: { lastRunAt: now, lastRunStatus: "SUCCESS" },
+          data: {
+            lastRunAt: now,
+            lastRunStatus: "SUCCESS",
+            lastPipelineCount: crawlResults.length,
+          },
         });
 
-        results.push({ label: job.label, status: "SUCCESS" });
+        results.push({
+          label: job.label,
+          status: "SUCCESS",
+          listings: crawlResults.length,
+        });
       } catch (err: any) {
         await prisma.scheduledCrawlJob.update({
           where: { id: job.id },
-          data: { lastRunAt: now, lastRunStatus: "FAILED", lastRunError: err.message?.slice(0, 500) },
+          data: {
+            lastRunAt: now,
+            lastRunStatus: "FAILED",
+            lastRunError: err.message?.slice(0, 500),
+          },
         });
         results.push({ label: job.label, status: "FAILED", error: err.message });
       }
     }
 
+    console.log(`[CrawlAll] 共抓取 ${totalListings} 条房源`);
+
     if (allRawItems.length > 0) {
       const processed = await LocalAgentMasterOrchestrator.executeFullPipeline(allRawItems);
       await batchUploadAssets(processed);
+      console.log(`[CrawlAll] 管线处理完成，${processed.length} 条入审核队列`);
     }
 
     return NextResponse.json({
       success: true,
-      msg: `全量抓取完成：${results.length} 个目标`,
+      msg: `全量抓取完成：${totalListings} 条房源，${results.length} 个平台`,
+      totalListings,
       results,
     });
   } catch (err: any) {

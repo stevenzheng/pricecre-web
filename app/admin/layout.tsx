@@ -1,6 +1,7 @@
 // app/admin/layout.tsx
 import type { Metadata } from "next";
 import "../globals.css";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "PriceCRE Admin · 数据管理中心",
@@ -33,10 +34,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SidebarLink href="/admin/pipeline-log" label="管线日志" icon={IconLog} />
         </nav>
 
-        <div className="px-3 py-3 border-t" style={{ borderColor: "var(--line)" }}>
-          <a
+        <div className="px-3 py-3 border-t space-y-1" style={{ borderColor: "var(--line)" }}>
+          <Link
             href="/"
-            className="flex items-center gap-1.5 text-xs rounded transition-colors px-2 py-1.5"
+            className="flex items-center gap-1.5 text-xs rounded-sm transition-colors px-2 py-1.5"
             style={{ color: "var(--text-muted)" }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -44,7 +45,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
             返回前台
-          </a>
+          </Link>
+          <form action="/api/auth/signout" method="POST">
+            <button className="flex items-center gap-1.5 text-xs rounded-sm transition-colors px-2 py-1.5 w-full text-left" style={{ color: "var(--text-muted)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              退出登录
+            </button>
+          </form>
         </div>
       </aside>
 

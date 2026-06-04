@@ -296,7 +296,7 @@ export default function PropertyCard({
           <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
             {property.city} · {property.district}
           </p>
-          <div className="text-right text-[11px] leading-snug hidden sm:block" style={{ color: "var(--text-hint)" }}>
+          <div className="text-right text-[11px] leading-snug" style={{ color: "var(--text-hint)" }}>
             {(property.dynamicIndicators.kolBuzzIndex ?? 0) > 80 ? "🔥 高热度商圈" : 
              (property.dynamicIndicators.submarketVacancy ?? 100) < 8 ? "📉 低空置率" :
              (property.dynamicIndicators.netCorporateMigration ?? 0) > 20 ? "📈 企业净迁入" : "数据持续更新中"}

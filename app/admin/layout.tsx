@@ -1,7 +1,6 @@
 // app/admin/layout.tsx — Stripe-Adapted Admin Shell
 "use client";
 
-import "../../app/globals.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

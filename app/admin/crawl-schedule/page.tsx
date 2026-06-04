@@ -1,211 +1,72 @@
-// app/admin/crawl-schedule/page.tsx — Ghost Admin Crawl Management
 "use client";
+import { useState, useEffect, useCallback } from "react";
 
-import useSWR, { useSWRConfig } from "swr";
-import { useState, useCallback } from "react";
-
-interface CrawlJob {
-  id: string;
-  label: string;
-  targetUrl: string;
-  propertyType: "OFFICE" | "SHOPS" | "INDUSTRIAL";
-  city: string;
-  district: string;
-  isActive: boolean;
-  lastRunAt: string | null;
-  lastRunStatus: string | null;
-  lastPipelineCount: number;
-}
-
-const typeLabel: Record<string, string> = { OFFICE: "Office", SHOPS: "Retail", INDUSTRIAL: "Industrial" };
+interface Job { id: string; label: string; targetUrl: string; propertyType: string; city: string; district: string; isActive: boolean; lastRunAt: string | null; lastRunStatus: string; lastPipelineCount: number; }
+const typeLabel: Record<string, string> = { OFFICE: "办公", SHOPS: "商业", INDUSTRIAL: "产业园" };
 
 export default function CrawlSchedulePage() {
-  const { data: jobs = [], isLoading, mutate } = useSWR<CrawlJob[]>("/api/agent/schedule");
-  const { mutate: globalMutate } = useSWRConfig();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [edit, setEdit] = useState<Partial<Job>>({});
   const [showForm, setShowForm] = useState(false);
-  const [editJob, setEditJob] = useState<Partial<CrawlJob> | null>(null);
-  const [toast, setToast] = useState("");
+  const [actionMsg, setActionMsg] = useState("");
+  const [crawling, setCrawling] = useState(false);
 
-  /* ---- Optimistic Update Helpers ---- */
-  const optUpdate = useCallback(
-    async (id: string, patch: Partial<CrawlJob>, rollback: Partial<CrawlJob>) => {
-      if (!jobs) return;
-      const old = jobs;
-      const next = jobs.map((j) => (j.id === id ? { ...j, ...patch } : j));
-      mutate(next, false);
-      try {
-        const res = await fetch(`/api/agent/schedule/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patch),
-        });
-        if (!res.ok) throw new Error("API error");
-        mutate();
-        globalMutate("/api/agent/schedule");
-      } catch {
-        mutate(jobs.map((j) => (j.id === id ? { ...j, ...rollback } : j)), false);
-        setToast("操作失败，已回滚");
-        setTimeout(() => setToast(""), 3000);
-      }
-    },
-    [jobs, mutate, globalMutate]
-  );
+  const fetchJobs = useCallback(async () => { setLoading(true); try { const res = await fetch("/api/agent/schedule"); setJobs(Array.isArray(await res.json()) ? await res.json() : []); } catch { setJobs([]); } setLoading(false); }, []);
+  useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
-  const toggleActive = (job: CrawlJob) => {
-    optUpdate(job.id, { isActive: !job.isActive }, { isActive: job.isActive });
-  };
+  const handleSave = async (e: React.FormEvent) => { e.preventDefault(); const url = edit.id ? `/api/agent/schedule/${edit.id}` : "/api/agent/schedule"; await fetch(url, { method: edit.id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(edit) }); setShowForm(false); setEdit({}); fetchJobs(); };
+  const toggleActive = async (j: Job) => { await fetch(`/api/agent/schedule/${j.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !j.isActive }) }); fetchJobs(); };
+  const deleteJob = async (j: Job) => { if (!confirm(`删除「${j.label}」？`)) return; await fetch(`/api/agent/schedule/${j.id}`, { method: "DELETE" }); fetchJobs(); };
 
-  const deleteJob = async (job: CrawlJob) => {
-    if (!confirm(`删除「${job.label}」？`)) return;
-    mutate(
-      jobs.filter((j) => j.id !== job.id),
-      false
-    );
-    try {
-      await fetch(`/api/agent/schedule/${job.id}`, { method: "DELETE" });
-      mutate();
-    } catch {
-      mutate();
-      setToast("删除失败");
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editJob) return;
-    const url = editJob.id ? `/api/agent/schedule/${editJob.id}` : "/api/agent/schedule";
-    const method = editJob.id ? "PUT" : "POST";
-    try {
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(editJob) });
-      if (res.ok) {
-        setShowForm(false);
-        setEditJob(null);
-        mutate();
-        setToast(editJob.id ? "已更新" : "已创建");
-      }
-    } catch {
-      setToast("保存失败");
-    }
-    setTimeout(() => setToast(""), 3000);
-  };
+  const activeJobs = jobs.filter(j => j.isActive);
+  const crawlAll = async () => { setCrawling(true); setActionMsg("全量抓取已启动..."); try { const res = await fetch("/api/agent/crawl-all", { method: "POST" }); const data = await res.json(); setActionMsg(data.success ? `完成: ${data.totalListings || 0} 条房源` : "抓取失败"); } catch { setActionMsg("请求失败"); } setCrawling(false); fetchJobs(); };
 
   return (
     <div className="gh-content-inner">
-      <div className="gh-page-header">
-        <h1 className="gh-page-title">爬取计划管理</h1>
-        <p className="gh-page-desc">管理目标站点，按城市与业态自动化调度数据采集</p>
+      <div className="gh-page-header" style={{ display: "flex", justifyContent: "space-between" }}>
+        <div><h1 className="gh-page-title">爬取计划</h1><p className="gh-page-desc">{jobs.length} 个目标 · {activeJobs.length} 活跃</p></div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => { setEdit({ label: "", targetUrl: "", propertyType: "OFFICE", city: "shanghai", district: "pudong", isActive: true }); setShowForm(true); }} className="gh-btn-outline" style={{ fontSize: 13, padding: "6px 14px" }}>+ 添加</button>
+          <button onClick={crawlAll} disabled={crawling || activeJobs.length === 0} className="gh-btn-primary" style={{ fontSize: 13, padding: "6px 16px" }}>{crawling ? "抓取中..." : `全量抓取 (${activeJobs.length})`}</button>
+        </div>
       </div>
+      {actionMsg && <div style={{ marginBottom: 16, padding: "8px 16px", borderRadius: 6, background: "rgba(62,176,239,0.08)", color: "#3EB0EF", fontSize: 13, cursor: "pointer" }} onClick={() => setActionMsg("")}>{actionMsg}</div>}
 
-      {/* Action bar */}
-      <div className="gh-action-bar">
-        <button
-          onClick={() => {
-            setEditJob({ label: "", targetUrl: "", propertyType: "OFFICE", city: "shanghai", district: "pudong", isActive: true });
-            setShowForm(true);
-          }}
-          className="gh-btn-primary"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          添加站点
-        </button>
-        <button className="gh-btn-outline" onClick={() => { setToast("全量抓取已触发"); setTimeout(() => setToast(""), 3000); }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
-          </svg>
-          全量抓取
-        </button>
-      </div>
-
-      {/* Toast */}
-      {toast && <div className="gh-toast" style={{ marginBottom: 16 }} onClick={() => setToast("")}>{toast}</div>}
-
-      {/* Form */}
-      {showForm && editJob && (
-        <div className="gh-form-card" style={{ marginBottom: 16 }}>
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 12px" }}>
-              <div>
-                <label className="gh-label">站点名称</label>
-                <input className="gh-input" value={editJob.label || ""} onChange={(e) => setEditJob({ ...editJob, label: e.target.value })} placeholder="前滩太古里" required />
-              </div>
-              <div>
-                <label className="gh-label">URL</label>
-                <input className="gh-input gh-input-mono" value={editJob.targetUrl || ""} onChange={(e) => setEditJob({ ...editJob, targetUrl: e.target.value })} placeholder="https://..." required />
-              </div>
-              <div>
-                <label className="gh-label">业态</label>
-                <select className="gh-select" value={editJob.propertyType} onChange={(e) => setEditJob({ ...editJob, propertyType: e.target.value as CrawlJob["propertyType"] })}>
-                  <option value="OFFICE">写字楼</option>
-                  <option value="SHOPS">商业零售</option>
-                  <option value="INDUSTRIAL">产业园</option>
-                </select>
-              </div>
-              <div>
-                <label className="gh-label">城市 / 区域</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input className="gh-input" value={editJob.city || ""} onChange={(e) => setEditJob({ ...editJob, city: e.target.value })} placeholder="shanghai" style={{ flex: 1 }} />
-                  <input className="gh-input" value={editJob.district || ""} onChange={(e) => setEditJob({ ...editJob, district: e.target.value })} placeholder="jing_an" style={{ flex: 1 }} />
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 20, paddingTop: 16, borderTop: "1px solid #E5E7EB" }}>
-              <button type="submit" className="gh-btn-primary">{editJob.id ? "保存" : "创建"}</button>
-              <button type="button" className="gh-btn-text" onClick={() => { setShowForm(false); setEditJob(null); }}>取消</button>
-            </div>
-          </form>
-        </div>
+      {showForm && (
+        <form onSubmit={handleSave} className="gh-card" style={{ marginBottom: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div><label className="gh-label">站点名称</label><input className="gh-input" value={edit.label || ""} onChange={e => setEdit({...edit, label: e.target.value})} required /></div>
+          <div><label className="gh-label">URL</label><input className="gh-input" style={{ fontFamily: "JetBrains Mono, monospace" }} value={edit.targetUrl || ""} onChange={e => setEdit({...edit, targetUrl: e.target.value})} required /></div>
+          <div><label className="gh-label">业态</label><select className="gh-select" style={{ width: "100%" }} value={edit.propertyType} onChange={e => setEdit({...edit, propertyType: e.target.value})}><option value="OFFICE">办公</option><option value="SHOPS">商业</option><option value="INDUSTRIAL">产业园</option></select></div>
+          <div><label className="gh-label">城市 / 区域</label><div style={{ display: "flex", gap: 8 }}><input className="gh-input" value={edit.city || ""} onChange={e => setEdit({...edit, city: e.target.value})} placeholder="shanghai" /><input className="gh-input" value={edit.district || ""} onChange={e => setEdit({...edit, district: e.target.value})} placeholder="jing_an" /></div></div>
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
+            <button type="submit" className="gh-btn-primary" style={{ fontSize: 13, padding: "6px 16px" }}>{edit.id ? "保存" : "添加"}</button>
+            <button type="button" onClick={() => { setShowForm(false); setEdit({}); }} className="gh-btn-ghost">取消</button>
+          </div>
+        </form>
       )}
 
-      {/* Skeleton */}
-      {isLoading && (
-        <div className="gh-card-static" style={{ display: "flex", flexDirection: "column", gap: 8, padding: 16 }}>
-          {[1, 2, 3].map((i) => <div key={i} className="gh-skeleton" style={{ height: 64, borderRadius: 8 }} />)}
-        </div>
-      )}
-
-      {/* Empty */}
-      {!isLoading && jobs.length === 0 && (
-        <div className="gh-empty">
-          <svg className="gh-empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round">
-            <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2"/>
-          </svg>
-          <p className="gh-empty-title">暂无目标站点</p>
-          <p className="gh-empty-desc">点击「添加站点」创建第一个爬取目标</p>
-        </div>
-      )}
-
-      {/* Job list */}
-      {!isLoading && jobs.length > 0 && (
-        <div className="gh-card-static" style={{ overflow: "hidden" }}>
-          {jobs.map((job, i) => (
-            <div
-              key={job.id}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "14px 20px",
-                borderBottom: i < jobs.length - 1 ? "1px solid #E5E7EB" : "none",
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                  <span className={`gh-badge ${job.isActive ? "gh-badge-success" : "gh-badge-neutral"}`}>
-                    {job.isActive ? "Active" : "Paused"}
-                  </span>
-                  <span className="gh-badge gh-badge-neutral">{typeLabel[job.propertyType]}</span>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: "#15171A" }}>{job.label}</span>
-                </div>
-                <p style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 12, fontWeight: 500, color: "#738A94", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{job.targetUrl}</p>
-              </div>
-              <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-                <button onClick={() => toggleActive(job)} className="gh-btn-text gh-btn-sm">{job.isActive ? "停用" : "启用"}</button>
-                <button onClick={() => { setEditJob({ ...job }); setShowForm(true); }} className="gh-btn-text gh-btn-sm">编辑</button>
-                <button onClick={() => deleteJob(job)} className="gh-btn-danger gh-btn-sm">删除</button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {loading ? <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div> : jobs.length === 0 ? <div className="gh-empty"><p className="gh-empty-title">暂无爬取目标</p><p className="gh-empty-desc">点击「+ 添加」创建第一个</p></div> : (
+        <table className="gh-table">
+          <thead><tr><th style={{ width: 30 }}></th><th>站点</th><th>URL</th><th>业态</th><th>城市</th><th style={{ textAlign: "center" }}>上次运行</th><th style={{ textAlign: "right", width: 180 }}></th></tr></thead>
+          <tbody>
+            {jobs.map(j => (
+              <tr key={j.id} style={{ opacity: j.isActive ? 1 : 0.4 }}>
+                <td><div style={{ width: 8, height: 8, borderRadius: "50%", background: j.isActive ? "#30CF43" : "#E5E7EB" }} /></td>
+                <td style={{ fontWeight: 600 }}>{j.label}</td>
+                <td className="gh-hint" style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 12, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.targetUrl}</td>
+                <td><span className="gh-badge gh-badge-accent">{typeLabel[j.propertyType]}</span></td>
+                <td style={{ fontSize: 13, color: "#738A94" }}>{j.city} / {j.district}</td>
+                <td style={{ textAlign: "center" }}>{j.lastRunAt ? <><span style={{ fontSize: 12 }}>{new Date(j.lastRunAt).toLocaleDateString("zh-CN")}</span> <span className={`gh-badge ${j.lastRunStatus === "SUCCESS" ? "gh-badge-success" : "gh-badge-error"}`}>{j.lastRunStatus}</span>{j.lastPipelineCount > 0 && <span style={{ marginLeft: 4, color: "#738A94", fontSize: 12 }}>({j.lastPipelineCount}条)</span>}</> : <span className="gh-hint">—</span>}</td>
+                <td style={{ textAlign: "right" }}>
+                  <button onClick={() => toggleActive(j)} className="gh-btn-ghost">{j.isActive ? "停用" : "启用"}</button>
+                  <button onClick={() => { setEdit({...j}); setShowForm(true); }} className="gh-btn-ghost">编辑</button>
+                  <button onClick={() => deleteJob(j)} className="gh-btn-danger">删除</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

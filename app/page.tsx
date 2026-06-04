@@ -94,6 +94,7 @@ export default function Home() {
     const arr = loadPersisted<string[]>("unlockedIds", []);
     return new Set(arr);
   });
+  const [unlockedData, setUnlockedData] = useState<Record<string, any>>({});
   const [myReferralCode, setMyReferralCode] = useState(() =>
     loadPersisted("referralCode", "sz2026")
   );

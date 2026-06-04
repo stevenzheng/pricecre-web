@@ -112,8 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={`gh-nav-item${activePanel === item.panel ? " active" : ""}`}
                 onClick={() => switchTo(item.panel)}
                 onMouseEnter={() => {
-                  /* prefetch panel code */
-                  PANEL_COMPONENTS[item.panel].preload?.();
+                  (PANEL_COMPONENTS[item.panel] as any).preload?.();
                 }}
               >
                 {item.icon}

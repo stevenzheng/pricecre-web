@@ -30,14 +30,15 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       {/* Header */}
       <div className="px-5 py-3 flex items-center gap-3" style={{ background: "var(--panel)" }}>
         <button
-          className="w-2.5 h-2.5 rounded-full flex-shrink-0 cursor-pointer transition-all"
-          style={{
-            background: isExhausted ? "var(--text-hint)" : isLow ? "var(--warning)" : "var(--positive)",
-            boxShadow: isExhausted ? "none" : `0 0 8px ${isLow ? "var(--warning)" : "var(--positive)"}44`,
-          }}
+          className="flex-shrink-0 cursor-pointer transition-all"
           onClick={() => setShowEye(!showEye)}
           aria-label={showEye ? "隐藏额度" : "显示额度"}
-        />
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+        </button>
         <div>
           <div className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>
             {isExhausted ? "额度已用完" : isLow ? "额度即将耗尽" : showEye ? (
@@ -109,8 +110,8 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
 
       {/* CTA */}
       <div className="px-5 py-3 border-t flex gap-2" style={{ borderColor: "var(--line)" }}>
-        <button className="btn-primary text-xs flex-1">提交数据获取额度</button>
-        <button className="btn-secondary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}>购买额度</button>
+        <button className="btn-primary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}>提交真实数据获取额度</button>
+        <button className="btn-secondary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); onClose?.(); }}>购买额度</button>
       </div>
     </div>
   );

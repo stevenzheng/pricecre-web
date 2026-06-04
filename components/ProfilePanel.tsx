@@ -1,11 +1,14 @@
 "use client";
 import { showModal } from "@/components/Toast";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Step = "login" | "register" | "verify" | "done";
 
-export default function ProfilePanel() {
+export default function ProfilePanel({ credits, totalCredits }: { 
+  credits?: { referral: number; purchased: number };
+  totalCredits?: number;
+}) {
   const [step, setStep] = useState<Step>("login");
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
   const [loggedIn, setLoggedIn] = useState(false);
@@ -15,6 +18,15 @@ export default function ProfilePanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
+
+  // Sync credits from parent page state
+  useEffect(() => {
+    if (credits) {
+      const total = credits.referral + credits.purchased;
+      if (total > 0 && !activated) setActivated(true);
+      setQuota(total);
+    }
+  }, [credits]);
 
   /* ---- 注册：发送验证码 ---- */
   const handleRegister = async (e: React.FormEvent) => {

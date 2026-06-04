@@ -80,6 +80,7 @@ export default function Home() {
     purchased: 5,
   });
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
+  const [unlockedData, setUnlockedData] = useState<Record<string, any>>({});
 
   const totalCredits = credits.referral + credits.purchased;
   const { lang } = useLanguage();
@@ -215,6 +216,10 @@ export default function Home() {
       const data = await res.json();
       if (data.unlocked) {
         setUnlockedIds((prev) => new Set(prev).add(propertyId));
+        // Store real indicators from server
+        if (data.property?.dynamicIndicators) {
+          setUnlockedData((prev) => ({ ...prev, [propertyId]: data.property.dynamicIndicators }));
+        }
         // Sync credits from server response
         setCredits((prev) => {
           const total = data.remainingCredits ?? (prev.referral + prev.purchased - 1);
@@ -575,15 +580,22 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 pb-4">
           {filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProperties.map((property) => (
+              {filteredProperties.map((property) => {
+                const isRealUnlocked = unlockedIds.has(property.id);
+                const realIndicators = unlockedData[property.id];
+                return (
                 <PropertyCard
                   key={property.id}
-                  property={{ ...property, isUnlocked: property.isUnlocked || unlockedIds.has(property.id) }}
+                  property={{
+                    ...property,
+                    isUnlocked: property.isUnlocked || isRealUnlocked,
+                    dynamicIndicators: realIndicators ? { ...property.dynamicIndicators, ...realIndicators } : property.dynamicIndicators,
+                  }}
                   remainingCredits={totalCredits}
                   onUnlock={handleUnlock}
                   autoExpand={property.id === focusedPropertyId}
                 />
-              ))}
+              )})}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
@@ -686,7 +698,7 @@ export default function Home() {
         {mobileTab === "share" && <ShareCenter />}
 
         {/* Profile Tab */}
-        {mobileTab === "profile" && <ProfilePanel />}
+        {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} />}
       </main>
 
       {/* ====== Footer ====== */}

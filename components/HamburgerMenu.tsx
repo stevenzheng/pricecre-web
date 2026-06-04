@@ -205,6 +205,11 @@ export default function HamburgerMenu({
         
         {/* Links */}
         <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
+          <div className="text-[11px] leading-relaxed mb-3" style={{ color: "var(--text-hint)" }}>
+            <p>数据来源于公开市场信息与用户提交，</p>
+            <p>仅供参考，不构成投资建议。</p>
+            <p>每日 8:00 更新。</p>
+          </div>
           <div className="flex items-center gap-4 text-[12px]">
             <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
             <a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>

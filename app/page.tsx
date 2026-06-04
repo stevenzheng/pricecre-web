@@ -528,27 +528,12 @@ export default function Home() {
         {mobileTab === "profile" && <ProfilePanel />}
       </main>
 
-      {/* ====== Desktop Footer ====== */}
+      {/* ====== Footer ====== */}
       <footer className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
-        <div className="max-w-7xl mx-auto px-4 py-5">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center gap-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
-              <span className="font-semibold" style={{ color: "var(--text-strong)" }}>PriceCRE</span>
-              <span>·</span>
-              <span>商业地产量化精算资产终端</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
-              <span>&copy; 2026 PriceCRE</span>
-              <span className="opacity-30 hidden sm:inline">|</span>
-              <span className="hidden sm:inline">v3.0.0_MODULAR</span>
-            </div>
-            <div className="text-[12px] leading-relaxed max-w-md" style={{ color: "var(--text-hint)" }}>
-              数据来源于公开市场信息与用户提交，
-              仅供参考，不构成投资建议。
-              每日 8:00 更新。
-            </div>
-            
-          </div>
+        <div className="max-w-7xl mx-auto px-4 py-3 text-center">
+          <span className="text-[12px]" style={{ color: "var(--text-hint)" }}>
+            商业地产量化精算资产终端 &copy; 2026 PriceCRE
+          </span>
         </div>
       </footer>
 

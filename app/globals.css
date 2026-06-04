@@ -522,6 +522,13 @@ body {
   }
 }
 
+/* Desktop font scale +15% */
+@media (min-width: 1024px) {
+  html {
+    font-size: 115%;
+  }
+}
+
 /* ---- Mobile Typography Scale (~30% larger) ---- */
 @media (max-width: 640px) {
   html {

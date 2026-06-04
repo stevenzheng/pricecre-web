@@ -110,7 +110,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
 
       {/* CTA */}
       <div className="px-5 py-3 border-t flex gap-2" style={{ borderColor: "var(--line)" }}>
-        <button className="btn-primary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}>提交真实数据获取额度</button>
+        <button className="btn-primary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}>提交真实交易</button>
         <button className="btn-secondary text-xs flex-1" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); onClose?.(); }}>购买额度</button>
       </div>
     </div>

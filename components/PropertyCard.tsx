@@ -516,7 +516,7 @@ export default function PropertyCard({
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
               {sortedFields.map((field) => {
                 const isFieldLocked = field.isLocked && !isUnlocked;
-                const displayValue = isFieldLocked ? "****" : formatValue(field.value, field.format);
+                const displayValue = isFieldLocked ? null : formatValue(field.value, field.format);
                 const isNegative = field.isPositive === false && typeof field.value === "number";
                 const isPositive = field.isPositive !== false && typeof field.value === "number" && field.value > 0;
 
@@ -524,7 +524,14 @@ export default function PropertyCard({
                   <div
                     key={field.key}
                     className={`metric-cell ${isFieldLocked ? "locked cursor-pointer hover:bg-[var(--accent-soft)]" : isUnlocked ? "unlocked" : ""}`}
-                    style={isFieldLocked ? { transition: "background 0.15s" } : {}}
+                    style={{
+                      ...(isFieldLocked ? { transition: "background 0.15s" } : {}),
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      minHeight: 52,
+                    }}
                     onClick={() => {
                       if (isFieldLocked && !isUnlocked) {
                         if (remainingCredits <= 0) {
@@ -535,43 +542,56 @@ export default function PropertyCard({
                       }
                     }}
                   >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[11px] font-medium cursor-help hover:underline decoration-dotted" style={{ color: "var(--text-muted)" }} onMouseEnter={(e) => { const target = e.currentTarget; const expl = indicatorExplanations[field.key]; if (expl) { const cleanExpl = expl.includes(" — ") ? expl.split(" — ").slice(1).join(" — ") : expl; const tip = document.createElement("div"); tip.className = "indicator-tooltip"; tip.textContent = cleanExpl; tip.style.cssText = "position:fixed;z-index:9999;max-width:280px;padding:10px 14px;background:var(--bg-surface);color:var(--text);border:1px solid var(--line);border-radius:10px;font-size:11px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.15);pointer-events:none;"; document.body.appendChild(tip); const rect = target.getBoundingClientRect(); tip.style.left = Math.min(rect.left, window.innerWidth - 290) + "px"; tip.style.top = (rect.bottom + 6) + "px"; (target as any)._tooltip = tip; }}} onMouseLeave={(e) => { const t = (e.currentTarget as any)._tooltip; if (t) { t.remove(); (e.currentTarget as any)._tooltip = null; } }}>
-                        {field.label}
-                      </span>
-                      <span
-                        className="text-[11px] font-normal tracking-[0.06em] ml-1"
-                        style={{
-                          opacity: 0.35,
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {field.abbr}
-                      </span>
-                    </div>
-                    <div
-                      className="text-xs font-medium truncate"
-                      style={{
-                        minHeight: "18px",
-                        display: "flex",
-                        alignItems: "center",
-                        color: isFieldLocked ? "var(--text-hint)" : isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
-                        fontFamily: "var(--font-mono)",
+                    {/* Chinese Label */}
+                    <span
+                      className="text-[11px] font-medium cursor-help hover:underline decoration-dotted"
+                      style={{ color: isFieldLocked ? "var(--text-muted)" : "var(--text-muted)", lineHeight: 1.3 }}
+                      onMouseEnter={(e) => {
+                        const target = e.currentTarget;
+                        const expl = indicatorExplanations[field.key];
+                        if (expl) {
+                          const cleanExpl = expl.includes(" — ") ? expl.split(" — ").slice(1).join(" — ") : expl;
+                          const tip = document.createElement("div");
+                          tip.className = "indicator-tooltip";
+                          tip.textContent = cleanExpl;
+                          tip.style.cssText = "position:fixed;z-index:9999;max-width:280px;padding:10px 14px;background:var(--bg-surface);color:var(--text);border:1px solid var(--line);border-radius:10px;font-size:11px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.15);pointer-events:none;";
+                          document.body.appendChild(tip);
+                          const rect = target.getBoundingClientRect();
+                          tip.style.left = Math.min(rect.left, window.innerWidth - 290) + "px";
+                          tip.style.top = (rect.bottom + 6) + "px";
+                          (target as any)._tooltip = tip;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const t = (e.currentTarget as any)._tooltip;
+                        if (t) { t.remove(); (e.currentTarget as any)._tooltip = null; }
                       }}
                     >
+                      {field.label}
+                    </span>
+
+                    {/* Value or Lock */}
+                    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end", flex: 1, paddingTop: 4 }}>
                       {isFieldLocked ? (
-                        <span className="inline-flex items-center gap-1" style={{ fontSize: "10px", fontWeight: 400, letterSpacing: "0.1em" }}>
-                          <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
-                            <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
-                          </svg>
-                          需解锁
-                        </span>
+                        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" style={{ color: "var(--text-hint)", flexShrink: 0 }}>
+                          <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
+                          <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
+                        </svg>
                       ) : (
-                        displayValue
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
+                          {displayValue}
+                        </span>
                       )}
                     </div>
                   </div>
+                );
                 );
               })}
             </div>

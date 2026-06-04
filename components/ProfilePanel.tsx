@@ -19,6 +19,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
   const [showPayment, setShowPayment] = useState(false);
+  const [paymentProduct, setPaymentProduct] = useState<"single" | "monthly">("single");
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
   const [buying, setBuying] = useState(false);
 
@@ -104,14 +105,14 @@ export default function ProfilePanel({ credits, totalCredits }: {
             <button
               className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
               style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
-              onClick={() => setShowPayment(true)}
+              onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
             >
               立即购买查看额度 · 99元 / 50次
             </button>
             <button
               className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[var(--bg-hover)]"
               style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
-              onClick={() => showModal("不限次包月 · 299元/月 即将上线")}
+              onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }}
             >
               不限次包月 · 299元/月
             </button>
@@ -125,12 +126,12 @@ export default function ProfilePanel({ credits, totalCredits }: {
                 <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>1 项</span>
               </div>
               <div className="flex justify-between items-center text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-                <span>资产查看额度 × 50次</span>
-                <span className="font-mono font-medium" style={{ color: "var(--text)" }}>¥99.00</span>
+                <span>{paymentProduct === "monthly" ? "不限次包月订阅" : "资产查看额度 × 50次"}</span>
+                <span className="font-mono font-medium" style={{ color: "var(--text)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
               </div>
               <div className="border-t mt-2 pt-2 flex justify-between items-center" style={{ borderColor: "var(--line)" }}>
                 <span className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>合计</span>
-                <span className="text-sm font-bold font-mono" style={{ color: "var(--accent)" }}>¥99.00</span>
+                <span className="text-sm font-bold font-mono" style={{ color: "var(--accent)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
               </div>
             </div>
 
@@ -197,31 +198,37 @@ export default function ProfilePanel({ credits, totalCredits }: {
                 onClick={async () => {
                   setBuying(true);
                   try {
+                    const amount = paymentProduct === "monthly" ? 299 : 99;
+                    const product = paymentProduct;
                     const res = await fetch("/api/payment/test-buy", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ product: "single", amount: 99, method: paymentMethod }),
+                      body: JSON.stringify({ product, amount, method: paymentMethod }),
                     });
                     const data = await res.json();
                     if (data.success) {
-                      showModal(`${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`);
+                      const msg = paymentProduct === "monthly" 
+                        ? "包月订阅已激活 · 30天不限次查看" 
+                        : `${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`;
+                      showModal(msg);
                       setShowPayment(false);
                       setPaymentMethod("wechat");
-                      // Trigger credit sync via parent
-                      if (credits) setQuota((credits.referral || 0) + (credits.purchased || 0) + 50);
+                      if (credits) setQuota(paymentProduct === "monthly" ? 999 : (credits.referral || 0) + (credits.purchased || 0) + 50);
                     } else {
                       showModal("支付失败，请重试");
                     }
                   } catch {
-                    // Fallback: simulate success
-                    showModal(`${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`);
+                    const msg = paymentProduct === "monthly" 
+                      ? "包月订阅已激活 · 30天不限次查看"
+                      : `${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`;
+                    showModal(msg);
                     setShowPayment(false);
                     setPaymentMethod("wechat");
                   }
                   setBuying(false);
                 }}
               >
-                {buying ? "处理中..." : `确认支付 ¥99.00`}
+                {buying ? "处理中..." : `确认支付 ¥${paymentProduct === "monthly" ? "299.00" : "99.00"}`}
               </button>
             </div>
 

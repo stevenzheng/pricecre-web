@@ -325,7 +325,7 @@ export default function PropertyCard({
             ) : (
               <span className="badge badge-locked gap-1">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-hint)" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="var(--text-hint)"/></svg>
-                待解锁
+                需解锁
               </span>
             )}
             {/* Share button in collapsed state */}
@@ -564,7 +564,7 @@ export default function PropertyCard({
                             <path d="M8 1a2 2 0 00-2 2v4a2 2 0 004 0V3a2 2 0 00-2-2z" />
                             <path d="M4 8a4 4 0 118 0v1a2 2 0 002 2H2a2 2 0 002-2V8z" />
                           </svg>
-                          待解锁
+                          需解锁
                         </span>
                       ) : (
                         displayValue

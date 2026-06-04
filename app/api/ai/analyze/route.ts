@@ -100,48 +100,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI 返回内容为空" }, { status: 502 });
     }
 
-    // Parse JSON from response
-    let parsed: {
-      score?: number;
-      positives?: string[];
-      negatives?: string[];
-      conclusion?: string;
+    // Parse JSON from response — robust multi-stage extraction
+    let parsed: any;
+    const text = rawContent.trim();
+
+    const tryParse = (s: string): boolean => {
+      try {
+        parsed = JSON.parse(s);
+        return true;
+      } catch {
+        return false;
+      }
     };
 
-    try {
-      // Try direct parse
-      parsed = JSON.parse(rawContent.trim());
-    } catch {
-      // Try to extract JSON from markdown code block
-      const match = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (match) {
-        try {
-          parsed = JSON.parse(match[1].trim());
-        } catch {
-          return NextResponse.json(
-            { error: "AI 返回格式异常" },
-            { status: 502 }
-          );
-        }
-      } else {
-        // Try to find any JSON object in the text
-        const objMatch = rawContent.match(/\{[\s\S]*\}/);
-        if (objMatch) {
-          try {
-            parsed = JSON.parse(objMatch[0]);
-          } catch {
-            return NextResponse.json(
-              { error: "AI 返回格式异常" },
-              { status: 502 }
-            );
-          }
-        } else {
-          return NextResponse.json(
-            { error: "AI 返回格式异常" },
-            { status: 502 }
-          );
-        }
+    // Stage 1: direct parse
+    if (tryParse(text)) { /* ok */ }
+    // Stage 2: extract from markdown code block
+    else {
+      const md = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (md && tryParse(md[1].trim())) { /* ok */ }
+    }
+    // Stage 3: find first { ... } block
+    if (!parsed) {
+      const objMatch = text.match(/\{[\s\S]*\}/);
+      if (objMatch && tryParse(objMatch[0])) { /* ok */ }
+    }
+    // Stage 4: fix common AI JSON mistakes (trailing commas, unquoted keys)
+    if (!parsed) {
+      let fixed = text
+        .replace(/,\s*}/g, "}")       // remove trailing commas
+        .replace(/,\s*]/g, "]")       // remove trailing commas in arrays
+        .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // quote unquoted keys
+      const objMatch = fixed.match(/\{[\s\S]*\}/);
+      if (!objMatch || !tryParse(objMatch[0])) {
+        return NextResponse.json(
+          { error: "AI 返回格式异常" },
+          { status: 502 }
+        );
       }
+    }
+
+    if (!parsed) {
+      return NextResponse.json(
+        { error: "AI 返回格式异常" },
+        { status: 502 }
+      );
     }
 
     const result = {

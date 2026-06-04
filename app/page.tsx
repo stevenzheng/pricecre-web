@@ -65,6 +65,23 @@ export default function Home() {
   const totalCredits = credits.referral + credits.purchased;
   const { lang, t, toggleLang } = useLanguage();
 
+  // Nearby city mapping for geo-location fallback (HK→深圳, 杭州→上海, etc.)
+  const NEARBY_CITY: Record<string, string> = {
+    "香港": "深圳", "Hong Kong": "深圳",
+    "广州": "深圳", "东莞": "深圳", "惠州": "深圳", "珠海": "深圳", "佛山": "深圳",
+    "澳门": "深圳", "Macau": "深圳",
+    "天津": "北京", "廊坊": "北京", "保定": "北京",
+    "南京": "苏州", "无锡": "苏州", "常州": "苏州", "南通": "苏州",
+    "杭州": "上海", "宁波": "上海", "嘉兴": "上海", "绍兴": "上海",
+    "重庆": "成都", "绵阳": "成都",
+  };
+  const resolveCity = (raw: string) => {
+    const c = raw.replace("市", "");
+    const covered = ["上海", "北京", "深圳", "苏州", "成都"];
+    if (covered.includes(c)) return c;
+    return NEARBY_CITY[c] || NEARBY_CITY[raw] || "";
+  };
+
   // Geolocation — auto-detect user city on initial load
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDetected, setGeoDetected] = useState(false);
@@ -81,9 +98,8 @@ export default function Home() {
         const d = await res.json();
         const cityName = d.city || "";
         setUserCity(cityName);
-        if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
-          setActiveCity(cityName);
-        }
+        const resolved = resolveCity(cityName);
+        if (resolved) { setActiveCity(resolved); setUserCity(resolved); }
       } catch {
         // Fallback: try ip-api.com
         try {
@@ -91,9 +107,8 @@ export default function Home() {
           const d = await res.json();
           const cityName = (d.city || "").replace("市", "");
           setUserCity(cityName);
-          if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
-            setActiveCity(cityName);
-          }
+          const resolved = resolveCity(cityName);
+          if (resolved) { setActiveCity(resolved); setUserCity(resolved); }
         } catch {
           // Silently fail — show all cities
         }
@@ -117,9 +132,8 @@ export default function Home() {
                 d.address?.city || d.address?.town || d.address?.county || "";
               const cityName = city.replace("市", "");
               setUserCity(cityName);
-              if (cityName && ["上海", "北京", "深圳", "苏州", "成都"].includes(cityName)) {
-                setActiveCity(cityName);
-              }
+              const resolved = resolveCity(cityName);
+              if (resolved) { setActiveCity(resolved); setUserCity(resolved); }
               setGeoDetected(true);
               setGeoLoading(false);
             })
@@ -428,14 +442,11 @@ export default function Home() {
         {/* Active Filter + Type Chips + Filter Button */}
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: "var(--text-hint)" }}>
-              共计 {filteredProperties.length}个资产
-            </span>
             {/* Property Type Filter Chips */}
             <div className="flex items-center gap-1.5 ml-2">
               {[
                 { key: "OFFICE", label: "写字楼" },
-                { key: "SHOPS", label: "商业" },
+                { key: "SHOPS", label: "商业零售" },
                 { key: "INDUSTRIAL", label: "产业园" },
               ].map((t) => {
                 const isActive = activeType === t.key;
@@ -443,7 +454,7 @@ export default function Home() {
                   <button
                     key={t.key}
                     onClick={() => handleTypeChange(t.key === activeType ? "ALL" : (t.key as PropertyType))}
-                    className={`text-[11px] px-2 py-0.5 rounded-md font-medium transition-all ${
+                    className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all ${
                       isActive
                         ? "text-[var(--accent)] ring-1 ring-[var(--accent)]"
                         : "text-[var(--text-muted)] hover:bg-[var(--panel)]"
@@ -486,16 +497,6 @@ export default function Home() {
               筛选
             </button>
           </div>
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-[var(--panel)]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" />
-            </svg>
-            筛选
-          </button>
         </div>
 
         {/* Property Cards */}

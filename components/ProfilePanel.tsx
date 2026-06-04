@@ -80,6 +80,14 @@ export default function ProfilePanel() {
   // Shared cards rendered in both logged-in and logged-out states
   const publicCards = (
     <div className="space-y-3">
+      {/* 商业付费直通车 */}
+      <div className="card p-3">
+        <div className="section-title">商业付费直通车</div>
+        <div className="space-y-2">
+          <button className="w-full py-3 rounded-xl text-sm font-medium" style={{ background: "var(--accent)", color: "var(--text-inverse)" }} onClick={() => showModal("购买成功 · 50次查看额度已到账")}>立即购买查看额度 · 99元 / 50次</button>
+          <button className="w-full py-2.5 rounded-xl text-sm font-medium" style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }} onClick={() => showModal("不限次包月即将上线")}>不限次包月 · 299元/月</button>
+        </div>
+      </div>
       {/* 分享转发 */}
       <div className="card p-3">
         <div className="section-title">分享转发获得查看额度</div>
@@ -108,15 +116,6 @@ export default function ProfilePanel() {
           <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => showModal("兑换码已激活")}>激活</button>
         </div>
       </div>
-
-      {/* 商业付费直通车 */}
-      <div className="card p-3">
-        <div className="section-title">商业付费直通车</div>
-        <div className="space-y-2">
-          <button className="w-full py-3 rounded-xl text-sm font-medium" style={{ background: "var(--accent)", color: "var(--text-inverse)" }} onClick={() => showModal("购买成功 · 50次查看额度已到账")}>立即购买查看额度 · 99元 / 50次</button>
-          <button className="w-full py-2.5 rounded-xl text-sm font-medium" style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }} onClick={() => showModal("不限次包月即将上线")}>不限次包月 · 299元/月</button>
-        </div>
-      </div>
     </div>
   );
 
@@ -124,7 +123,6 @@ export default function ProfilePanel() {
   if (!loggedIn) {
     return (
       <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
-        {publicCards}
         <div className="card p-6 space-y-5">
           {/* 标签 */}
           <div className="flex items-center gap-2 justify-center">
@@ -271,7 +269,8 @@ export default function ProfilePanel() {
           </div>
 
         </div>
-      </div>
+      {publicCards}
+    </div>
     );
   }
 

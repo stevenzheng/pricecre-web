@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const navItems = [
   {
@@ -54,6 +55,7 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Login page — no sidebar
   if (pathname === "/admin/login") {
@@ -62,8 +64,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar — Stripe Brand Dark */}
-      <aside className="admin-sidebar">
+      {/* Mobile hamburger */}
+      <button
+        className="admin-mobile-toggle"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle sidebar"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="18" x2="20" y2="18" />
+        </svg>
+      </button>
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar${sidebarOpen ? " open" : ""}`}>
         <div className="admin-sidebar-brand">
           <Link href="/admin" style={{ textDecoration: "none" }}>
             <h1>PriceCRE</h1>

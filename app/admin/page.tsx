@@ -1,33 +1,30 @@
 // app/admin/page.tsx — Stripe-Adapted Dashboard Overview
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function AdminOverview() {
-  const stats = [
-    {
-      label: "待审核资产",
-      value: "—",
-      href: "/admin/data-review",
-      accent: "#533afd",
-    },
-    {
-      label: "活跃爬取计划",
-      value: "—",
-      href: "/admin/crawl-schedule",
-      accent: "#15be53",
-    },
-    {
-      label: "今日新增",
-      value: "—",
-      href: "/admin/data-review",
-      accent: "#533afd",
-    },
-    {
-      label: "驳回 / 异常",
-      value: "—",
-      href: "/admin/pipeline-log",
-      accent: "#dc2626",
-    },
-  ];
+  const [stats, setStats] = useState([
+    { label: "资产总数", value: "—", href: "/admin/data-review", accent: "#533afd" },
+    { label: "覆盖城市", value: "—", href: "/admin/data-review", accent: "#15be53" },
+    { label: "注册用户", value: "—", href: "/admin/data-review", accent: "#533afd" },
+    { label: "管线条目", value: "—", href: "/admin/pipeline-log", accent: "#dc2626" },
+  ]);
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        setStats([
+          { label: "资产总数", value: String(d.propertyCount ?? "—"), href: "/admin/data-review", accent: "#533afd" },
+          { label: "覆盖城市", value: String(d.cityCount ?? "—"), href: "/admin/data-review", accent: "#15be53" },
+          { label: "注册用户", value: String(d.userCount ?? "—"), href: "/admin/data-review", accent: "#533afd" },
+          { label: "管线条目", value: "—", href: "/admin/pipeline-log", accent: "#dc2626" },
+        ]);
+      })
+      .catch(() => {});
+  }, []);
 
   const quickCards = [
     {

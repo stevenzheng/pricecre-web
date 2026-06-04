@@ -1,0 +1,270 @@
+#!/usr/bin/env python3
+"""Generate mock-data.ts with REAL building names for each city"""
+import json, random
+
+random.seed(42)  # Reproducible
+
+# REAL commercial property names per city (verified from public sources)
+REAL_PROPERTIES = {
+    "上海": {
+        "OFFICE": [
+            "上海中心大厦", "上海环球金融中心", "金茂大厦", "上海国金中心",
+            "恒隆广场", "上海来福士广场", "港汇恒隆广场", "上海嘉里中心",
+            "上海太平金融大厦", "上海东亚银行大厦", "长泰国际金融中心",
+            "上海会德丰国际广场", "上海企业天地", "上海环贸广场",
+        ],
+        "SHOPS": [
+            "上海新天地", "上海K11购物艺术中心", "上海太古汇",
+            "上海大悦城", "上海正大广场", "上海龙之梦购物中心",
+            "上海月星环球港", "上海万象城",
+        ],
+        "INDUSTRIAL": [
+            "上海张江高科技园", "上海漕河泾开发区", "上海金桥出口加工区",
+            "上海外高桥保税区", "上海紫竹科学园区", "上海临港产业区",
+            "上海康桥工业园", "上海松江经济技术开发区",
+        ],
+    },
+    "北京": {
+        "OFFICE": [
+            "北京国贸三期", "北京中国尊", "北京华贸中心", "北京嘉里中心",
+            "北京金融街中心", "北京国贸大厦A座", "北京银泰中心",
+            "北京远洋大厦", "北京环球金融中心", "北京英蓝国际金融中心",
+            "北京凤凰置地广场", "北京远洋光华国际中心",
+            "北京恒基中心", "北京诺德中心",
+        ],
+        "SHOPS": [
+            "北京三里屯太古里", "北京SKP", "北京国贸商城",
+            "北京王府中環", "北京西单大悦城", "北京朝阳大悦城",
+            "北京荟聚购物中心", "北京颐堤港",
+        ],
+        "INDUSTRIAL": [
+            "北京中关村软件园", "北京亦庄经济技术开发区",
+            "北京丰台科技园", "北京大兴生物医药基地",
+            "北京顺义临空经济区", "北京昌平未来科学城",
+            "北京通州运河商务园", "北京生命科学园",
+        ],
+    },
+    "深圳": {
+        "OFFICE": [
+            "深圳平安金融中心", "深圳华润大厦", "深圳腾讯滨海大厦",
+            "深圳招商银行大厦", "深圳证券大厦", "深圳能源大厦",
+            "深圳万科滨海云中心", "深圳卓越世纪中心", "深圳前海世茂大厦",
+            "深圳后海金融中心", "深圳中洲大厦", "深圳汉国中心",
+            "深圳东海国际中心", "深圳华强金融中心",
+        ],
+        "SHOPS": [
+            "深圳万象天地", "深圳万象城", "深圳海岸城",
+            "深圳益田假日广场", "深圳壹方城", "深圳欢乐海岸",
+            "深圳华润城万象天地", "深圳金光华广场",
+        ],
+        "INDUSTRIAL": [
+            "深圳科技园", "深圳前海深港合作区", "深圳南山智园",
+            "深圳龙岗大运软件小镇", "深圳光明科学城",
+            "深圳坂田华为基地园区", "深圳坪山生物医药产业园",
+            "深圳蛇口网谷",
+        ],
+    },
+    "苏州": {
+        "OFFICE": [
+            "苏州国际金融中心", "苏州东方之门", "苏州环球188广场",
+            "苏州协鑫广场", "苏州中南中心", "苏州恒业大厦",
+            "苏州尼盛广场", "苏州星海广场", "苏州圆融时代广场",
+            "苏州现代传媒广场",
+        ],
+        "SHOPS": [
+            "苏州中心商场", "苏州印象城", "苏州久光百货",
+            "苏州圆融星座购物中心", "苏州新光天地",
+            "苏州大悦春风里", "苏州龙湖天街",
+        ],
+        "INDUSTRIAL": [
+            "苏州生物医药产业园", "苏州纳米城", "苏州国际科技园",
+            "苏州独墅湖科教创新区", "苏州吴江经济技术开发区",
+            "苏州高新区科技城", "苏州昆山花桥国际商务城",
+            "苏州相城经济技术开发区", "苏州太仓港经济技术开发区",
+            "苏州张家港保税区",
+        ],
+    },
+    "成都": {
+        "OFFICE": [
+            "成都天府国际金融中心", "成都IFS国际金融中心",
+            "成都招商大魔方", "成都仁恒置地广场", "成都银泰中心",
+            "成都绿地中心", "成都环球中心", "成都天府软件园",
+            "成都交子金融科技中心", "成都招商中央华城",
+            "成都来福士广场", "成都天投国际商务中心",
+            "成都中交国际中心", "成都华润大厦",
+        ],
+        "SHOPS": [
+            "成都太古里", "成都IFS", "成都万象城",
+            "成都大悦城", "成都银泰城", "成都王府井购物中心",
+            "成都悠方购物中心", "成都世豪广场",
+        ],
+        "INDUSTRIAL": [
+            "成都高新西区产业园", "成都天府国际生物城",
+            "成都双流航空经济区", "成都青白江国际铁路港",
+            "成都新都现代交通产业园", "成都龙泉驿汽车产业园",
+            "成都科学城", "成都温江医学城",
+        ],
+    },
+}
+
+DISTRICTS = {
+    "上海": ["浦东新区", "静安区", "黄浦区", "徐汇区", "长宁区", "虹口区", "杨浦区", "普陀区", "闵行区", "松江区"],
+    "北京": ["朝阳区", "海淀区", "西城区", "东城区", "丰台区", "大兴区", "通州区", "昌平区", "顺义区", "石景山区"],
+    "深圳": ["南山区", "福田区", "罗湖区", "宝安区", "龙华区", "龙岗区", "光明区", "坪山区", "盐田区", "前海"],
+    "苏州": ["工业园区", "姑苏区", "高新区", "吴中区", "相城区", "吴江区", "昆山市", "太仓市", "张家港市", "常熟市"],
+    "成都": ["锦江区", "高新区", "武侯区", "青羊区", "金牛区", "成华区", "天府新区", "双流区", "龙泉驿区", "温江区"],
+}
+
+def generate_indicators(ptype, face_rent):
+    r = random
+    base = {
+        "faceRent": face_rent,
+        "netEffectiveRent": round(face_rent * r.uniform(0.6, 0.93), 1),
+        "capRate": round(r.uniform(2.5, 7.5), 1),
+        "priceToRentRatio": round(r.uniform(14, 38), 1),
+        "wale": round(r.uniform(2.0, 9.0), 1),
+        "retentionRate": round(r.uniform(55, 97), 1),
+        "tenantConcentration": round(r.uniform(12, 60), 1),
+        "esgCertification": r.choice(["LEED Platinum", "LEED Gold", "LEED Silver", "BREEAM Excellent", "BREEAM Good", "WELL Gold", "WELL Silver", "—"]),
+        "npiMargin": round(r.uniform(38, 78), 1),
+        "collectionRate": round(r.uniform(85, 99.9), 1),
+        "noiCagr3Y": round(r.uniform(-10, 20), 1),
+        "submarketVacancy": round(r.uniform(2, 22), 1),
+        "ltvRatio": round(r.uniform(28, 72), 1),
+        "debtYield": round(r.uniform(4, 15), 1),
+        "cashOnCashReturn": round(r.uniform(3, 13), 1),
+        "projectedIrr5Y": round(r.uniform(1, 16), 1),
+        "landFloorPrice": r.randint(2500, 38000),
+        "capexIntensity": r.randint(40, 420),
+        "compTxPrice": r.randint(18000, 130000),
+        "yieldSpread": r.randint(75, 380),
+        "kolBuzzIndex": r.randint(25, 98),
+        "negativeSentimentRate": round(r.uniform(1, 25), 1),
+        "employeeHappinessScore": r.randint(50, 95),
+        "netCorporateMigration": round(r.uniform(-6, 40), 1),
+        "hqSupplyChainRatio": round(r.uniform(6, 58), 1),
+        "corporateInquiryIndex": r.randint(18, 96),
+        "culturalRadianceLevel": r.randint(1, 5),
+        "policyIncentiveLevel": r.randint(1, 5),
+        "reversionRate": round(r.uniform(-8, 28), 1),
+        "spaceUtilization": round(r.uniform(58, 96), 1),
+        "netAbsorption": round(r.uniform(-8000, 35000), 0),
+        "electricityOutputRatio": round(r.uniform(40, 380), 1),
+    }
+
+    if ptype == "SHOPS":
+        base.update({
+            "salesEfficiency": r.randint(1500, 28000),
+            "rentToSalesRatio": round(r.uniform(4, 30), 1),
+            "footfallTicketSize": f"{r.randint(25, 850)}",
+            "anchorDependency": round(r.uniform(8, 58), 1),
+            "merchantChurnRate": round(r.uniform(1, 28), 1),
+            "firstStoreRatio": round(r.uniform(0, 35), 1),
+            "openToCloseRatio": round(r.uniform(0.3, 2.8), 1),
+            "tradeAreaPopulation": r.randint(3, 85),
+            "demographicPremiumScore": r.randint(28, 96),
+        })
+    elif ptype == "INDUSTRIAL":
+        base.update({
+            "electricityOutputRatio": round(r.uniform(15, 220), 1),
+            "taxCovenantRate": r.randint(3, 85),
+            "loadingDockRatio": r.randint(1, 18),
+        })
+
+    return base
+
+# Build property list
+all_props = []
+prop_id = 0
+
+# Rent ranges by city (realistic)
+CITY_RENT_RANGES = {
+    "OFFICE": {"上海": (6, 22), "北京": (8, 25), "深圳": (7, 23), "苏州": (3, 8), "成都": (3, 7)},
+    "SHOPS": {"上海": (15, 45), "北京": (18, 48), "深圳": (20, 42), "苏州": (8, 20), "成都": (10, 30)},
+    "INDUSTRIAL": {"上海": (1.8, 5.5), "北京": (2, 6), "深圳": (2.5, 6), "苏州": (1.5, 4), "成都": (1.2, 3.5)},
+}
+
+for city, types in REAL_PROPERTIES.items():
+    for ptype, names in types.items():
+        for name in names:
+            rent_range = CITY_RENT_RANGES[ptype][city]
+            prop_id += 1
+            all_props.append({
+                "id": f"prop-{prop_id:03d}",
+                "projectName": name,
+                "city": city,
+                "district": random.choice(DISTRICTS[city]),
+                "rawAddress": f"{city}",
+                "propertyType": ptype,
+                "faceRent": round(random.uniform(*rent_range), 1),
+                "dataSource": random.choice(["贝壳商办", "好租", "点点租", "安居客", "公开市场"]),
+                "isUnlocked": False,
+                "area": random.randint(200, 8000),
+                "dynamicIndicators": generate_indicators(ptype, random.uniform(*rent_range)),
+            })
+
+# Write mock-data.ts
+lines = [
+    'import { PropertyType, DynamicIndicators } from "@/types/indicators";',
+    "",
+    "export interface Property {",
+    "  id: string;",
+    "  projectName: string;",
+    "  city: string;",
+    "  district: string;",
+    "  rawAddress: string;",
+    "  propertyType: PropertyType;",
+    "  faceRent: number;",
+    "  dataSource: string;",
+    "  isUnlocked: boolean;",
+    "  area: number;",
+    "  updatedAt: string;",
+    "  dynamicIndicators: DynamicIndicators;",
+    "}",
+    "",
+]
+
+city_names = sorted(set(p["city"] for p in all_props))
+lines.append(f"export const cityList: string[] = {json.dumps(city_names, ensure_ascii=False)};")
+lines.append("")
+lines.append('export const propertyTypeLabels: Record<PropertyType, string> = { OFFICE: "写字楼", SHOPS: "商业零售", INDUSTRIAL: "产业园" };')
+lines.append("")
+lines.append("export const mockProperties: Property[] = [")
+
+for p in all_props:
+    ind = json.dumps(p["dynamicIndicators"], ensure_ascii=False, indent=4).replace("\n", "\n    ")
+    lines.append("  {")
+    lines.append(f'    id: "{p["id"]}",')
+    lines.append(f'    projectName: {json.dumps(p["projectName"], ensure_ascii=False)},')
+    lines.append(f'    city: {json.dumps(p["city"], ensure_ascii=False)},')
+    lines.append(f'    district: {json.dumps(p["district"], ensure_ascii=False)},')
+    lines.append(f'    rawAddress: {json.dumps(p["rawAddress"], ensure_ascii=False)},')
+    lines.append(f'    propertyType: PropertyType.{p["propertyType"]},')
+    lines.append(f'    faceRent: {p["faceRent"]},')
+    lines.append(f'    dataSource: {json.dumps(p["dataSource"], ensure_ascii=False)},')
+    lines.append(f'    isUnlocked: {str(p["isUnlocked"]).lower()},')
+    lines.append(f'    area: {p["area"]},')
+    lines.append(f'    updatedAt: "2026-06-04",')
+    lines.append(f'    dynamicIndicators: {ind}')
+    lines.append("  },")
+
+lines.append("];")
+content = "\n".join(lines)
+
+out_path = "/Users/stevenair/Desktop/Pricecre.WB/lib/mock-data.ts"
+with open(out_path, "w", encoding="utf-8") as f:
+    f.write(content)
+
+print(f"✅ 已写入 {out_path}")
+print(f"   共 {len(all_props)} 个真实物业名称")
+
+# Verify
+for city in sorted(REAL_PROPERTIES):
+    count = sum(1 for p in all_props if p["city"] == city)
+    types = {}
+    for p in all_props:
+        if p["city"] == city:
+            types[p["propertyType"]] = types.get(p["propertyType"], 0) + 1
+    print(f"  {city}: {count} 条 ({', '.join(f'{k} {v}' for k,v in sorted(types.items()))})")
+
+print(f"\n文件: {len(content):,} bytes")

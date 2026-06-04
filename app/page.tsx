@@ -84,17 +84,26 @@ export default function Home() {
   const { lang } = useLanguage();
 
   // Nearby city mapping for geo-location fallback (HK→深圳, 杭州→上海, etc.)
+  // Also maps English IP API returns to Chinese
+  const CITY_EN_TO_CN: Record<string, string> = {
+    "Shanghai": "上海", "Beijing": "北京", "Shenzhen": "深圳",
+    "Guangzhou": "广州", "Hangzhou": "杭州", "Chengdu": "成都",
+    "Suzhou": "苏州", "Changsha": "长沙", "Xi'an": "西安", "Xian": "西安",
+    "Nanjing": "苏州", "Wuxi": "苏州",
+    "Hong Kong": "深圳", "Macau": "深圳",
+  };
   const NEARBY_CITY: Record<string, string> = {
-    "香港": "深圳", "Hong Kong": "深圳",
-    "广州": "深圳", "东莞": "深圳", "惠州": "深圳", "珠海": "深圳", "佛山": "深圳",
-    "澳门": "深圳", "Macau": "深圳",
+    "香港": "深圳", "广州": "深圳", "东莞": "深圳", "惠州": "深圳", "珠海": "深圳", "佛山": "深圳",
+    "澳门": "深圳",
     "天津": "北京", "廊坊": "北京", "保定": "北京",
     "南京": "苏州", "无锡": "苏州", "常州": "苏州", "南通": "苏州",
     "杭州": "上海", "宁波": "上海", "嘉兴": "上海", "绍兴": "上海",
     "重庆": "成都", "绵阳": "成都",
   };
   const resolveCity = (raw: string) => {
-    const c = raw.replace("市", "");
+    let c = raw.replace("市", "");
+    // Try English→Chinese first
+    if (CITY_EN_TO_CN[c]) c = CITY_EN_TO_CN[c];
     const covered = ["上海", "北京", "深圳", "苏州", "成都", "广州", "杭州", "长沙", "西安"];
     if (covered.includes(c)) return c;
     return NEARBY_CITY[c] || NEARBY_CITY[raw] || "";
@@ -377,10 +386,10 @@ export default function Home() {
               </span>
             </button>
 
-            {userCity && (
+            {(activeCity !== "全部" || userCity) && (
               <span className="inline-flex items-center gap-1 text-[11px] font-medium ml-1" style={{ color: "var(--accent)" }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                {userCity}
+                {activeCity !== "全部" ? activeCity : resolveCity(userCity) || userCity}
               </span>
             )}
 

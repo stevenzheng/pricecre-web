@@ -427,7 +427,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
   /* ---- 已登录 ---- */
   return (
     <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
-      {publicCards}
+      {/* 1. 用户信息卡片 */}
       <div className="card p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--panel)" }}>
@@ -461,6 +461,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
         </div>
       </div>
 
+      {/* 3. 付费 + 分享 + 公众号 */}
+      {publicCards}
 
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实交易</button>}

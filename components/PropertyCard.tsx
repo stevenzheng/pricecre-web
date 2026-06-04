@@ -235,7 +235,8 @@ export default function PropertyCard({
     if (isUnlocked || state.isUnlocking || remainingCredits <= 0) return;
     dispatch({ type: "START_UNLOCK" });
     if (onUnlock) onUnlock(property.id);
-    setTimeout(() => dispatch({ type: "UNLOCK_SUCCESS" }), 800);
+    // Shorter delay — the real API handles data, UI shows spinner briefly
+    setTimeout(() => dispatch({ type: "UNLOCK_SUCCESS" }), 400);
   }, [isUnlocked, state.isUnlocking, remainingCredits, onUnlock, property.id]);
 
   const netEffectiveRent = isUnlocked ? property.dynamicIndicators.netEffectiveRent : null;

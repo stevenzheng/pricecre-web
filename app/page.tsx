@@ -429,8 +429,6 @@ export default function Home() {
         {mobileTab === "market" && (
           <>
         {/* Stats Bar */}
-        <div>
-        {/* Stats Bar content */}
         <div className="border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="grid grid-cols-4 gap-0">

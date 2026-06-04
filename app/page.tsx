@@ -36,13 +36,6 @@ export default function Home() {
     document.addEventListener("open-wechat-card", h);
     return () => document.removeEventListener("open-wechat-card", h);
   }, []);
-  const [wechatCardData, setWechatCardData] = useState<any>(null);
-
-  useEffect(() => {
-    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
-    document.addEventListener("open-wechat-card", h);
-    return () => document.removeEventListener("open-wechat-card", h);
-  }, []);
 
   // Listen for hamburger menu nav events
   useEffect(() => {

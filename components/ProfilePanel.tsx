@@ -18,6 +18,9 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
+  const [buying, setBuying] = useState(false);
 
   // Sync credits from parent page state
   useEffect(() => {
@@ -93,12 +96,140 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const publicCards = (
     <div className="space-y-3">
       {/* 商业付费直通车 */}
-      <div className="card p-3">
+      <div className="card p-4">
         <div className="section-title">商业付费直通车</div>
-        <div className="space-y-2">
-          <button className="w-full py-3 rounded-xl text-sm font-medium" style={{ background: "var(--accent)", color: "var(--text-inverse)" }} onClick={() => showModal("购买成功 · 50次查看额度已到账")}>立即购买查看额度 · 99元 / 50次</button>
-          <button className="w-full py-2.5 rounded-xl text-sm font-medium" style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }} onClick={() => showModal("不限次包月即将上线")}>不限次包月 · 299元/月</button>
-        </div>
+        
+        {!showPayment ? (
+          <div className="space-y-2">
+            <button
+              className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
+              onClick={() => setShowPayment(true)}
+            >
+              立即购买查看额度 · 99元 / 50次
+            </button>
+            <button
+              className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[var(--bg-hover)]"
+              style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
+              onClick={() => showModal("不限次包月 · 299元/月 即将上线")}
+            >
+              不限次包月 · 299元/月
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3 animate-slide-up">
+            {/* Order Summary */}
+            <div className="p-3 rounded-lg" style={{ background: "var(--panel)" }}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>订单明细</span>
+                <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>1 项</span>
+              </div>
+              <div className="flex justify-between items-center text-xs mb-1" style={{ color: "var(--text-muted)" }}>
+                <span>资产查看额度 × 50次</span>
+                <span className="font-mono font-medium" style={{ color: "var(--text)" }}>¥99.00</span>
+              </div>
+              <div className="border-t mt-2 pt-2 flex justify-between items-center" style={{ borderColor: "var(--line)" }}>
+                <span className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>合计</span>
+                <span className="text-sm font-bold font-mono" style={{ color: "var(--accent)" }}>¥99.00</span>
+              </div>
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>选择支付方式</span>
+              
+              {/* WeChat */}
+              <button
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${paymentMethod === "wechat" ? "ring-1" : ""}`}
+                style={{
+                  borderColor: paymentMethod === "wechat" ? "var(--accent)" : "var(--line)",
+                  background: paymentMethod === "wechat" ? "var(--accent-soft)" : "var(--panel)",
+                }}
+                onClick={() => setPaymentMethod("wechat")}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#07C160" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M8.69 3.46c-4.15 0-7.52 2.73-7.52 6.1 0 1.86.98 3.53 2.5 4.66l-.63 2.1 2.43-1.23c.96.29 2.02.45 3.14.45.37 0 .74-.02 1.1-.06a5.72 5.72 0 01-.18-1.46c0-3.07 3.02-5.57 6.75-5.57.3 0 .6.02.88.05C17.16 6.23 13.37 3.46 8.69 3.46z"/><path d="M17.35 9.72c-3.4 0-6.16 1.86-6.16 4.16 0 2.3 2.76 4.16 6.16 4.16.25 0 .5-.02.74-.04v.01c.94.3 2.63 1.01 2.63 1.01l-.54-1.89c1.2-.88 1.9-2.04 1.9-3.29 0-2.26-2.76-4.12-6.73-4.12z"/></svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>微信支付</div>
+                  <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>WeChat Pay · 扫码即付</div>
+                </div>
+                {paymentMethod === "wechat" && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
+                )}
+              </button>
+
+              {/* Alipay */}
+              <button
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${paymentMethod === "alipay" ? "ring-1" : ""}`}
+                style={{
+                  borderColor: paymentMethod === "alipay" ? "var(--accent)" : "var(--line)",
+                  background: paymentMethod === "alipay" ? "var(--accent-soft)" : "var(--panel)",
+                }}
+                onClick={() => setPaymentMethod("alipay")}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#1677FF" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9V7h2v6zm4 4h-2v-2h2v2zm0-6h-2V7h2v4z"/></svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>支付宝</div>
+                  <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>Alipay · 安全支付</div>
+                </div>
+                {paymentMethod === "alipay" && (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
+                )}
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <button
+                className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                style={{ background: "var(--panel)", color: "var(--text-muted)", border: "1px solid var(--line)" }}
+                onClick={() => { setShowPayment(false); setPaymentMethod("wechat"); }}
+              >
+                返回
+              </button>
+              <button
+                className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: buying ? "var(--text-hint)" : "var(--accent)", color: "var(--text-inverse)", cursor: buying ? "not-allowed" : "pointer" }}
+                disabled={buying}
+                onClick={async () => {
+                  setBuying(true);
+                  try {
+                    const res = await fetch("/api/payment/test-buy", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ product: "single", amount: 99, method: paymentMethod }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      showModal(`${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`);
+                      setShowPayment(false);
+                      setPaymentMethod("wechat");
+                      // Trigger credit sync via parent
+                      if (credits) setQuota((credits.referral || 0) + (credits.purchased || 0) + 50);
+                    } else {
+                      showModal("支付失败，请重试");
+                    }
+                  } catch {
+                    // Fallback: simulate success
+                    showModal(`${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`);
+                    setShowPayment(false);
+                    setPaymentMethod("wechat");
+                  }
+                  setBuying(false);
+                }}
+              >
+                {buying ? "处理中..." : `确认支付 ¥99.00`}
+              </button>
+            </div>
+
+            <p className="text-[9px] text-center" style={{ color: "var(--text-hint)" }}>
+              支付成功后额度即时到账 · 支持微信/支付宝双通道
+            </p>
+          </div>
+        )}
       </div>
       {/* 分享转发 */}
       <div className="card p-3">

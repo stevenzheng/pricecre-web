@@ -10,9 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail, generateVerificationCode, verificationEmailTemplate } from "@/lib/email";
-
-// 内存存储验证码（生产环境请用 Redis 或数据库）
-const codeStore = new Map<string, { code: string; expires: number }>();
+import { setCode } from "@/lib/codeStore";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // 生成验证码
     const code = generateVerificationCode();
-    codeStore.set(email, { code, expires: Date.now() + 10 * 60 * 1000 });
+    setCode(email, code);
 
     // 发送邮件
     const result = await sendEmail({

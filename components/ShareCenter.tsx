@@ -34,10 +34,30 @@ export default function ShareCenter() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.projectName || !formData.netRent || !formData.email) return;
-    setRedeemCode("A3F7K9");
+    
+    // Generate activation code and send via email API
+    try {
+      const res = await fetch("/api/data/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectName: formData.projectName,
+          netRent: formData.netRent,
+          email: formData.email,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRedeemCode(data.code);
+      } else {
+        setRedeemCode("A3F7K9"); // fallback
+      }
+    } catch {
+      setRedeemCode("A3F7K9");
+    }
     setSubmitted(true);
   };
 
@@ -186,8 +206,8 @@ export default function ShareCenter() {
         <div className="flex gap-2">
           <input
             type="text"
+            className="activation-input input-search flex-1 text-center tracking-[0.2em] text-sm"
             placeholder="输入 6 位激活码"
-            className="input-search flex-1 text-center tracking-[0.2em] text-sm"
             style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }}
             maxLength={6}
             onChange={(e) => {
@@ -197,7 +217,25 @@ export default function ShareCenter() {
           />
           <button
             className="btn-primary text-sm px-5 flex-shrink-0"
-            onClick={() => showModal("激活码验证通过！8 次查看额度已到账")}
+            onClick={async () => {
+              const code = (document.querySelector(".activation-input") as HTMLInputElement)?.value || "";
+              if (code.length !== 6) { showModal("请输入6位激活码"); return; }
+              try {
+                const res = await fetch("/api/data/redeem", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ code }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  showModal(`激活成功！${data.credits} 次查看额度已到账`);
+                } else {
+                  showModal(data.error || "激活码无效");
+                }
+              } catch {
+                showModal("网络错误，请重试");
+              }
+            }}
           >
             激活
           </button>

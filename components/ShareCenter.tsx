@@ -66,7 +66,7 @@ export default function ShareCenter() {
     <div className="max-w-lg mx-auto px-4 py-6 space-y-5" style={{ fontFamily: "var(--font-sans)" }}>
       {/* Title */}
       <div className="text-center">
-        <h2 className="text-lg font-bold mb-1" style={{ color: "var(--text-strong)" }}>
+        <h2 className="text-lg font-medium mb-1" style={{ color: "var(--text-strong)" }}>
           提交租金数据，获取累计查看额度
         </h2>
         <p className="text-[11px] mt-2 px-4 py-2 rounded-lg inline-block" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
@@ -156,9 +156,9 @@ export default function ShareCenter() {
             <div className="p-4 rounded-lg text-center space-y-2" style={{ background: "var(--positive-soft)", border: "1px solid var(--positive-border)" }}>
               <div className="flex items-center justify-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <span className="text-xs font-bold" style={{ color: "var(--positive)" }}>数据已提报 · 审核通过后自动并网</span>
+                <span className="text-xs font-medium" style={{ color: "var(--positive)" }}>数据已提报 · 审核通过后自动并网</span>
               </div>
-              <code className="px-5 py-2 rounded-lg text-lg font-bold inline-block" style={{ background: "var(--bg-surface)", color: "var(--accent)", fontFamily: "var(--font-mono)", letterSpacing: "0.15em" }}>{redeemCode}</code>
+              <code className="px-5 py-2 rounded-lg text-lg font-medium inline-block" style={{ background: "var(--bg-surface)", color: "var(--accent)", fontFamily: "var(--font-mono)", letterSpacing: "0.15em" }}>{redeemCode}</code>
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>数据核准后额度自动到账 · 也可手动输入兑换码激活</div>
             </div>
           ) : (
@@ -172,15 +172,15 @@ export default function ShareCenter() {
         <div className="section-title">分享转发获得查看额度</div>
         
         <div className="mb-4 text-center">
-          <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
+          <div className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
           <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
+            <span className="text-2xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
             <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
             <span className="text-xs" style={{ color: "var(--text-hint)" }}>次</span>
           </div>
         </div>
         <div className="space-y-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>你的全局专属裂变链接</div>
+          <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>你的全局专属裂变链接</div>
           <div className="flex gap-2">
             <input type="text" readOnly value="pricecre.com/r/sz2026" className="input-search flex-1 text-xs" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} />
             <button className="btn-secondary text-xs px-4 flex-shrink-0" onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); showModal("已复制裂变链接"); }}>
@@ -217,14 +217,14 @@ export default function ShareCenter() {
         {purchaseStep === "idle" && (
           <div className="space-y-2">
             <button
-              className="w-full py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
+              className="w-full py-3.5 rounded-xl text-sm font-medium transition-all hover:opacity-90"
               style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
               onClick={handlePurchase}
             >
               立即购买查看额度 · 99元 / 50次
             </button>
             <button
-              className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2"
               style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
               onClick={() => showModal("VIP 即将上线")}
             >
@@ -236,15 +236,15 @@ export default function ShareCenter() {
 
         {purchaseStep === "confirm" && (
           <div className="text-center space-y-3 animate-slide-up">
-            <div className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>确认支付</div>
-            <div className="text-2xl font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>¥99.00</div>
+            <div className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>确认支付</div>
+            <div className="text-2xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>¥99.00</div>
             <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>即刻到账 50 次查看额度 · 永久有效</div>
 
             {/* 支付方式选择 */}
             <div className="flex gap-2 justify-center pt-1">
               <button
                 onClick={() => setPaymentMethod("wechat")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium transition-all ${
                   paymentMethod === "wechat" ? "ring-1" : ""
                 }`}
                 style={{
@@ -262,7 +262,7 @@ export default function ShareCenter() {
               </button>
               <button
                 onClick={() => setPaymentMethod("alipay")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium transition-all ${
                   paymentMethod === "alipay" ? "ring-1" : ""
                 }`}
                 style={{
@@ -292,8 +292,8 @@ export default function ShareCenter() {
         {purchaseStep === "success" && (
           <div className="text-center space-y-3 animate-slide-up">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2.5" className="mx-auto"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            <div className="text-sm font-bold" style={{ color: "var(--positive)" }}>测试购买成功 · 额度已到账</div>
-            <code className="px-5 py-2 rounded-lg text-lg font-bold inline-block" style={{ background: "var(--accent-soft)", color: "var(--accent)", fontFamily: "var(--font-mono)", letterSpacing: "0.15em" }}>{purchaseCode}</code>
+            <div className="text-sm font-medium" style={{ color: "var(--positive)" }}>测试购买成功 · 额度已到账</div>
+            <code className="px-5 py-2 rounded-lg text-lg font-medium inline-block" style={{ background: "var(--accent-soft)", color: "var(--accent)", fontFamily: "var(--font-mono)", letterSpacing: "0.15em" }}>{purchaseCode}</code>
             <div><button className="btn-primary text-xs" onClick={() => { setPurchaseStep("idle"); setPurchaseCode(""); }}>返回查看确权额度</button></div>
           </div>
         )}

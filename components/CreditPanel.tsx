@@ -18,10 +18,10 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       {/* Warning Banner (when exhausted) */}
       {isExhausted && (
         <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: "var(--negative-soft)" }}>
-          <span className="badge badge-negative text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
+          <span className="badge badge-negative text-[9px] tracking-wider font-medium" style={{ fontFamily: "var(--font-mono)" }}>
             LIMIT_WARNING
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--negative)" }}>
+          <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--negative)" }}>
             // 额度超限
           </span>
         </div>
@@ -39,7 +39,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
           aria-label={showEye ? "隐藏额度" : "显示额度"}
         />
         <div>
-          <div className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>
+          <div className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>
             {isExhausted ? "额度已用完" : isLow ? "额度即将耗尽" : showEye ? (
               <span className="inline-flex items-center gap-1">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -68,7 +68,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </div>
             <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>邀约额度</div>
+              <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>邀约额度</div>
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>分享链接获取</div>
             </div>
           </div>
@@ -81,7 +81,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             </div>
             <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>付费池</div>
+              <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>付费池</div>
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>直接购买 · ¥99/50次</div>
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function CreditPanel({ credits, onClose }: CreditPanelProps) {
       {/* Total */}
       <div className="px-5 pb-4">
         <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: isExhausted ? "var(--negative-soft)" : "var(--positive-soft)" }}>
-          <span className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>可用额度</span>
+          <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>可用额度</span>
           <span className="text-base font-medium" style={{ color: isExhausted ? "var(--negative)" : "var(--positive)", fontFamily: "var(--font-mono)" }}>{total}</span>
         </div>
       </div>

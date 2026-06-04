@@ -84,15 +84,15 @@ export default function ProfilePanel() {
         <div className="card p-6 space-y-5">
           {/* 标签 */}
           <div className="flex items-center gap-2 justify-center">
-            <span className="badge badge-accent text-[9px] tracking-wider font-bold" style={{ fontFamily: "var(--font-mono)" }}>
+            <span className="badge badge-accent text-[9px] tracking-wider font-medium" style={{ fontFamily: "var(--font-mono)" }}>
               SECURE_GATEWAY
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
               // 账户登录
             </span>
           </div>
 
-          <h2 className="text-center text-lg font-bold" style={{ color: "var(--text-strong)" }}>
+          <h2 className="text-center text-lg font-medium" style={{ color: "var(--text-strong)" }}>
             {step === "verify" ? "验证邮箱" : "登录 PriceCRE"}
           </h2>
 
@@ -100,11 +100,11 @@ export default function ProfilePanel() {
           {step !== "verify" && (
             <div className="flex rounded-lg p-0.5" style={{ background: "var(--panel)" }}>
               <button onClick={() => setStep("login")}
-                className={`flex-1 py-2 text-xs font-semibold rounded-md transition-all ${step === "login" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
+                className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${step === "login" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
                 邮箱登录
               </button>
               <button onClick={() => setStep("register")}
-                className={`flex-1 py-2 text-xs font-semibold rounded-md transition-all ${step === "register" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
+                className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${step === "register" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
                 注册新账户
               </button>
             </div>
@@ -140,7 +140,7 @@ export default function ProfilePanel() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>账户邮箱</span>
-                  <span className="text-[9px] font-bold tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
+                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
                 </div>
                 <input type="email" placeholder="your@email.com" value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -149,7 +149,7 @@ export default function ProfilePanel() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>设置密码</span>
-                  <span className="text-[9px] font-bold tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
+                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
                 </div>
                 <input type="password" placeholder="至少 6 位" value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -158,7 +158,7 @@ export default function ProfilePanel() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>确认密码</span>
-                  <span className="text-[9px] font-bold tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>CONFIRM</span>
+                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>CONFIRM</span>
                 </div>
                 <input type="password" placeholder="再次输入" value={form.confirm}
                   onChange={(e) => setForm({ ...form, confirm: e.target.value })}
@@ -175,7 +175,7 @@ export default function ProfilePanel() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>账户邮箱</span>
-                  <span className="text-[9px] font-bold tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
+                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
                 </div>
                 <input type="email" placeholder="your@email.com" value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -184,7 +184,7 @@ export default function ProfilePanel() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>访问密码</span>
-                  <span className="text-[9px] font-bold tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
+                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
                 </div>
                 <input type="password" placeholder="········" value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -201,10 +201,10 @@ export default function ProfilePanel() {
             <>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px" style={{ background: "var(--line)" }} />
-                <span className="text-[10px] font-bold" style={{ color: "var(--text-hint)" }}>OR</span>
+                <span className="text-[10px] font-medium" style={{ color: "var(--text-hint)" }}>OR</span>
                 <div className="flex-1 h-px" style={{ background: "var(--line)" }} />
               </div>
-              <button className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+              <button className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                 style={{ background: "var(--positive-soft)", color: "var(--positive)", border: "1px solid var(--positive-border)" }}
                 onClick={() => setLoggedIn(true)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/><path d="M14.332 11.09a9.225 9.225 0 00-1.525.197c-1.961.36-3.717 1.525-4.775 3.053-.556.803-.858 1.69-.858 2.59 0 2.637 1.99 4.964 4.83 5.807a5.19 5.19 0 001.445.213c.506 0 1.007-.073 1.493-.213l1.086.636a.18.18 0 00.095.031.17.17 0 00.168-.168c0-.041-.017-.082-.027-.122l-.222-.846a.338.338 0 01.121-.38c1.822-1.209 2.922-3.083 2.922-5.314 0-3.26-2.95-5.684-6.278-5.684z"/></svg>
@@ -222,7 +222,7 @@ export default function ProfilePanel() {
               </svg>
               <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>关注微信公众号</span>
             </div>
-            <span className="text-sm font-bold" style={{ color: "var(--positive)" }}>PriceCRE</span>
+            <span className="text-sm font-medium" style={{ color: "var(--positive)" }}>PriceCRE</span>
             <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>获取最新资产数据推送与行业洞察</span>
           </div>
 
@@ -240,7 +240,7 @@ export default function ProfilePanel() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <div>
-            <div className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>用户</div>
+            <div className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>用户</div>
             <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{form.email}</div>
           </div>
           <button onClick={() => { setLoggedIn(false); setStep("login"); }} className="ml-auto text-[10px] font-medium hover:underline" style={{ color: "var(--text-muted)" }}>退出登录</button>
@@ -248,7 +248,7 @@ export default function ProfilePanel() {
         <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "var(--panel)" }}>
           <div className="w-3 h-3 rounded-full" style={{ background: activated && quota > 0 ? "var(--positive)" : "var(--text-hint)" }} />
           <div>
-            <div className="text-[13px] font-bold" style={{ color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
+            <div className="text-[13px] font-medium" style={{ color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
               {!activated ? "尚未激活额度" : quota > 0 ? `可用额度：${quota} 次` : "额度已用完"}
             </div>
             <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{!activated ? "提交数据或购买额度即可激活" : ""}</div>
@@ -260,7 +260,7 @@ export default function ProfilePanel() {
         <div className="grid grid-cols-3 gap-3">
           {[{ label: "提交", value: 0 }, { label: "购买", value: 0 }, { label: "查看", value: 0 }].map((s) => (
             <div key={s.label} className="text-center py-2 rounded-lg" style={{ background: "var(--panel)" }}>
-              <div className="text-lg font-bold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
+              <div className="text-lg font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{s.label}</div>
             </div>
           ))}

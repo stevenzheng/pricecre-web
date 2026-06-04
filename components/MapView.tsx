@@ -74,7 +74,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       {cityProps.length > 0 && (
         <div className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
           <div className="px-4 py-2 flex items-center justify-between">
-            <span className="text-xs font-bold" style={{ color: "var(--text-strong)" }}>{activeCity} · {cityProps.length} 资产</span>
+            <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>{activeCity} · {cityProps.length} 资产</span>
           </div>
           <div className="px-4 pb-3 space-y-1.5">
             {cityProps.map((p) => (
@@ -86,7 +86,7 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
                     : p.propertyType === "SHOPS" ? <><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></>
                     : <><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></>}
                   </svg>
-                  <div className="min-w-0"><div className="text-[13px] font-bold truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div><div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.district}</div></div>
+                  <div className="min-w-0"><div className="text-[13px] font-medium truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div><div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.district}</div></div>
                 </div>
                 <div className="text-right flex-shrink-0 ml-2"><div className="text-sm font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>¥{p.faceRent.toFixed(1)}</div><div className="text-[10px]" style={{ color: "var(--text-hint)" }}>/㎡/天</div></div>
               </div>

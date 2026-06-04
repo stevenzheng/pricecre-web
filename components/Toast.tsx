@@ -41,15 +41,6 @@ export default function Modal() {
       >
         <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--text)" }}>{message}</p>
         <div className="flex gap-2 justify-center">
-          {!isToast && (
-            <button
-              className="px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
-              style={{ background: "var(--panel)", color: "var(--text-muted)" }}
-              onClick={() => setVisible(false)}
-            >
-              关闭
-            </button>
-          )}
           <button
             className="px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
             style={{ background: "var(--accent)", color: "var(--text-inverse)" }}

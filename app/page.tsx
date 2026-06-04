@@ -544,7 +544,7 @@ export default function Home() {
         {/* Property Cards */}
         <div className="max-w-7xl mx-auto px-4 pb-4">
           {filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {filteredProperties.map((property) => (
                 <PropertyCard
                   key={property.id}

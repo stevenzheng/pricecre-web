@@ -205,17 +205,15 @@ export default function HamburgerMenu({
         
         {/* Links */}
         <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
-          <div className="text-[11px] leading-relaxed mb-3" style={{ color: "var(--text-hint)" }}>
+          <div className="space-y-1.5 text-[12px] mb-3">
+            <a href="/terms" className="block hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
+            <a href="/privacy" className="block hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
+            <a href="/contact" className="block hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
+          </div>
+          <div className="text-[11px] leading-relaxed" style={{ color: "var(--text-hint)" }}>
             <p>数据来源于公开市场信息与用户提交，</p>
             <p>仅供参考，不构成投资建议。</p>
             <p>每日 8:00 更新。</p>
-          </div>
-          <div className="space-y-1 text-[12px]">
-            <a href="/terms" className="hover:underline" style={{ color: "var(--text-muted)" }}>服务条款</a>
-          </div>
-          <div><a href="/privacy" className="hover:underline" style={{ color: "var(--text-muted)" }}>隐私政策</a>
-          </div>
-          <div><a href="/contact" className="hover:underline" style={{ color: "var(--text-muted)" }}>联系我们</a>
           </div>
         </div>
 
@@ -225,12 +223,12 @@ export default function HamburgerMenu({
             <span className="text-[10px]" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
               v3.0.0_MODULAR
             </span>
-            <span className="flex items-center gap-1.5">
+            <a href="https://sz4ai.com" target="_blank" rel="noopener" className="flex items-center gap-1.5" style={{ color: "var(--positive)" }}>
               <span className="badge-live-dot" />
-              <span className="text-[10px] font-bold tracking-wider" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
-                LIVE
+              <span className="text-[10px] font-medium tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>
+                狮帝芬
               </span>
-            </span>
+            </a>
           </div>
         </div>
       </div>

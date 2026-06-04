@@ -5,16 +5,24 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, userId } = await request.json();
+    const { propertyId, projectName, city } = await request.json();
 
     if (!propertyId) {
       return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
     }
 
-    // Find the property
-    const property = await prisma.commercialProperty.findUnique({
+    // Find property — try by ID first, then by projectName+city (for mock-data IDs)
+    let property = await prisma.commercialProperty.findUnique({
       where: { id: propertyId },
     });
+
+    if (!property && projectName && city) {
+      // Fallback: find first matching project name + city
+      property = await prisma.commercialProperty.findFirst({
+        where: { projectName, city },
+        orderBy: { updatedAt: "desc" },
+      });
+    }
 
     if (!property) {
       return NextResponse.json({ error: "资产不存在" }, { status: 404 });

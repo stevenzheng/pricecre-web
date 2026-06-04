@@ -208,10 +208,14 @@ export default function Home() {
   // Handlers
   const handleUnlock = useCallback(async (propertyId: string) => {
     try {
+      const prop = mockProperties.find(p => p.id === propertyId);
       const res = await fetch("/api/assets/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId }),
+        body: JSON.stringify({ 
+          propertyId,
+          ...(prop ? { projectName: prop.projectName, city: prop.city } : {}),
+        }),
       });
       const data = await res.json();
       if (data.unlocked) {

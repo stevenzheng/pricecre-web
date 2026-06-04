@@ -13,5 +13,11 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/agent/pipeline",
+      "schedule": "*/30 * * * *"
+    }
   ]
 }

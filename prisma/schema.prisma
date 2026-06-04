@@ -158,3 +158,28 @@ model ScheduledCrawlJob {
 
   @@index([isActive, scheduleHour, scheduleMinute])
 }
+
+enum SourceType {
+  SSR_HTML
+  EXTERNAL_API
+  JSON_LD
+  RSS_FEED
+  FILE_DOWNLOAD
+}
+
+model DataSourceRegistry {
+  id          String     @id @default(uuid())
+  name        String
+  url         String
+  sourceType  SourceType
+  fieldMap    Json       @default("{}")
+  crawlConfig Json       @default("{}")
+  isActive    Boolean    @default(true)
+  priority    Int        @default(0)
+  lastRunAt   DateTime?
+  lastStatus  String     @default("IDLE")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([isActive, sourceType])
+}

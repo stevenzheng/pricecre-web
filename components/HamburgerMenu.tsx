@@ -180,20 +180,20 @@ export default function HamburgerMenu({
         <div className="px-5 py-5">
           <div className="section-title">快捷操作</div>
           <div className="space-y-1">
-            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "map" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "map" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
               </svg>
               地图视图
             </button>
-            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
               互享兑换
             </button>
-            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <button onClick={() => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })), 100); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
               </svg>
@@ -206,15 +206,15 @@ export default function HamburgerMenu({
         {/* Links */}
         <div className="px-5 py-4 border-t" style={{ borderColor: "var(--line)" }}>
           <div className="space-y-1 mb-3">
-            <a href="/terms" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <a href="/terms" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               服务条款
             </a>
-            <a href="/privacy" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <a href="/privacy" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
               隐私政策
             </a>
-            <a href="/contact" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
+            <a href="/contact" className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--panel)] transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               联系我们
             </a>

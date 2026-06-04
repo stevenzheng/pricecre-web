@@ -36,6 +36,13 @@ export default function Home() {
   const [mobileTab, setMobileTab] = useState<"market" | "map" | "share" | "profile">("market");
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
+  const [wechatCardData, setWechatCardData] = useState<any>(null);
+
+  useEffect(() => {
+    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
+    document.addEventListener("open-wechat-card", h);
+    return () => document.removeEventListener("open-wechat-card", h);
+  }, []);
 
   // Listen for hamburger menu nav events
   useEffect(() => {

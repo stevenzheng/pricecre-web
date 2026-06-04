@@ -220,11 +220,13 @@ export default function ShareCenter() {
             onClick={async () => {
               const code = (document.querySelector(".activation-input") as HTMLInputElement)?.value || "";
               if (code.length !== 6) { showModal("请输入6位激活码"); return; }
+              let userEmail = "";
+              try { const stored = localStorage.getItem("pricecre_user"); if (stored) userEmail = JSON.parse(stored).email || ""; } catch {}
               try {
                 const res = await fetch("/api/data/redeem", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ code }),
+                  body: JSON.stringify({ code, email: userEmail || formData.email }),
                 });
                 const data = await res.json();
                 if (data.success) {

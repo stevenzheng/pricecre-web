@@ -1,18 +1,21 @@
 /**
  * POST /api/data/submit
  * 
- * 接收数据提报 → 生成激活码 → 发送邮件 → 存储激活码
+ * 接收数据提报 → 生成激活码 → 发送邮件
+ * Uses deterministic HMAC code (same email = same code)
  */
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail, generateVerificationCode, activationEmailTemplate } from "@/lib/email";
-import { setActivationCode } from "@/lib/codeStore";
+import { sendEmail, activationEmailTemplate } from "@/lib/email";
+import { createHash } from "crypto";
 
-function generateCode(): string {
-  // Generate 6-char alphanumeric activation code
+function generateAuthCode(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";
+  const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    const idx = parseInt(hash.slice(i * 2, i * 2 + 2), 16) % chars.length;
+    code += chars[idx];
   }
   return code;
 }
@@ -25,9 +28,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "项目名称和邮箱不能为空" }, { status: 400 });
     }
 
-    // Generate activation code
-    const code = generateCode();
-    setActivationCode(code, 8);
+    // Generate deterministic activation code from email
+    const code = generateAuthCode(email);
 
     // Send activation email
     await sendEmail({

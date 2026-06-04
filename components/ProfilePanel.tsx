@@ -537,7 +537,18 @@ export default function ProfilePanel({ credits, totalCredits }: {
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实交易</button>}
         {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { setQuota((q) => q + 8); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}
-        <button className="btn-secondary w-full text-xs" onClick={() => showModal("即将上线")}>账户设置</button>
+        <button
+          className="btn-secondary w-full text-xs"
+          onClick={() => {
+            localStorage.removeItem("pricecre_user");
+            setLoggedIn(false);
+            setStep("login");
+            setForm({ email: "", password: "", confirm: "", code: "" });
+            showModal("已退出登录");
+          }}
+        >
+          退出登录
+        </button>
       </div>
     </div>
   );

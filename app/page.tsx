@@ -428,11 +428,8 @@ export default function Home() {
         {/* Active Filter + Type Chips + Filter Button */}
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              {activeFilterLabel}
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-hint)", fontFamily: "var(--font-mono)" }}>
-              · {filteredProperties.length} 资产
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+              共计 {filteredProperties.length}个资产
             </span>
             {/* Property Type Filter Chips */}
             <div className="flex items-center gap-1.5 ml-2">

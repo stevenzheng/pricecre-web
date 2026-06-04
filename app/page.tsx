@@ -428,10 +428,10 @@ export default function Home() {
         )}
         {mobileTab === "market" && (
           <>
-        {/* Stats Bar + Filter Bar — sticky together */}
-        <div className="sticky top-[56px] z-20 border-b" style={{ borderColor: "var(--line)", background: "var(--bg)" }}>
+        {/* Stats Bar + Filter Bar — filter bar sticky */}
+        <div>
         {/* Stats Bar */}
-        <div style={{ background: "var(--bg-surface)" }}>
+        <div className="border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="grid grid-cols-4 gap-0">
               <div className="stat-item">
@@ -502,7 +502,7 @@ export default function Home() {
                     }`}
                     style={isActive ? { background: "var(--accent-soft)" } : {}}
                   >
-                    {t.label} <span style={{ color: "var(--text-strong)", fontWeight: 700 }}>{count}</span>
+                    {t.label} <span style={{ fontSize: "10px", fontWeight: 300, color: "var(--text-hint)" }}>{count}</span>
                   </button>
                 );
               })}

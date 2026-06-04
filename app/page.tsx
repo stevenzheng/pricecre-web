@@ -490,9 +490,9 @@ export default function Home() {
             {/* Property Type Filter Chips */}
             <div className="flex items-center gap-2">
               {[
-                { key: "OFFICE", label: "写字楼" },
-                { key: "SHOPS", label: "商业零售" },
-                { key: "INDUSTRIAL", label: "产业园" },
+                { key: "OFFICE", label: "写字楼", icon: (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-0.5"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2"/></svg>) },
+                { key: "SHOPS", label: "商业零售", icon: (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-0.5"><path d="M3 9l1.5-5.5A2 2 0 016.5 2h11a2 2 0 012 1.5L21 9"/><path d="M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M9 22V12h6v10"/></svg>) },
+                { key: "INDUSTRIAL", label: "产业园", icon: (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-0.5"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>) },
               ].map((t) => {
                 const isActive = activeType === t.key;
                 const count = mockProperties.filter(p =>
@@ -509,6 +509,7 @@ export default function Home() {
                     }`}
                     style={isActive ? { background: "var(--accent-soft)" } : {}}
                   >
+                    {t.icon}
                     {t.label} <span style={{ fontSize: "10px", fontWeight: 300, color: "var(--text-hint)" }}>{count}</span>
                   </button>
                 );
@@ -550,7 +551,7 @@ export default function Home() {
         {/* Property Cards */}
         <div className="max-w-7xl mx-auto px-4 pb-4">
           {filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProperties.map((property) => (
                 <PropertyCard
                   key={property.id}

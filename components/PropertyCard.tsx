@@ -251,7 +251,7 @@ export default function PropertyCard({
       >
         {/* Top Row: Type Badge (left) + Mini Indicators (right) */}
         <div className="flex items-start justify-between gap-1.5 mb-1.5">
-          <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+          <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider flex-shrink-0" style={{ color: "var(--text-muted)" }}>
             <span style={{ color: "var(--accent)" }}>{typeIcon}</span>
             {typeLabel}
           </span>

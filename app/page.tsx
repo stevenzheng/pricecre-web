@@ -245,12 +245,13 @@ export default function Home() {
                 </svg>
               </div>
               <div>
-                <div
-                  className="text-[13px] sm:text-[14px] font-bold leading-tight tracking-tight whitespace-nowrap"
-                  style={{ color: "var(--text-strong)" }}
+                <a
+                  href="https://pricecre.com"
+                  className="text-[13px] sm:text-[14px] font-bold leading-tight tracking-tight whitespace-nowrap hover:opacity-80 transition-opacity"
+                  style={{ color: "var(--text-strong)", textDecoration: "none" }}
                 >
                   PriceCRE · 地产价值
-                </div>
+                </a>
               </div>
             </div>
 

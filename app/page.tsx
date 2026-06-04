@@ -4,7 +4,6 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import PropertyCard from "@/components/PropertyCard";
 import ThemeToggle from "@/components/ThemeToggle";
-import LanguageToggle from "@/components/LanguageToggle";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import MobileNav from "@/components/MobileNav";
 import CreditPanel from "@/components/CreditPanel";
@@ -82,7 +81,7 @@ export default function Home() {
   });
 
   const totalCredits = credits.referral + credits.purchased;
-  const { lang, t, toggleLang } = useLanguage();
+  const { lang } = useLanguage();
 
   // Nearby city mapping for geo-location fallback (HK→深圳, 杭州→上海, etc.)
   const NEARBY_CITY: Record<string, string> = {
@@ -329,12 +328,14 @@ export default function Home() {
               <span className="badge-live-dot" />
               LIVE
             </span>
+            {/*
             {userCity && (
               <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium ml-1" style={{ color: "var(--text-muted)" }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 {userCity}
               </span>
             )}
+            */}
           </div>
 
           {/* Center: Search (Desktop) */}
@@ -376,7 +377,12 @@ export default function Home() {
               </span>
             </button>
 
-            <LanguageToggle lang={lang} onToggle={toggleLang} />
+            {userCity && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium ml-1" style={{ color: "var(--accent)" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                {userCity}
+              </span>
+            )}
 
             <ThemeToggle />
 

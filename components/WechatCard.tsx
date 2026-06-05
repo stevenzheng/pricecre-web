@@ -8,12 +8,14 @@ interface WechatCardProps {
   district: string;
   faceRent: number;
   propertyType: string;
+  propertyId: string;
   indicators: { label: string; value: string }[];
   onClose: () => void;
 }
 
-export default function WechatCard({ projectName, city, district, faceRent, propertyType, indicators, onClose }: WechatCardProps) {
-  const url = `https://pricecre.com`;
+export default function WechatCard({ projectName, city, district, faceRent, propertyType, propertyId, indicators, onClose }: WechatCardProps) {
+  const propertyUrl = `https://pricecre.com/?p=${encodeURIComponent(propertyId)}`;
+  const url = propertyUrl;
   const [copied, setCopied] = useState(false);
   const [isWechat, setIsWechat] = useState(false);
 
@@ -26,7 +28,7 @@ export default function WechatCard({ projectName, city, district, faceRent, prop
   const shareData = {
     title: `PriceCRE · ${projectName}`,
     desc: `${city} · ${district} · ${propertyType} | ¥${faceRent.toFixed(1)}/㎡/天 | ${indicators.length}项精算指标`,
-    link: url,
+    link: propertyUrl,
     imgUrl: "https://pricecre.com/og.png",
   };
 
@@ -73,7 +75,7 @@ export default function WechatCard({ projectName, city, district, faceRent, prop
       const cardEl = document.querySelector(".wechat-card-inner");
       if (cardEl) {
         // Use html2canvas if available, or fallback to text copy
-        const shareText = `【PriceCRE · 地产价值】\n${projectName}\n${city} · ${district} · ${propertyType}\n挂牌租金面价: ¥${faceRent.toFixed(1)}/㎡/天\n共 ${indicators.length} 项精算指标\n了解更多: ${url}`;
+        const shareText = `【PriceCRE · 地产价值】\n${projectName}\n${city} · ${district} · ${propertyType}\n挂牌租金面价: ¥${faceRent.toFixed(1)}/㎡/天\n共 ${indicators.length} 项精算指标\n查看详情: ${propertyUrl}`;
         await navigator.clipboard.writeText(shareText);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);

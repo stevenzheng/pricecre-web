@@ -340,6 +340,7 @@ export default function PropertyCard({
                     district: property.district,
                     faceRent: property.faceRent,
                     propertyType: typeLabel,
+                    propertyId: property.id,
                     indicators: sortedFields
                       .filter(f => !f.isLocked || isUnlocked)
                       .slice(0, 9)

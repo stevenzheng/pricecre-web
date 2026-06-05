@@ -13,7 +13,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
   const [loggedIn, setLoggedIn] = useState(false);
   const [activated, setActivated] = useState(false);
-  const [quota, setQuota] = useState(0);
+  // quota is derived from page-level credits for consistency with CreditPanel
+  const quota = credits && (credits.referral + credits.purchased) > 0 ? credits.referral + credits.purchased : 0;
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +36,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
           setForm((prev) => ({ ...prev, email: user.email }));
           setLoggedIn(true);
           setStep("done");
-          if (user.totalCredits) setQuota(user.totalCredits);
+          if (user.totalCredits) setActivated(true);
           setActivated(true);
           fetchHistory();
           if (user.referralCode) {
@@ -52,7 +53,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
     if (credits) {
       const total = credits.referral + credits.purchased;
       if (total > 0 && !activated) setActivated(true);
-      setQuota(total);
+      // quota is now derived from credits prop — no need to set manually
     }
   }, [credits]);
 
@@ -258,7 +259,6 @@ export default function ProfilePanel({ credits, totalCredits }: {
                       showModal(msg);
                       setShowPayment(false);
                       setPaymentMethod("wechat");
-                      if (credits) setQuota(paymentProduct === "monthly" ? 999 : (credits.referral || 0) + (credits.purchased || 0) + 50);
                     } else {
                       showModal("支付失败，请重试");
                     }
@@ -536,7 +536,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
 
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实交易</button>}
-        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { setQuota((q) => q + 8); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}
+        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}
         <button
           className="btn-secondary w-full text-xs"
           onClick={() => {

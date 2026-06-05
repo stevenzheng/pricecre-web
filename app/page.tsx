@@ -107,8 +107,21 @@ export default function Home() {
   useEffect(() => { savePersisted("unlockedIds", [...unlockedIds]); }, [unlockedIds]);
   useEffect(() => { savePersisted("referralCode", myReferralCode); }, [myReferralCode]);
 
-  // Load user state from localStorage on mount
+  // Handle ?p=prop-001 parameter from QR code / shared links
   useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const propId = params.get("p");
+      if (propId) {
+        setTimeout(() => {
+          const el = document.getElementById(`property-${propId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 500);
+      }
+    } catch {}
+  }, []);
     try {
       const stored = localStorage.getItem("pricecre_user");
       if (stored) {

@@ -94,18 +94,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .gh-badge-accent { background: rgba(62,176,239,0.08); color: #2090CC; }
         .gh-badge-neutral { background: #F0F0F1; color: #738A94; }
         .gh-badge-error { background: rgba(230,76,76,0.08); color: #E64C4C; }
+        .gh-badge-danger { background: rgba(230,76,76,0.08); color: #E64C4C; }
+        .gh-badge-warning { background: rgba(240,168,48,0.08); color: #B5791A; }
 
         .gh-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); padding: 20px; }
-        .gh-input { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 14px; font-weight: 400; color: #15171A; font-family: inherit; outline: none; background: #fff; }
+        .gh-card-static { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); }
+        .gh-input { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 14px; font-weight: 400; color: #15171A; font-family: inherit; outline: none; background: #fff; box-sizing: border-box; }
         .gh-input:focus { border-color: #3EB0EF; }
         .gh-input::placeholder { color: #A5B4BF; }
-        .gh-label { font-size: 12px; font-weight: 600; color: #738A94; text-transform: uppercase; letter-spacing: 0.3px; }
-        .gh-select { padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 14px; color: #15171A; background: #fff; outline: none; font-family: inherit; }
+        .gh-label { font-size: 12px; font-weight: 600; color: #738A94; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; display: block; }
+        .gh-select { padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 14px; color: #15171A; background: #fff; outline: none; font-family: inherit; box-sizing: border-box; }
         .gh-select:focus { border-color: #3EB0EF; }
 
         .gh-filter-tab { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; color: #738A94; background: transparent; font-family: inherit; }
         .gh-filter-tab:hover { background: #F5F6F7; }
         .gh-filter-tab.active { background: rgba(62,176,239,0.1); color: #3EB0EF; }
+
+        .gh-filter-tabs { display: inline-flex; gap: 2px; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 6px; padding: 3px; }
+        .gh-action-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+
+        .gh-table-wrap { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); }
+        .gh-td-mono { font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace; font-weight: 500; font-size: 13px; font-feature-settings: "tnum"; }
+        .gh-td-hint { font-size: 13px; color: #738A94; }
+        .gh-td-muted { color: #738A94; }
+
+        .gh-btn-sm { font-size: 13px; padding: 5px 10px; }
+
+        .gh-toast { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #15171A; box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08); cursor: pointer; }
+        .gh-skeleton { background: linear-gradient(90deg, #F0F0F1 25%, #E5E7EB 50%, #F0F0F1 75%); background-size: 200% 100%; animation: gh-shimmer 1.4s ease-in-out infinite; border-radius: 6px; }
+        @keyframes gh-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes gh-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .gh-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .gh-dot-success { background: #30CF43; }
+        .gh-dot-error { background: #E64C4C; }
+        .gh-dot-muted { background: #738A94; }
+        .gh-dot-accent { background: #3EB0EF; }
+
+        .gh-stat-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px 24px; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); }
+        .gh-stat-label { font-size: 11px; font-weight: 500; color: #738A94; text-transform: uppercase; letter-spacing: 0.3px; margin: 0 0 4px; }
+        .gh-stat-value { font-size: 28px; font-weight: 600; color: #15171A; font-feature-settings: "tnum"; letter-spacing: -0.56px; line-height: 1; margin: 0; font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace; }
+
+        .gh-quick-card { display: flex; align-items: center; gap: 16px; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px; text-decoration: none; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); transition: border-color 0.12s; }
+        .gh-quick-card:hover { border-color: #D1D5DB; }
+        .gh-quick-card-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #F0F0F1; flex-shrink: 0; }
+        .gh-quick-card-icon svg { color: #15171A; }
+        .gh-quick-card h3 { font-size: 14px; font-weight: 600; color: #15171A; margin: 0 0 2px; font-family: inherit; }
+        .gh-quick-card p { font-size: 13px; font-weight: 400; color: #738A94; margin: 0; font-family: inherit; }
+
+        .gh-form-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04); }
 
         .gh-empty { text-align: center; padding: 80px 24px; }
         .gh-empty-title { font-size: 16px; font-weight: 600; color: #15171A; margin: 0 0 4px; }

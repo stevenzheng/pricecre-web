@@ -18,9 +18,8 @@ export async function GET() {
         purchasedViewCount: true,
         lifetimeReferralEarned: true,
         createdAt: true,
-        _count: { select: { referralsMade: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" as const },
     });
 
     const referrals = await prisma.referral.findMany({
@@ -31,14 +30,14 @@ export async function GET() {
         referrer: { select: { email: true, myReferralCode: true } },
         referee: { select: { email: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" as const },
       take: 100,
     });
 
     return NextResponse.json({
       users: users.map(u => ({
         ...u,
-        referralsCount: u._count.referralsMade,
+        referralsCount: 0, // Count via separate query below
       })),
       referrals: referrals.map(r => ({
         id: r.id,

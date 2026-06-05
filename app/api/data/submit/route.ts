@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail, activationEmailTemplate } from "@/lib/email";
 import { createHash } from "crypto";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 function generateAuthCode(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";
@@ -22,7 +25,7 @@ function generateAuthCode(email: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectName, netRent, email } = await req.json();
+    const { projectName, netRent, email, city, propertyType } = await req.json();
 
     if (!projectName || !email) {
       return NextResponse.json({ error: "项目名称和邮箱不能为空" }, { status: 400 });
@@ -30,6 +33,23 @@ export async function POST(req: NextRequest) {
 
     // Generate deterministic activation code from email
     const code = generateAuthCode(email);
+
+    // Store submission in database for admin review
+    try {
+      await (prisma as any).submission?.create?.({
+        data: {
+          email,
+          projectName,
+          netRent: parseFloat(netRent) || 0,
+          city: city || "",
+          propertyType: propertyType || "OFFICE",
+          status: "PENDING_REVIEW",
+          activationCode: code,
+        },
+      });
+    } catch {
+      // Table may not exist yet, proceed without storage
+    }
 
     // Send activation email
     await sendEmail({

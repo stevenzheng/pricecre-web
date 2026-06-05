@@ -6,11 +6,43 @@
 // 流程: 爬虫抓取 → GIS赋能 → 数据质量校验 → 金融精算 → Supabase上行
 // ============================================================
 import { SsrHydrationScraper, CrawlJobConfig } from "./scrapers/ssr-hydration-scraper";
+import { TavilyScraper } from "./scrapers/tavily-scraper";
 import { LocalAgentMasterOrchestrator } from "./master-pipeline";
 import { batchUploadAssets } from "./uploader";
 import { validateBatch, generateQualitySummary } from "./data-quality";
 import { RawScrapedPackage } from "./schemas";
 import type { PropertyType } from "./schemas";
+
+// ── Tavily 爬取任务定义 ──────────────────────────────
+
+interface TavilyCrawlTask {
+  label: string;
+  city: string;
+  district: string;
+  propertyType: PropertyType;
+  maxResults: number;
+}
+
+/** 从预置任务中提取去重后的城市/区/业态组合 */
+function deriveTavilyTasks(jobs: CrawlJobConfig[]): TavilyCrawlTask[] {
+  const seen = new Set<string>();
+  const tasks: TavilyCrawlTask[] = [];
+
+  for (const j of jobs) {
+    const key = `${j.city}|${j.district}|${j.propertyType}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    tasks.push({
+      label: `Tavily·${j.label}`,
+      city: j.city,
+      district: j.district,
+      propertyType: j.propertyType,
+      maxResults: j.maxResults ?? 20,
+    });
+  }
+
+  return tasks;
+}
 
 // ── 预置爬取任务 ─────────────────────────────────────
 
@@ -50,12 +82,14 @@ function parseArgs(): {
   city?: string;
   limit?: number;
   platforms?: string[];
+  tavily: boolean;
 } {
   const args = process.argv.slice(2);
-  const opts: ReturnType<typeof parseArgs> = { dryRun: false };
+  const opts: ReturnType<typeof parseArgs> = { dryRun: false, tavily: false };
 
   for (const arg of args) {
     if (arg === "--dry-run") opts.dryRun = true;
+    else if (arg === "--tavily") opts.tavily = true;
     else if (arg.startsWith("--city=")) opts.city = arg.split("=")[1];
     else if (arg.startsWith("--limit=")) opts.limit = parseInt(arg.split("=")[1]);
     else if (arg.startsWith("--platforms=")) {
@@ -99,16 +133,33 @@ async function main() {
   }
 
   // ── 阶段1: 爬取 ──────────────────────────────────
-  console.log(`\n▶ 阶段1: 启动 ${jobs.length} 个爬取任务\n`);
-
   const allRawPackages: RawScrapedPackage[] = [];
   const crawlResults = new Map<string, RawScrapedPackage[]>();
 
-  for (const job of jobs) {
-    console.log(`  ⏳ ${job.label}`);
-    const rawPackages = await SsrHydrationScraper.crawlAndEnrich(job);
-    crawlResults.set(job.label, rawPackages);
-    allRawPackages.push(...rawPackages);
+  if (opts.tavily) {
+    console.log(`\n▶ 阶段1: Tavily 搜索模式 — ${jobs.length} 个区域\n`);
+    const tavilyTasks = deriveTavilyTasks(jobs);
+
+    for (const task of tavilyTasks) {
+      console.log(`  ⏳ ${task.label}`);
+      const rawPackages = await TavilyScraper.crawlAndEnrich({
+        city: task.city,
+        district: task.district,
+        propertyType: task.propertyType,
+        maxResults: task.maxResults,
+      });
+      crawlResults.set(task.label, rawPackages);
+      allRawPackages.push(...rawPackages);
+    }
+  } else {
+    console.log(`\n▶ 阶段1: SSR 爬虫模式 — ${jobs.length} 个爬取任务\n`);
+
+    for (const job of jobs) {
+      console.log(`  ⏳ ${job.label}`);
+      const rawPackages = await SsrHydrationScraper.crawlAndEnrich(job);
+      crawlResults.set(job.label, rawPackages);
+      allRawPackages.push(...rawPackages);
+    }
   }
 
   console.log(`\n  ✅ 爬取汇总: ${allRawPackages.length} 条原始数据\n`);

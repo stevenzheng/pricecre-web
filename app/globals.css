@@ -892,6 +892,42 @@ body {
   padding: 5px 10px;
 }
 
+/* legacy aliases for user-written pages */
+.gh-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 19px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background: transparent;
+  color: #3EB0EF;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-decoration: none;
+  line-height: 1;
+}
+.gh-btn-ghost:hover {
+  background: rgba(62, 176, 239, 0.04);
+  border-color: #3EB0EF;
+}
+
+.gh-mono {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 500;
+  font-size: 13px;
+  font-feature-settings: "tnum";
+}
+
+.gh-hint {
+  font-size: 13px;
+  color: #738A94;
+}
+
 /* ---- Inputs ---- */
 .gh-input {
   width: 100%;

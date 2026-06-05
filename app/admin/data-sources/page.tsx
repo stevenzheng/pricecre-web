@@ -1,20 +1,13 @@
-// app/admin/data-sources/page.tsx — Crawl Source Manager
+// app/admin/data-sources/page.tsx — Ghost Admin Data Sources
 "use client";
 
 import { useState, useEffect } from "react";
 
 interface DataSource {
-  id: string;
-  label: string;
-  targetUrl: string;
-  propertyType: string;
-  city: string;
-  district: string;
-  isActive: boolean;
-  lastRunAt: string | null;
-  lastRunStatus: string;
-  lastPipelineCount: number;
-  lastRunError?: string;
+  id: string; label: string; targetUrl: string;
+  propertyType: string; city: string; district: string;
+  isActive: boolean; lastRunAt: string | null;
+  lastRunStatus: string; lastPipelineCount: number; lastRunError?: string;
 }
 
 const typeLabel: Record<string, string> = { OFFICE: "办公", SHOPS: "商业", INDUSTRIAL: "产业园" };
@@ -37,33 +30,31 @@ export default function DataSourcesPage() {
 
   const toggleActive = async (s: DataSource) => {
     await fetch(`/api/agent/schedule/${s.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: !s.isActive }),
     });
     fetchSources();
   };
 
   return (
-    <div className="admin-content-inner">
-      <div className="admin-page-header">
-        <h1 className="admin-page-title">数据源管理</h1>
-        <p className="admin-page-desc">
-          {sources.length} 个数据源 · {sources.filter(s => s.isActive).length} 活跃 · 
-          累计产出 {sources.reduce((s, x) => s + (x.lastPipelineCount || 0), 0)} 条
+    <div className="gh-content-inner">
+      <div className="gh-page-header">
+        <h1 className="gh-page-title">数据源管理</h1>
+        <p className="gh-page-desc">
+          {sources.length} 个数据源 · {sources.filter(s => s.isActive).length} 活跃 · 累计产出 {sources.reduce((s, x) => s + (x.lastPipelineCount || 0), 0)} 条
         </p>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#64748d" }}>加载中...</div>
+        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
       ) : sources.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#64748d" }}>
-          <p style={{ fontSize: 16, marginBottom: 4 }}>暂无数据源</p>
-          <p style={{ fontSize: 13 }}>前往「爬取计划」添加数据源</p>
+        <div className="gh-empty">
+          <p className="gh-empty-title">暂无数据源</p>
+          <p className="gh-empty-desc">前往「爬取计划」添加数据源</p>
         </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="str-table">
+        <div className="gh-table-wrap">
+          <table className="gh-table">
             <thead>
               <tr>
                 <th>站点名称</th>
@@ -73,43 +64,30 @@ export default function DataSourcesPage() {
                 <th>状态</th>
                 <th style={{ textAlign: "right" }}>产量</th>
                 <th>最近运行</th>
-                <th style={{ width: 80 }}>操作</th>
+                <th style={{ width: 80 }} />
               </tr>
             </thead>
             <tbody>
               {sources.map((s) => (
                 <tr key={s.id}>
-                  <td style={{ fontWeight: 400 }}>{s.label}</td>
-                  <td className="str-td-hint" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <td style={{ fontWeight: 600 }}>{s.label}</td>
+                  <td className="gh-td-hint" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {s.targetUrl}
                   </td>
-                  <td>{typeLabel[s.propertyType] || s.propertyType}</td>
-                  <td>{s.city} · {s.district}</td>
+                  <td><span className="gh-badge gh-badge-neutral">{typeLabel[s.propertyType] || s.propertyType}</span></td>
+                  <td className="gh-td-muted">{s.city} · {s.district}</td>
                   <td>
-                    <span style={{
-                      fontSize: 11, fontWeight: 500,
-                      color: s.isActive ? "#10b981" : "#64748d",
-                    }}>
-                      {s.isActive ? "活跃" : "停用"}
+                    <span className={`gh-badge ${s.isActive ? "gh-badge-success" : "gh-badge-neutral"}`}>
+                      {s.isActive ? "Active" : "Paused"}
                     </span>
                   </td>
-                  <td className="str-td-mono" style={{ textAlign: "right" }}>
-                    {s.lastPipelineCount || 0}
-                  </td>
-                  <td className="str-td-hint">
-                    {s.lastRunAt ? new Date(s.lastRunAt).toLocaleString("zh-CN") : "未运行"}
+                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{s.lastPipelineCount || 0}</td>
+                  <td className="gh-td-hint">
+                    {s.lastRunAt ? new Date(s.lastRunAt).toLocaleString("zh-CN") : "—"}
                   </td>
                   <td>
-                    <button
-                      onClick={() => toggleActive(s)}
-                      style={{
-                        padding: "4px 10px", borderRadius: 5, border: "1px solid",
-                        borderColor: s.isActive ? "#ef4444" : "#10b981",
-                        background: s.isActive ? "#fef2f2" : "#ecfdf5",
-                        color: s.isActive ? "#ef4444" : "#10b981",
-                        fontSize: 11, cursor: "pointer",
-                      }}
-                    >
+                    <button onClick={() => toggleActive(s)} className={`gh-btn-text gh-btn-sm`}
+                      style={{ color: s.isActive ? "#E64C4C" : "#30CF43" }}>
                       {s.isActive ? "停用" : "启用"}
                     </button>
                   </td>

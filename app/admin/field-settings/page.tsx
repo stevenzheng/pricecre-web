@@ -1,37 +1,20 @@
-// app/admin/field-settings/page.tsx — Indicator Field Manager
+// app/admin/field-settings/page.tsx — Ghost Admin Field Settings
 "use client";
 
 import { useState, useEffect } from "react";
 
 interface FieldMeta {
-  key: string;
-  label: string;
-  category: string;
-  isActive: boolean;
-  isPremium: boolean;
-  format: string;
+  key: string; label: string; category: string;
+  isActive: boolean; isPremium: boolean; format: string;
 }
 
 const CATEGORIES: Record<string, string> = {
-  core: "核心指标",
-  valuation: "估值指标",
-  lease: "租约质量",
-  office: "写字楼效率",
-  shops: "商业零售",
-  macro: "宏观合规",
-  dev: "投前建造",
-  ops: "运营效率",
-  exit: "投后退出",
-  economy: "经济政策",
-  social: "舆情社群",
-  industrial: "产业园",
-  retail: "零售生态",
-  migration: "企业迁入",
-  brand: "品牌选址",
-  culture: "文化艺术",
-  service: "物业品牌",
-  debt: "资本债务",
-  population: "人口统计",
+  core: "核心指标", valuation: "估值指标", lease: "租约质量",
+  office: "写字楼效率", shops: "商业零售", macro: "宏观合规",
+  dev: "投前建造", ops: "运营效率", exit: "投后退出",
+  economy: "经济政策", social: "舆情社群", industrial: "产业园",
+  retail: "零售生态", migration: "企业迁入", brand: "品牌选址",
+  culture: "文化艺术", service: "物业品牌", debt: "资本债务", population: "人口统计",
 };
 
 export default function FieldSettingsPage() {
@@ -41,85 +24,48 @@ export default function FieldSettingsPage() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    // Load from API — fallback to hardcoded 47 fields
-    fetch("/api/admin/field-settings")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.fields?.length) {
-          setFields(d.fields);
-        } else {
-          // Fallback to default 47-field set
-          setFields(getDefaultFields());
-        }
-      })
-      .catch(() => setFields(getDefaultFields()))
-      .finally(() => setLoading(false));
+    fetch("/api/admin/field-settings").then((r) => r.json()).then((d) => {
+      setFields(d.fields?.length ? d.fields : getDefaultFields());
+    }).catch(() => setFields(getDefaultFields())).finally(() => setLoading(false));
   }, []);
 
   const toggleField = (key: string) => {
-    setFields((prev) =>
-      prev.map((f) => (f.key === key ? { ...f, isActive: !f.isActive } : f))
-    );
+    setFields((prev) => prev.map((f) => (f.key === key ? { ...f, isActive: !f.isActive } : f)));
   };
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      await fetch("/api/admin/field-settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields }),
-      });
-    } catch {}
+    try { await fetch("/api/admin/field-settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields }) }); } catch {}
     setSaving(false);
   };
 
-  const filtered = filter === "all"
-    ? fields
-    : fields.filter((f) => f.isActive === (filter === "active"));
+  const filtered = filter === "all" ? fields : fields.filter((f) => f.isActive === (filter === "active"));
 
   return (
-    <div className="admin-content-inner">
-      <div className="admin-page-header">
-        <h1 className="admin-page-title">字段配置</h1>
-        <p className="admin-page-desc">
-          47 项精算指标的显示/隐藏控制 · {fields.filter((f) => f.isActive).length} 项启用
-        </p>
+    <div className="gh-content-inner">
+      <div className="gh-page-header">
+        <h1 className="gh-page-title">字段配置</h1>
+        <p className="gh-page-desc">47 项精算指标 · {fields.filter((f) => f.isActive).length} 项启用</p>
       </div>
 
-      <div style={{ marginBottom: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {["all", "active", "inactive"].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            style={{
-              padding: "6px 14px", borderRadius: 6, border: "1px solid",
-              borderColor: filter === s ? "#533afd" : "#e2e4ea",
-              background: filter === s ? "rgba(83,58,253,0.08)" : "#fff",
-              color: filter === s ? "#533afd" : "#64748d",
-              fontSize: 12, fontWeight: 500, cursor: "pointer",
-            }}
-          >
-            {s === "all" ? "全部" : s === "active" ? "已启用" : "已隐藏"}
-          </button>
-        ))}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            marginLeft: "auto", padding: "6px 16px", borderRadius: 6, border: "none",
-            background: saving ? "#cbd5e1" : "#533afd", color: "#fff", fontSize: 12, cursor: "pointer",
-          }}
-        >
+      <div className="gh-action-bar">
+        <div className="gh-filter-tabs">
+          {(["all", "active", "inactive"] as const).map((s) => (
+            <button key={s} className={`gh-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}>
+              {s === "all" ? "全部" : s === "active" ? "已启用" : "已隐藏"}
+            </button>
+          ))}
+        </div>
+        <button onClick={handleSave} disabled={saving} className="gh-btn-primary" style={{ fontSize: 13 }}>
           {saving ? "保存中..." : "保存配置"}
         </button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#64748d" }}>加载中...</div>
+        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="str-table">
+        <div className="gh-table-wrap">
+          <table className="gh-table">
             <thead>
               <tr>
                 <th style={{ width: 40 }}>#</th>
@@ -127,35 +73,24 @@ export default function FieldSettingsPage() {
                 <th>分类</th>
                 <th>格式</th>
                 <th style={{ width: 80 }}>状态</th>
-                <th style={{ width: 80 }}>操作</th>
+                <th style={{ width: 80 }} />
               </tr>
             </thead>
             <tbody>
               {filtered.map((f, i) => (
                 <tr key={f.key} style={{ opacity: f.isActive ? 1 : 0.5 }}>
-                  <td className="str-td-hint">{i + 1}</td>
-                  <td style={{ fontWeight: 400 }}>{f.label}</td>
-                  <td className="str-td-hint">{CATEGORIES[f.category] || f.category}</td>
-                  <td className="str-td-mono">{f.format}</td>
+                  <td className="gh-td-hint">{i + 1}</td>
+                  <td style={{ fontWeight: 600 }}>{f.label}</td>
+                  <td className="gh-td-hint">{CATEGORIES[f.category] || f.category}</td>
+                  <td className="gh-td-mono">{f.format}</td>
                   <td>
-                    <span style={{
-                      fontSize: 11, fontWeight: 500,
-                      color: f.isActive ? "#10b981" : "#ef4444",
-                    }}>
+                    <span className={`gh-badge ${f.isActive ? "gh-badge-success" : "gh-badge-danger"}`}>
                       {f.isActive ? "启用" : "隐藏"}
                     </span>
                   </td>
                   <td>
-                    <button
-                      onClick={() => toggleField(f.key)}
-                      style={{
-                        padding: "4px 10px", borderRadius: 5, border: "1px solid",
-                        borderColor: f.isActive ? "#ef4444" : "#10b981",
-                        background: f.isActive ? "#fef2f2" : "#ecfdf5",
-                        color: f.isActive ? "#ef4444" : "#10b981",
-                        fontSize: 11, cursor: "pointer",
-                      }}
-                    >
+                    <button onClick={() => toggleField(f.key)} className="gh-btn-text gh-btn-sm"
+                      style={{ color: f.isActive ? "#E64C4C" : "#30CF43" }}>
                       {f.isActive ? "隐藏" : "启用"}
                     </button>
                   </td>

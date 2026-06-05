@@ -122,6 +122,9 @@ export default function Home() {
       }
     } catch {}
   }, []);
+
+  // Restore user login state from localStorage
+  useEffect(() => {
     try {
       const stored = localStorage.getItem("pricecre_user");
       if (stored) {

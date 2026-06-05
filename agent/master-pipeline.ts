@@ -53,12 +53,12 @@ export class LocalAgentMasterOrchestrator {
   }
 
   private static async searchExaSentiment(projectName: string): Promise<{ corpus: string; results: any }> {
-    const EXA_API_KEY = process.env.EXA_API_KEY;
+    const EXA_API_KEY = process.env.EXASEARCH_API_KEY || process.env.EXA_API_KEY;
     const Exa = await import("exa-js").then((m) => m.Exa);
     const exa = new Exa(EXA_API_KEY || "");
 
     if (!EXA_API_KEY) {
-      console.warn("[Exa] EXA_API_KEY 未配置，跳过舆情扫描");
+      console.warn("[Exa] EXASEARCH_API_KEY 未配置，跳过舆情扫描");
       return { corpus: "", results: { results: [] } };
     }
 

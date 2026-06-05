@@ -61,6 +61,21 @@ const CITY_EN_TO_ZH: Record<string, string> = {
   hangzhou: "杭州", changsha: "长沙", xian: "西安",
 };
 
+const DISTRICT_EN_TO_ZH: Record<string, string> = {
+  lujiazui: "陆家嘴", jing_an: "静安", zhangjiang: "张江",
+  qiantan: "前滩", pudong: "浦东", huangpu: "黄浦",
+  xuhui: "徐汇", changning: "长宁", hongkou: "虹口",
+  yangpu: "杨浦", chaoyang: "朝阳", haidian: "海淀",
+  dongcheng: "东城", xicheng: "西城", nanshan: "南山",
+  futian: "福田", luohu: "罗湖", baoan: "宝安",
+  tianhe: "天河", yuexiu: "越秀", haizhu: "海珠",
+  xihu: "西湖", binjiang: "滨江", gusu: "姑苏",
+  suzhou_gongyeyuan: "苏州工业园区", jinjiang: "锦江",
+  wuhou: "武侯", gaoxin: "高新", yuelu: "岳麓",
+  furong: "芙蓉", yanta: "雁塔", weiyang: "未央",
+  all: "", _default: "",
+};
+
 const PROPERTY_TYPE_ZH: Record<PropertyType, string> = {
   OFFICE: "写字楼", SHOPS: "商铺", INDUSTRIAL: "产业园",
 };
@@ -83,7 +98,7 @@ function buildQueries(
 ): QueryTemplates {
   const cityZh = CITY_EN_TO_ZH[city] || city;
   const typeZh = PROPERTY_TYPE_ZH[propertyType];
-  const districtZh = district === "all" || district === "_default" ? "" : district;
+  const districtZh = DISTRICT_EN_TO_ZH[district] || district;
 
   const location = districtZh ? `${cityZh}${districtZh}` : cityZh;
 
@@ -328,10 +343,12 @@ export class TavilyScraper {
     maxResults?: number;
   }): Promise<RawScrapedPackage[]> {
     const { city, district, propertyType, maxResults = 10 } = params;
+    const districtZh = DISTRICT_EN_TO_ZH[district] || district;
+    const cityZh = CITY_EN_TO_ZH[city] || city;
     const queries = buildQueries(city, district, propertyType);
     const apiKey = getApiKey();
 
-    console.log(`[Tavily·爬取] ${CITY_EN_TO_ZH[city] || city}/${district} ${PROPERTY_TYPE_ZH[propertyType]}`);
+    console.log(`[Tavily·爬取] ${cityZh}/${districtZh} ${PROPERTY_TYPE_ZH[propertyType]}`);
     console.log(`  搜索词: "${queries.listing}"`);
 
     const result = await search({

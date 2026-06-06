@@ -245,68 +245,74 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Purchase Card */}
-      <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px", marginTop: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-          商业付费直通车
-        </div>
-        {!showPayment ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <button onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
-              style={{ padding: "10px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
-              查看权益 × 50次 · ¥99.00
-            </button>
-            <button onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }}
-              style={{ padding: "10px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#404040", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
-              不限次包月 · ¥299.00/月
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div style={{ padding: "10px 12px", background: "#F7F7F7", borderRadius: 8, marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{paymentProduct === "monthly" ? "不限次包月" : "查看权益 × 50 次"}</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "#171717" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>合计</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color: "#0070F3" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-              </div>
+          {/* Purchase Card */}
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+              商业付费直通车
             </div>
-            <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-              {(["wechat","alipay"] as const).map(m => (
-                <button key={m} onClick={() => setPaymentMethod(m)}
-                  style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: paymentMethod === m ? "2px solid #0070F3" : "1px solid #E5E5E5", background: paymentMethod === m ? "rgba(0,112,243,0.04)" : "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", color: m === "wechat" ? "#07C160" : "#1677FF" }}>
-                  {m === "wechat" ? "微信支付" : "支付宝"}
+            {!showPayment ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
+                  style={{ padding: "10px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  查看权益 × 50次 · ¥99.00
                 </button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => setShowPayment(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>返回</button>
-              <button onClick={async () => {
-                setBuying(true);
-                try {
-                  const amount = paymentProduct === "monthly" ? 299 : 99;
-                  const res = await fetch("/api/payment/test-buy", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: form.email, product: paymentProduct, amount, paymentMethod }),
-                  });
-                  const d = await res.json();
-                  if (d.success) { setShowPayment(false); showModal("支付成功！额度已到账"); }
-                  else showModal(d.error || "支付失败");
-                } catch { showModal("网络错误"); }
-                setBuying(false);
-              }} disabled={buying}
-                style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: buying ? "default" : "pointer", opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
-                {buying ? "处理中..." : `确认支付`}
-              </button>
-            </div>
+                <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", textAlign: "center", marginTop: -4, marginBottom: 2 }}>
+                  一次性购买 50 次资产数据查看额度，不限时长，用完为止
+                </div>
+                <button onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }}
+                  style={{ padding: "10px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#404040", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  不限次包月 · ¥299.00/月
+                </button>
+                <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", textAlign: "center", marginTop: -4 }}>
+                  30 天内不限次数查看资产数据及 AI 分析，到期自动取消
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ padding: "10px 12px", background: "#F7F7F7", borderRadius: 8, marginBottom: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{paymentProduct === "monthly" ? "不限次包月" : "查看权益 × 50 次"}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "#171717" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>合计</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color: "#0070F3" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  {(["wechat","alipay"] as const).map(m => (
+                    <button key={m} onClick={() => setPaymentMethod(m)}
+                      style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: paymentMethod === m ? "2px solid #0070F3" : "1px solid #E5E5E5", background: paymentMethod === m ? "rgba(0,112,243,0.04)" : "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", color: m === "wechat" ? "#07C160" : "#1677FF" }}>
+                      {m === "wechat" ? "微信支付" : "支付宝"}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => setShowPayment(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>返回</button>
+                  <button onClick={async () => {
+                    setBuying(true);
+                    try {
+                      const amount = paymentProduct === "monthly" ? 299 : 99;
+                      const res = await fetch("/api/payment/test-buy", {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: form.email, product: paymentProduct, amount, paymentMethod }),
+                      });
+                      const d = await res.json();
+                      if (d.success) { setShowPayment(false); showModal("支付成功！额度已到账"); }
+                      else showModal(d.error || "支付失败");
+                    } catch { showModal("网络错误"); }
+                    setBuying(false);
+                  }} disabled={buying}
+                    style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: buying ? "default" : "pointer", opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                    {buying ? "处理中..." : `确认支付`}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

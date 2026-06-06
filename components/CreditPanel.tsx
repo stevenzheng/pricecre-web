@@ -136,7 +136,30 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
       </div>
 
       {/* ── CTA ── */}
-      <div style={{ display: "flex", gap: 8, padding: "12px 16px", borderTop: "1px solid #E5E5E5" }}>
+      <div style={{ display: "flex", gap: 8, padding: "12px 16px 8px", borderTop: "1px solid #E5E5E5" }}>
+        {[
+          { label: "查看订单", icon: "cart", color: "#7C3AED", action: "orders" },
+          { label: "已解锁资产", icon: "unlock", color: "#0070F3", action: "assets" },
+          { label: "对话记录", icon: "chat", color: "#2563EB", action: "chats" },
+        ].map((btn) => (
+          <button
+            key={btn.label}
+            onClick={() => {
+              document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action }));
+              onClose?.();
+            }}
+            style={{
+              flex: 1, padding: "6px 0", borderRadius: 6, border: "1px solid #E5E5E5",
+              background: "#FFF", color: btn.color, fontSize: 12, fontWeight: 500,
+              fontFamily: "var(--font-sans)", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+            }}
+          >
+            <Icon type={btn.icon} size={12} /> {btn.label}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 8, padding: "8px 16px 12px", borderTop: "1px solid #F0F0F0" }}>
         <button
           onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}
           style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}

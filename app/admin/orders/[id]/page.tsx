@@ -37,8 +37,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => { fetchOrder(); }, [id]);
 
   const handleAction = async (action: string, extra?: Record<string, any>) => {
+    if (!order) return;
     if (action === "refund" && !showRefundModal) {
-      setRefundAmount(String(order.amount));
+      setRefundAmount(order ? String(order.amount) : "0");
       setRefundReason("");
       setShowRefundModal(true);
       return;

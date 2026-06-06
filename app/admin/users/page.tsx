@@ -390,6 +390,7 @@ export default function UsersPage() {
                 <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: 600, borderBottom: "1px solid #E5E5E5" }}>消耗</th>
                 <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: 600, borderBottom: "1px solid #E5E5E5" }}>余额</th>
                 <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: 600, borderBottom: "1px solid #E5E5E5" }}>备注</th>
+                <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: 600, borderBottom: "1px solid #E5E5E5", width: 60 }}>操作</th>
               </tr></thead>
               <tbody>
                 {ud.chatLogs.map((c: any, i: number) => (
@@ -397,7 +398,19 @@ export default function UsersPage() {
                     <td style={{ padding: "6px 10px", color: "#A3A3A3", whiteSpace: "nowrap", fontSize: 11 }}>{new Date(c.createdAt).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}</td>
                     <td style={{ padding: "6px 10px", textAlign: "right", fontFamily: "var(--font-geist-mono)", color: "#EE0000" }}>-{Math.abs(c.amount)}</td>
                     <td style={{ padding: "6px 10px", textAlign: "right", fontFamily: "var(--font-geist-mono)", color: "#171717" }}>{c.balance}</td>
-                    <td style={{ padding: "6px 10px", color: "#737373", fontSize: 11, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.note || "—"}</td>
+                    <td style={{ padding: "6px 10px", color: "#737373", fontSize: 11, maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.note}>{c.note || "—"}</td>
+                    <td style={{ padding: "6px 10px", textAlign: "center" }}>
+                      <button
+                        onClick={() => {
+                          const text = `用户: ${detailModal!.email}\n时间: ${new Date(c.createdAt).toLocaleString("zh-CN")}\n消耗: ${Math.abs(c.amount)} 条\n备注: ${c.note || "AI对话"}`;
+                          navigator.clipboard.writeText(text).then(() => setMsg("已复制对话记录"));
+                        }}
+                        style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 10, color: "#737373", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+                        title="复制记录以便存入知识库"
+                      >
+                        复制
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

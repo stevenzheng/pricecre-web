@@ -1,4 +1,55 @@
 "use client";
+/* ---- 兑换码内联组件 ---- */
+function RedeemSection() {
+  const [code, setCode] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [msg, setMsg] = useState("");
+
+  const handleActivate = async () => {
+    if (code.length !== 6) { setMsg("请输入6位激活码"); setStatus("error"); return; }
+    setStatus("loading");
+    let userEmail = "";
+    try { const stored = localStorage.getItem("pricecre_user"); if (stored) userEmail = JSON.parse(stored).email || ""; } catch {}
+    try {
+      const res = await fetch("/api/data/redeem", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, email: userEmail }),
+      });
+      const d = await res.json();
+      if (d.success) { setMsg(`激活成功！${d.credits} 次查询权益已到账`); setStatus("success"); setCode(""); }
+      else { setMsg(d.error || "激活失败"); setStatus("error"); }
+    } catch { setMsg("网络错误"); setStatus("error"); }
+  };
+
+  return (
+    <div className="card p-3">
+      <div className="section-title">激活兑换码</div>
+      <div className="flex gap-2">
+        <input
+          type="text" placeholder="输入 6 位兑换码"
+          value={code} onChange={e => { setCode(e.target.value.toUpperCase()); setStatus("idle"); }}
+          className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6}
+          onKeyDown={e => { if (e.key === "Enter") handleActivate(); }}
+        />
+        <button
+          className="btn-primary text-sm px-5 flex-shrink-0"
+          onClick={handleActivate}
+          disabled={status === "loading"}
+        >
+          {status === "loading" ? "验证中..." : "激活"}
+        </button>
+      </div>
+      {status !== "idle" && (
+        <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)",
+          background: status === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)",
+          color: status === "success" ? "#0070F3" : "#EE0000" }}>
+          {msg}
+        </div>
+      )}
+    </div>
+  );
+}
+
 import { showModal } from "@/components/Toast";
 import CreditPanel from "@/components/CreditPanel";
 
@@ -317,13 +368,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
       </div>
 
       {/* 激活兑换码 */}
-      <div className="card p-3">
-        <div className="section-title">激活兑换码</div>
-        <div className="flex gap-2">
-          <input type="text" placeholder="输入 6 位兑换码" className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6} />
-          <button className="btn-primary text-sm px-5 flex-shrink-0" onClick={() => showModal("兑换码已激活")}>激活</button>
-        </div>
-      </div>
+      <RedeemSection />
     </div>
   );
 

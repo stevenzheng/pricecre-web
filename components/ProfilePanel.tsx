@@ -30,6 +30,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
     try { return localStorage.getItem("pricecre_username") || "用户"; } catch { return "用户"; }
   });
   const [editingName, setEditingName] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const saveUsername = (name: string) => {
     setUsername(name);
@@ -287,8 +288,13 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               <div style={{ ...caption, fontSize: 11, marginBottom: 4 }}>好友注册后双方各得 10 次免费查看</div>
               <div style={{ display: "flex", gap: 6 }}>
                 <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
-                <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); }}
-                  style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
+                <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                  style={{
+                    padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3",
+                    background: copied ? "#0070F3" : "#FFF", color: copied ? "#FFF" : "#0070F3",
+                    fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)",
+                    transition: "all 0.2s ease",
+                  }}>{copied ? "已复制" : "复制"}</button>
               </div>
             </div>
           </SectionCard>

@@ -6,7 +6,8 @@ interface CreditPanelProps {
   credits: { shared: number; referral: number; purchased: number };
   chatTokens: { total: number; used: number };
   creditStats: { viewCount: number; unlockCount: number; conversations: number };
-  onClose?: () => void; // optional: in modal mode
+  userEmail?: string | null;
+  onClose?: () => void;
 }
 
 // Vercel Design System: 14/12/11 sizing, Geist Mono fw:300 numbers, -0.03em
@@ -34,9 +35,10 @@ const Icon = ({ type, size = 16 }: { type: string; size?: number }) => {
   }
 };
 
-export default function CreditPanel({ credits, chatTokens, creditStats, onClose }: CreditPanelProps) {
+export default function CreditPanel({ credits, chatTokens, creditStats, userEmail, onClose }: CreditPanelProps) {
   const total = credits.shared + credits.referral + credits.purchased;
   const isExhausted = total === 0;
+  const isLoggedIn = !!userEmail;
   const isLow = total <= 3 && total > 0;
   const remainingChat = Math.max(0, chatTokens.total - chatTokens.used);
 
@@ -50,7 +52,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
       <div style={{ padding: "8px 12px", display: "flex", alignItems: "center", gap: 6, background: isExhausted ? "rgba(238,0,0,0.03)" : isLow ? "rgba(245,166,35,0.05)" : "rgba(0,112,243,0.03)", borderRadius: "12px 12px 0 0" }}>
         <Icon type={isExhausted ? "alert" : isLow ? "alert" : "check"} size={12} />
         <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>
-          {isExhausted ? "额度已用完" : isLow ? `剩余 ${total} 次 · 即将耗尽` : `可用 ${total} 次额度`}
+          {!isLoggedIn ? "请先登录" : isExhausted ? "额度已用完" : isLow ? `剩余 ${total} 次 · 即将耗尽` : `可用 ${total} 次额度`}
           {isExhausted && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: "#A3A3A3" }}>请购买或邀请好友获取</span>}
         </span>
         {onClose && (
@@ -104,7 +106,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
           {[
-            { label: "查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
+            { label: "资产卡权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
             { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
             { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
             { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
@@ -121,7 +123,6 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
       <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderTop: "1px solid #E5E5E5" }}>
         {[
           { label: "查看订单", icon: "cart", color: "#7C3AED", action: "orders" },
-          { label: "已解锁资产", icon: "unlock", color: "#0070F3", action: "assets" },
           { label: "对话记录", icon: "chat", color: "#2563EB", action: "chats" },
         ].map((btn) => (
           <button key={btn.label} onClick={() => { document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action })); onClose?.(); }}

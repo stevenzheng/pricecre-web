@@ -53,6 +53,8 @@ export default function Home() {
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
   const [wechatCardData, setWechatCardData] = useState<any>(null);
   const [aiAnalysisData, setAiAnalysisData] = useState<any>(null);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   useEffect(() => {
     const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
@@ -191,6 +193,25 @@ export default function Home() {
       } catch {}
     };
     fetchQuota();
+  }, [userEmail]);
+
+  // Handle CreditPanel quick actions
+  useEffect(() => {
+    const h = (e: Event) => {
+      const action = (e as CustomEvent).detail;
+      if (action === "chats" && userEmail) {
+        fetch(`/api/admin/user-detail?email=${encodeURIComponent(userEmail)}`).then(r => r.json()).then(d => {
+          setChatHistory(d.chatLogs || []);
+          setShowChatHistory(true);
+        }).catch(() => {});
+      } else if (action === "orders") {
+        window.open("/admin/orders", "_blank");
+      } else if (action === "assets") {
+        setMobileTab("market");
+      }
+    };
+    document.addEventListener("credit-panel-action", h);
+    return () => document.removeEventListener("credit-panel-action", h);
   }, [userEmail]);
 
   const totalCredits = credits.shared + credits.referral + credits.purchased;
@@ -887,6 +908,39 @@ export default function Home() {
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
       {chatProp && <PropertyChat property={chatProp} email={userEmail || undefined} onClose={() => setChatProp(null)} />}
+
+      {/* Chat History Panel */}
+      {showChatHistory && (
+        <>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200 }} onClick={() => setShowChatHistory(false)} />
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "#FFF", borderRadius: 12, width: 480, maxWidth: "92vw", maxHeight: "70vh", overflow: "auto", zIndex: 201, border: "1px solid #E5E5E5", boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #E5E5E5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, color: "#171717", margin: 0, fontFamily: "var(--font-sans)" }}>AI 对话记录</h3>
+              <button onClick={() => setShowChatHistory(false)} style={{ padding: "2px 8px", border: "none", background: "none", fontSize: 18, color: "#A3A3A3", cursor: "pointer" }}>✕</button>
+            </div>
+            <div style={{ padding: 12 }}>
+              {chatHistory.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: "55vh", overflow: "auto" }}>
+                  {chatHistory.map((c: any, i: number) => (
+                    <div key={i} style={{ padding: "8px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>
+                          {new Date(c.createdAt).toLocaleString("zh-CN")}
+                        </span>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-geist-mono)", color: "#EE0000" }}>-{Math.abs(c.amount)} 条</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>{c.note || "AI 对话消费"}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: 20, color: "#A3A3A3", fontSize: 12 }}>暂无对话记录</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

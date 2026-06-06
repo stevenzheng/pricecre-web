@@ -1,8 +1,8 @@
 "use client";
 
 interface MobileNavProps {
-  activeTab: "market" | "map" | "share" | "profile";
-  onTabChange: (tab: "market" | "map" | "share" | "profile") => void;
+  activeTab: "market" | "map" | "share" | "profile" | "orders";
+  onTabChange: (tab: "market" | "map" | "share" | "profile" | "orders") => void;
 }
 
 const tabs = [

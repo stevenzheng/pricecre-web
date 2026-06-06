@@ -48,7 +48,7 @@ export default function Home() {
 
   // UI State
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState(() => {
+  const [mobileTab, setMobileTab] = useState<"market" | "map" | "share" | "profile" | "orders">(() => {
     try { return (sessionStorage.getItem("pricecre_tab") as any) || "market"; }
     catch { return "market"; }
   });
@@ -84,7 +84,7 @@ export default function Home() {
   useEffect(() => {
     const handler = (e: Event) => {
       const tab = (e as CustomEvent).detail;
-      if (["map", "share", "market", "profile"].includes(tab)) setMobileTab(tab as "map" | "share" | "market" | "profile");
+      if (["map", "share", "market", "profile", "orders"].includes(tab)) setMobileTab(tab as any);
     };
     document.addEventListener("nav-to-tab", handler);
     return () => document.removeEventListener("nav-to-tab", handler);
@@ -226,6 +226,10 @@ export default function Home() {
         }
         if (ud && !ud.error) {
           setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.viewCount || 0, conversations: ud.totalConversations || 0 });
+          // Restore previously unlocked property IDs from server history
+          if (ud.viewLogs?.length) {
+            setUnlockedIds(new Set(ud.viewLogs.map((v: any) => v.propertyId).filter(Boolean)));
+          }
         }
       } catch {}
     };
@@ -241,11 +245,13 @@ export default function Home() {
           setChatHistory(d.chatLogs || []);
           setShowChatHistory(true);
         }).catch(() => {});
-      } else if (action === "orders" && userEmail) {
-        fetch(`/api/admin/user-detail?email=${encodeURIComponent(userEmail)}`).then(r => r.json()).then(d => {
-          setOrderHistory(d.orders || []);
-          setShowOrderHistory(true);
-        }).catch(() => {});
+      } else if (action === "orders") {
+        if (userEmail) {
+          fetch(`/api/admin/user-detail?email=${encodeURIComponent(userEmail)}`).then(r => r.json()).then(d => {
+            setOrderHistory(d.orders || []);
+            setMobileTab("orders");
+          }).catch(() => {});
+        }
       } else if (action === "assets") {
         setMobileTab("market");
       }
@@ -464,7 +470,7 @@ export default function Home() {
   }, []);
 
   const handleTabChange = useCallback(
-    (tab: "market" | "map" | "share" | "profile") => {
+    (tab: "market" | "map" | "share" | "profile" | "orders") => {
       setMobileTab(tab);
       try { sessionStorage.setItem("pricecre_tab", tab); } catch {}
       if (tab === "market") setFocusedPropertyId(null);
@@ -929,6 +935,47 @@ export default function Home() {
 
         {/* Profile Tab */}
         {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} chatTokens={chatTokens} creditStats={creditStats} userEmail={userEmail} />}
+
+        {/* Order History Page */}
+        {mobileTab === "orders" && (
+          <div className="max-w-4xl mx-auto px-4 py-6">
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 16 }}>我的订单</h2>
+            {orderHistory.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #E5E5E5", textAlign: "left", background: "#FAFAFA" }}>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>订单编号</th>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>商品</th>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>金额</th>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>支付方式</th>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>状态</th>
+                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>时间</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderHistory.map((o: any, i: number) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #F0F0F0" }}>
+                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: 12, color: "#171717" }}>{o.orderNo || "—"}</td>
+                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", color: "#404040" }}>{o.product === "monthly" ? "不限次包月" : o.product === "ai-chat-100" ? "AI对话×100条" : "查看权益×50次"}</td>
+                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "#0070F3" }}>¥{Number(o.amount || 0).toFixed(2)}</td>
+                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", color: "#404040" }}>{o.paymentMethod === "wechat" ? "微信支付" : o.paymentMethod === "alipay" ? "支付宝" : "—"}</td>
+                      <td style={{ padding: "10px 12px" }}>
+                        <span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 12, fontWeight: 500,
+                          background: o.status === 1 ? "rgba(16,185,129,0.1)" : o.status === 0 ? "rgba(245,166,35,0.1)" : "rgba(238,0,0,0.06)",
+                          color: o.status === 1 ? "#10B981" : o.status === 0 ? "#F5A623" : "#EE0000",
+                          fontFamily: "var(--font-sans)",
+                        }}>{o.status === 1 ? "已支付" : o.status === 0 ? "待支付" : o.status === 3 ? "已退款" : "—"}</span>
+                      </td>
+                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", fontSize: 12, color: "#A3A3A3" }}>{new Date(o.createdAt).toLocaleString("zh-CN")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: "center", padding: 40, color: "#A3A3A3", fontSize: 14 }}>暂无订单记录</div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* ====== Footer ====== */}

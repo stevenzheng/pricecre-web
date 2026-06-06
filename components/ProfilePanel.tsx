@@ -262,6 +262,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
                   一次性购买 50 次资产数据查看额度，不限时长，用完为止
                 </div>
                 <button onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }}
+                  className={paymentProduct === "monthly" && showPayment ? "" : "btn-live-glow"}
                   style={{ padding: "10px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#404040", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
                   不限次包月 · ¥299.00/月
                 </button>
@@ -312,6 +313,50 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               </div>
             )}
           </div>
+
+          {/* AI 对话购买 */}
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              AI 对话次数
+            </div>
+            <button onClick={async () => {
+              setBuying(true);
+              try {
+                const res = await fetch("/api/payment/test-buy", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: form.email, product: "ai-chat-100", amount: 10, paymentMethod: "wechat" }),
+                });
+                const d = await res.json();
+                if (d.success) showModal("AI对话100条已到账！");
+                else showModal(d.error || "购买失败");
+              } catch { showModal("网络错误"); }
+              setBuying(false);
+            }} disabled={buying}
+              style={{
+                width: "100%", padding: "10px 0", borderRadius: 8, border: "none",
+                background: "linear-gradient(135deg, #2563EB 0%, #EC4899 100%)",
+                color: "#FFF", fontSize: 13, fontWeight: 500, cursor: buying ? "default" : "pointer",
+                opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)",
+              }}>
+              ¥10 · 100条对话
+            </button>
+            <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", textAlign: "center", marginTop: 6 }}>
+              100 条 AI 助理对话额度，私密咨询资产行情与精算分析
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes liveGlow {
+              0%, 100% { box-shadow: 0 0 4px rgba(239,68,68,0.4), 0 0 8px rgba(239,68,68,0.2); }
+              50% { box-shadow: 0 0 8px rgba(239,68,68,0.6), 0 0 16px rgba(239,68,68,0.4); }
+            }
+            .btn-live-glow {
+              animation: liveGlow 2s ease-in-out infinite;
+              border-color: #EF4444 !important;
+              color: #EF4444 !important;
+            }
+          `}</style>
         </div>
       </div>
     </div>

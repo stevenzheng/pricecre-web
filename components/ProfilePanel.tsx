@@ -297,7 +297,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
       <div className="card p-3">
         <div className="section-title">分享转发获得查询权益</div>
         <div className="mb-3 text-center">
-          <div className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权权益</div>
+          <div style={{ fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", color: "var(--text-muted)", marginBottom: 8 }}>历史累计已获取确权权益</div>
           <div className="flex items-center justify-center gap-2">
             <span className="text-xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>0</span>
             <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
@@ -497,10 +497,10 @@ export default function ProfilePanel({ credits, totalCredits }: {
         <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "var(--panel)" }}>
           <div className="w-3 h-3 rounded-full" style={{ background: activated && quota > 0 ? "var(--positive)" : "var(--text-hint)" }} />
           <div>
-            <div className="text-[13px] font-medium" style={{ color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
+            <div style={{ fontSize: 14, fontWeight: 400, fontFamily: "var(--font-sans)", color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
               {!activated ? "尚未激活权益" : quota > 0 ? `可用权益：${quota} 次` : "权益已用完"}
             </div>
-            <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{!activated ? "提交数据或购买权益即可激活" : ""}</div>
+            <div style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-sans)", color: "var(--text-muted)", marginTop: 2 }}>{!activated ? "提交数据或购买权益即可激活" : ""}</div>
           </div>
         </div>
       </div>
@@ -509,8 +509,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
         <div className="grid grid-cols-3 gap-3">
           {[{ label: "累计提报", value: 0 }, { label: "累计购买", value: 0 }, { label: "已确权", value: viewHistory.length }].map((s) => (
             <div key={s.label} className="text-center py-2 rounded-lg" style={{ background: "var(--panel)" }}>
-              <div className="text-base font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>{s.value}</div>
-              <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{s.label}</div>
+              <div style={{ fontSize: 20, fontWeight: 300, color: "#171717", fontFamily: "var(--font-mono)", letterSpacing: "-0.03em" }}>{s.value}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>

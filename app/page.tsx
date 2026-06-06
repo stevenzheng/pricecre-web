@@ -534,7 +534,7 @@ export default function Home() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
-              <span className="font-semibold" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>
+              <span style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)", fontWeight: 300, fontSize: 14, letterSpacing: "-0.03em" }}>
                 {totalCredits}
               </span>
             </button>

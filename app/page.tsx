@@ -455,7 +455,7 @@ export default function Home() {
     } catch {
       showModal("网络异常，请稍后重试");
     }
-  }, []);
+  }, [userEmail]); // Must depend on userEmail for closure to update after login
 
   const handleCityChange = useCallback((city: string) => {
     setActiveCity(city);

@@ -545,7 +545,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
       {publicCards}
 
       <div className="space-y-2">
-        {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实交易</button>}
+        {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提报交易</button>}
         {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买权益</button>}
         <button
           className="btn-secondary w-full text-xs"

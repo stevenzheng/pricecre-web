@@ -56,7 +56,7 @@ export const zh = {
   shareYuanPM: "元/㎡",
   shareProof: "上传真实成交凭证",
   shareEmail: "注册邮箱",
-  shareSubmitBtn: "提交真实成交数据",
+  shareSubmitBtn: "提报真实成交数据",
   shareRedeem: "激活兑换码",
   shareRedeemPlaceholder: "输入 6 位兑换码",
   shareRedeemBtn: "激活",

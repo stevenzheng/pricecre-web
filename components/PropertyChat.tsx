@@ -21,7 +21,7 @@ function renderContent(text: string) {
   });
 }
 
-export default function PropertyChat({ property, onClose }: { property: PropertyContext; onClose: () => void }) {
+export default function PropertyChat({ property, email, onClose }: { property: PropertyContext; email?: string; onClose: () => void }) {
   const [messages, setMessages] = useState<Msg[]>([{
     role: "assistant",
     content: `嗨！我是 **${property.projectName}** 的 AI 助理 👋
@@ -109,7 +109,7 @@ export default function PropertyChat({ property, onClose }: { property: Property
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: withUser, property }),
+        body: JSON.stringify({ messages: withUser, property, email }),
       });
       const d = await res.json();
       setMessages(prev => [...prev, { role: "assistant", content: d.content || "无响应" }]);

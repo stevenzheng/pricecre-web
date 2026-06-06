@@ -182,7 +182,7 @@ export default function ShareCenter() {
               <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>数据核准后权益自动到账 · 也可手动输入兑换码激活</div>
             </div>
           ) : (
-            <button type="submit" className="btn-primary w-full text-sm">提交真实成交数据</button>
+            <button type="submit" className="btn-primary w-full text-sm">提报真实成交数据</button>
           )}
           {!submitted && (
             <p className="text-[10px] text-center leading-relaxed px-2" style={{ color: "var(--text-hint)" }}>

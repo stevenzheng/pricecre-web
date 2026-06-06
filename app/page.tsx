@@ -886,7 +886,7 @@ export default function Home() {
       <Modal />
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
-      {chatProp && <PropertyChat property={chatProp} onClose={() => setChatProp(null)} />}
+      {chatProp && <PropertyChat property={chatProp} email={userEmail || undefined} onClose={() => setChatProp(null)} />}
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

@@ -1,5 +1,6 @@
-// app/api/ai/chat/route.ts — Asset AI Chat (OpenAI-compatible, natural conversation)
+// app/api/ai/chat/route.ts — Asset AI Chat (server-side token consumption)
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -15,7 +16,38 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json() as any;
-    const { messages, property } = body;
+    const { messages, property, email } = body;
+
+    // Server-side token consumption
+    if (email) {
+      let token = await prisma.userChatToken.findUnique({ where: { email } });
+      if (!token) {
+        // New user: give default 100 tokens
+        token = await prisma.userChatToken.create({ data: { email, tokens: 100, totalUsed: 0 } });
+      }
+
+      const remaining = token.tokens - token.totalUsed;
+      if (remaining <= 0) {
+        return NextResponse.json({ role: "assistant", content: "您的 AI 对话额度已用完，请联系管理员或购买额度。" }, { status: 200 });
+      }
+
+      // Consume 1 token
+      await prisma.userChatToken.update({
+        where: { email },
+        data: { totalUsed: { increment: 1 } },
+      });
+
+      // Audit log
+      await prisma.creditAuditLog.create({
+        data: {
+          email,
+          type: "consume_chat",
+          amount: -1,
+          balance: token.tokens - token.totalUsed - 1,
+          note: `AI对话消费`,
+        },
+      });
+    }
 
     const indicators = (property?.indicators || []).filter((i: any) => i.value && i.value !== "undefined" && i.value !== "null");
     const kv = indicators.map((i: any) => `- ${i.label}: ${i.value}`).join("\n");

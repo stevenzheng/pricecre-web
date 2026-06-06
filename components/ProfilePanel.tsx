@@ -26,6 +26,16 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
+  const [username, setUsername] = useState(() => {
+    try { return localStorage.getItem("pricecre_username") || "用户"; } catch { return "用户"; }
+  });
+  const [editingName, setEditingName] = useState(false);
+
+  const saveUsername = (name: string) => {
+    setUsername(name);
+    try { localStorage.setItem("pricecre_username", name); } catch {}
+    setEditingName(false);
+  };
 
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -152,17 +162,6 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   }
 
   // ── Logged-in Desktop Layout ──
-  const [username, setUsername] = useState(() => {
-    try { return localStorage.getItem("pricecre_username") || "用户"; } catch { return "用户"; }
-  });
-  const [editingName, setEditingName] = useState(false);
-
-  const saveUsername = (name: string) => {
-    setUsername(name);
-    try { localStorage.setItem("pricecre_username", name); } catch {}
-    setEditingName(false);
-  };
-
   return (
     <div style={{ padding: "16px", maxWidth: 740, margin: "0 auto" }}>
       {/* User header */}

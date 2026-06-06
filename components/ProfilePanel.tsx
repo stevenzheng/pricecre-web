@@ -258,7 +258,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
         {/* 裂变邀约 */}
         <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 6 }}>裂变邀约</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginBottom: 8, fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
+          <div style={{ fontSize: 11, color: "#A3A3A3", marginBottom: 8, fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
             pricecre.com/r/{referralCode}
           </div>
           <button onClick={() => {

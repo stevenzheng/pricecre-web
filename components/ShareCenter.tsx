@@ -68,7 +68,7 @@ export default function ShareCenter() {
       const res = await fetch("/api/payment/test-buy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: "single", amount: 99 }),
+        body: JSON.stringify({ email: formData.email, product: "single", amount: 99, paymentMethod }),
       });
       const data = await res.json();
       if (data.success) {

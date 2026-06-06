@@ -179,15 +179,15 @@ export default function ProfilePanel({ credits, totalCredits }: {
             <div className="p-3 rounded-lg" style={{ background: "var(--panel)" }}>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>订单明细</span>
-                <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>1 项</span>
+                <span style={{ fontSize: 11, color: "var(--text-hint)", fontWeight: 500 }}>1 项</span>
               </div>
-              <div className="flex justify-between items-center text-xs mb-1" style={{ color: "var(--text-muted)" }}>
+              <div className="flex justify-between items-center mb-1" style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400 }}>
                 <span>{paymentProduct === "monthly" ? "不限次包月订阅" : "资产查询权益 × 50次"}</span>
-                <span className="font-mono font-medium" style={{ color: "var(--text)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: "var(--text)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
               </div>
               <div className="border-t mt-2 pt-2 flex justify-between items-center" style={{ borderColor: "var(--line)" }}>
-                <span className="text-xs font-semibold" style={{ color: "var(--text-strong)" }}>合计</span>
-                <span className="text-sm font-bold font-mono" style={{ color: "var(--accent)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-strong)" }}>合计</span>
+                <span style={{ fontSize: 14, fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--accent)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
               </div>
             </div>
 
@@ -208,8 +208,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M8.69 3.46c-4.15 0-7.52 2.73-7.52 6.1 0 1.86.98 3.53 2.5 4.66l-.63 2.1 2.43-1.23c.96.29 2.02.45 3.14.45.37 0 .74-.02 1.1-.06a5.72 5.72 0 01-.18-1.46c0-3.07 3.02-5.57 6.75-5.57.3 0 .6.02.88.05C17.16 6.23 13.37 3.46 8.69 3.46z"/><path d="M17.35 9.72c-3.4 0-6.16 1.86-6.16 4.16 0 2.3 2.76 4.16 6.16 4.16.25 0 .5-.02.74-.04v.01c.94.3 2.63 1.01 2.63 1.01l-.54-1.89c1.2-.88 1.9-2.04 1.9-3.29 0-2.26-2.76-4.12-6.73-4.12z"/></svg>
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>微信支付</div>
-                  <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>WeChat Pay · 扫码即付</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-strong)" }}>微信支付</div>
+                  <div style={{ fontSize: 11, fontWeight: 400, color: "var(--text-hint)" }}>WeChat Pay · 扫码即付</div>
                 </div>
                 {paymentMethod === "wechat" && (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
@@ -229,8 +229,8 @@ export default function ProfilePanel({ credits, totalCredits }: {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9V7h2v6zm4 4h-2v-2h2v2zm0-6h-2V7h2v4z"/></svg>
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>支付宝</div>
-                  <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>Alipay · 安全支付</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-strong)" }}>支付宝</div>
+                  <div style={{ fontSize: 11, fontWeight: 400, color: "var(--text-hint)" }}>Alipay · 安全支付</div>
                 </div>
                 {paymentMethod === "alipay" && (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
@@ -259,7 +259,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
                     const res = await fetch("/api/payment/test-buy", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ product, amount, method: paymentMethod }),
+                      body: JSON.stringify({ email: form.email, product, amount, paymentMethod: paymentMethod }),
                     });
                     const data = await res.json();
                     if (data.success) {

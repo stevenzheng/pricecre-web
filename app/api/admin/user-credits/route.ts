@@ -17,7 +17,13 @@ export async function GET(request: Request) {
   if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
 
   let uc = await prisma.userCredit.findUnique({ where: { email } });
-  if (!uc) uc = await prisma.userCredit.create({ data: { email, referralCredits: 10, purchasedCredits: 0, totalUsed: 0 } });
+  if (!uc) {
+    // 从 legacy User 迁移初始值
+    const user = await prisma.user.findUnique({ where: { email }, select: { referralViewCount: true, purchasedViewCount: true } });
+    const referralVal = user?.referralViewCount ?? 10;
+    const purchasedVal = user?.purchasedViewCount ?? 0;
+    uc = await prisma.userCredit.create({ data: { email, referralCredits: referralVal, purchasedCredits: purchasedVal, totalUsed: 0 } });
+  }
 
   return NextResponse.json({
     email: uc.email,
@@ -36,7 +42,12 @@ export async function POST(request: Request) {
     if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
 
     let uc = await prisma.userCredit.findUnique({ where: { email } });
-    if (!uc) uc = await prisma.userCredit.create({ data: { email, referralCredits: 10 } });
+    if (!uc) {
+      const user = await prisma.user.findUnique({ where: { email }, select: { referralViewCount: true, purchasedViewCount: true } });
+      const referralVal = user?.referralViewCount ?? 10;
+      const purchasedVal = user?.purchasedViewCount ?? 0;
+      uc = await prisma.userCredit.create({ data: { email, referralCredits: referralVal, purchasedCredits: purchasedVal } });
+    }
 
     if (setCredits != null) {
       const oldTotal = uc.referralCredits + uc.purchasedCredits;

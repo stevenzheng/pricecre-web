@@ -149,7 +149,9 @@ export default function UsersPage() {
             const isExpanded = expandedUser === u.id;
             const cr = u.email ? userCredits[u.email] : null;
             const tr = u.email ? userTokens[u.email] : null;
-            const totalCredits = (cr?.referralCredits || 0) + (cr?.purchasedCredits || 0);
+            const totalCredits = cr 
+              ? ((cr.referralCredits || 0) + (cr.purchasedCredits || 0))
+              : (u.referralViewCount || 0) + (u.purchasedViewCount || 0);
 
             return (
               <div key={u.id} style={{ background: "#FFF", borderRadius: 8, border: `1px solid ${isExpanded ? "#0070F3" : "#E5E5E5"}`, overflow: "hidden", transition: "border-color 0.15s" }}>
@@ -177,7 +179,9 @@ export default function UsersPage() {
                 {/* Expanded management panel */}
                 {isExpanded && (() => {
                   const ud = u.email ? userDetail[u.email] : null;
-                  const totalCreditsVal = (cr?.referralCredits || 0) + (cr?.purchasedCredits || 0);
+                  const totalCreditsVal = cr 
+                    ? (cr.referralCredits || 0) + (cr.purchasedCredits || 0)
+                    : (u.referralViewCount || 0) + (u.purchasedViewCount || 0);
                   const tokensVal = tr?.tokens || 0;
                   const tokensUsed = tr?.totalUsed || 0;
                   const remaining = Math.max(0, tokensVal - tokensUsed);
@@ -196,8 +200,8 @@ export default function UsersPage() {
                           {totalCreditsVal}
                         </div>
                         <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#737373", marginBottom: 12, fontFamily: "var(--font-sans)" }}>
-                          <span>邀约获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.referralCredits || u.referralViewCount || 0}</b></span>
-                          <span>付费获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.purchasedCredits || u.purchasedViewCount || 0}</b></span>
+                          <span>邀约获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.referralCredits ?? u.referralViewCount ?? 0}</b></span>
+                          <span>付费获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.purchasedCredits ?? u.purchasedViewCount ?? 0}</b></span>
                           {(cr?.totalUsed || 0) > 0 && <span>已用 <b style={{ color: "#EE0000", fontWeight: 600 }}>{cr.totalUsed}</b></span>}
                         </div>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>

@@ -110,7 +110,13 @@ export default function Home() {
 
   // Credits + user state
   const [credits, setCredits] = useState(() =>
-    loadPersisted("credits", { referral: 3, purchased: 5 })
+    loadPersisted("credits", { shared: 0, referral: 3, purchased: 5 })
+  );
+  const [chatTokens, setChatTokens] = useState(() =>
+    loadPersisted("chatTokens", { total: 0, used: 0 })
+  );
+  const [creditStats, setCreditStats] = useState(() =>
+    loadPersisted("creditStats", { viewCount: 0, unlockCount: 0, conversations: 0 })
   );
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => {
     const arr = loadPersisted<string[]>("unlockedIds", []);
@@ -126,6 +132,8 @@ export default function Home() {
 
   // Persist on change
   useEffect(() => { savePersisted("credits", credits); }, [credits]);
+  useEffect(() => { savePersisted("chatTokens", chatTokens); }, [chatTokens]);
+  useEffect(() => { savePersisted("creditStats", creditStats); }, [creditStats]);
   useEffect(() => { savePersisted("unlockedIds", [...unlockedIds]); }, [unlockedIds]);
   useEffect(() => { savePersisted("referralCode", myReferralCode); }, [myReferralCode]);
 
@@ -155,13 +163,37 @@ export default function Home() {
         if (user.email) setUserEmail(user.email);
         // Sync credits if stored from registration
         if (user.totalCredits) {
-          setCredits({ referral: user.totalCredits, purchased: 0 });
+          setCredits({ shared: 0, referral: user.totalCredits, purchased: 0 });
         }
       }
     } catch {}
   }, []);
 
-  const totalCredits = credits.referral + credits.purchased;
+  // Fetch real credit/token/stats from server when logged in
+  useEffect(() => {
+    if (!userEmail) return;
+    const fetchQuota = async () => {
+      try {
+        const [cr, tk, ud] = await Promise.all([
+          fetch(`/api/admin/user-credits?email=${encodeURIComponent(userEmail)}`).then(r => r.json()),
+          fetch(`/api/ai/chat-quota?email=${encodeURIComponent(userEmail)}&assetId=__page__`).then(r => r.json()),
+          fetch(`/api/admin/user-detail?email=${encodeURIComponent(userEmail)}`).then(r => r.json()),
+        ]);
+        if (cr && !cr.error) {
+          setCredits({ shared: 0, referral: cr.referralCredits || 0, purchased: cr.purchasedCredits || 0 });
+        }
+        if (tk && !tk.error) {
+          setChatTokens({ total: tk.tokens || 0, used: tk.totalUsed || 0 });
+        }
+        if (ud && !ud.error) {
+          setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.viewCount || 0, conversations: ud.totalConversations || 0 });
+        }
+      } catch {}
+    };
+    fetchQuota();
+  }, [userEmail]);
+
+  const totalCredits = credits.shared + credits.referral + credits.purchased;
   const { lang } = useLanguage();
 
   // Nearby city mapping for geo-location fallback (HK→深圳, 杭州→上海, etc.)
@@ -347,8 +379,8 @@ export default function Home() {
         setCredits((prev) => {
           const total = data.remainingCredits ?? (prev.referral + prev.purchased - 1);
           // Prefer referral pool deduction logic
-          if (prev.referral > 0) return { referral: prev.referral - 1, purchased: prev.purchased };
-          return { referral: 0, purchased: Math.max(0, total) };
+          if (prev.referral > 0) return { shared: prev.shared, referral: prev.referral - 1, purchased: prev.purchased };
+          return { shared: prev.shared, referral: 0, purchased: Math.max(0, total) };
         });
       } else if (data.error) {
         showModal(data.error);
@@ -568,6 +600,8 @@ export default function Home() {
             <div className="absolute right-4 top-[calc(var(--nav-height)+4px)] z-50 animate-slide-up">
               <CreditPanel
               credits={credits}
+              chatTokens={chatTokens}
+              creditStats={creditStats}
               onClose={() => setShowCreditPanel(false)}
               />
             </div>

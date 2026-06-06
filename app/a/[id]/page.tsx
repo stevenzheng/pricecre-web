@@ -25,11 +25,19 @@ export default async function SharedAnalysisPage({ params }: { params: { id: str
       <head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width"/><title>{cached.projectName} - AI精算分析报告</title><style>{`
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;color:#1a1a2e;line-height:1.7;max-width:860px;margin:0;padding:40px 36px;background:#FFF}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}
 .page-header .brand{display:flex;align-items:center;gap:10px}
-.page-header .brand .logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0f172a,#334155);color:#FFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center}
-.page-header .brand .name{font-size:15px;font-weight:700;color:#0f172a}
-.page-header .web-url{font-size:11px;color:#94a3b8;font-family:'SF Mono','Menlo',monospace}
+.page-header .brand .logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0f172a,#334155);color:#FFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.page-header .brand .names{display:flex;flex-direction:column}
+.page-header .brand .name{font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.02em}
+.page-header .brand .sub{font-size:10px;color:#94a3b8;font-weight:500;letter-spacing:0.02em}
+.page-header .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.page-header .header-right .web-url{font-size:11px;color:#94a3b8;font-family:'SF Mono','Menlo',monospace;text-align:right}
+.page-header .header-right .lang-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#64748b;font-weight:500}
+.page-header .header-right .lang-row .divider{width:1px;height:12px;background:#cbd5e1}
+.page-header .qr-wrap{display:flex;align-items:center;gap:6px}
+.page-header .qr-wrap img{width:36px;height:36px;border-radius:4px}
+.page-header .qr-wrap .qr-label{font-size:8px;color:#94a3b8;text-align:center;line-height:1.2}
 .title-block{text-align:left;margin-bottom:28px;padding-bottom:20px;border-bottom:2px solid #0f172a}
 .title-block .asset-name{font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.03em;margin-bottom:6px}
 .title-block .asset-addr{font-size:13px;color:#64748b;margin-bottom:4px}
@@ -47,11 +55,8 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
 .ind-card{border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;background:#fafafa;text-align:center}
 .ind-card .ind-label{display:block;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px}
 .ind-card .ind-val{display:block;font-size:14px;font-weight:700;color:#0f172a;font-family:'SF Mono','Menlo',monospace}
-.footer{border-top:1px solid #e2e8f0;padding-top:16px;margin-top:12px;display:flex;justify-content:space-between;align-items:flex-start}
-.footer .footer-text{text-align:right;flex:1}
-.footer .qr{margin-right:16px;flex-shrink:0}
-.footer .qr img{width:70px;height:70px}
-.footer .qr .qr-label{font-size:8px;color:#94a3b8;text-align:center;margin-top:2px}
+.footer{border-top:1px solid #e2e8f0;padding-top:16px;margin-top:12px}
+.footer .footer-text{text-align:right}
 .footer .company{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:4px}
 .footer .info{font-size:10px;color:#94a3b8;line-height:1.5}
 .footer .disclaimer{font-size:9px;color:#94a3b8;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9}
@@ -60,8 +65,26 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
 `}</style></head>
       <body>
         <div className="page-header">
-          <div className="brand"><div className="logo">PC</div><div className="name">PriceCRE</div></div>
-          <div className="web-url">pricecre.com</div>
+          <div className="brand">
+            <div className="logo">PC</div>
+            <div className="names">
+              <div className="name">PriceCRE · 地产价值</div>
+              <div className="sub">Commercial Real Estate Intelligence</div>
+            </div>
+          </div>
+          <div className="header-right">
+            <div className="lang-row">
+              <span>地产价值</span>
+              <span className="divider" />
+              <span>CRE Intelligence</span>
+            </div>
+            <div className="web-url">{shareUrl}</div>
+            <div className="qr-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(shareUrl)}`} alt="QR code" />
+              <div className="qr-label">扫码<br/>查看</div>
+            </div>
+          </div>
         </div>
 
         <div className="title-block">
@@ -87,11 +110,6 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
         </div>
 
         <div className="footer">
-          <div className="qr">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(shareUrl)}`} alt="QR code" />
-            <div className="qr-label">扫码查看报告</div>
-          </div>
           <div className="footer-text">
             <div className="company">PriceCRE · 商业地产量化精算资产终端</div>
             <div className="info">报告编号：{reportId} &nbsp;|&nbsp; 生成时间：{now}</div>

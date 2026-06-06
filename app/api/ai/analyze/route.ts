@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 const API_KEY = process.env.ANTHROPIC_API_KEY || "";
 const API_BASE = process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn";
 const MODEL = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
 
 interface AnalyzeRequest {
+  email?: string;
   projectName: string;
   city: string;
   district: string;
@@ -48,6 +50,15 @@ ${indicatorLines}
 export async function POST(request: NextRequest) {
   try {
     const body: AnalyzeRequest = await request.json();
+
+    // Require login
+    if (!body.email) {
+      return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    }
+    const user = await prisma.user.findUnique({ where: { email: body.email } });
+    if (!user) {
+      return NextResponse.json({ error: "用户不存在，请先注册" }, { status: 401 });
+    }
 
     if (!body.projectName || !body.indicators?.length) {
       return NextResponse.json({ error: "缺少必要参数" }, { status: 400 });

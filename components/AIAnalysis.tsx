@@ -6,11 +6,12 @@ interface AIAnalysisProps {
   projectName: string; city: string; district: string; propertyType: string;
   faceRent: number; netEffectiveRent: number | null;
   indicators: { label: string; value: string; key: string }[];
+  email?: string;
   onClose: () => void;
 }
 
 export default function AIAnalysis({
-  projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, onClose,
+  projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, email, onClose,
 }: AIAnalysisProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export default function AIAnalysis({
     let cancelled = false;
     fetch("/api/ai/analyze", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators }),
+      body: JSON.stringify({ projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, email }),
     }).then(r => r.json()).then(data => {
       if (cancelled) return;
       if (data.error) { setError(data.error); setLoading(false); return; }

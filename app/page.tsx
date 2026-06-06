@@ -70,7 +70,8 @@ export default function Home() {
   useEffect(() => {
     const h = (e: Event) => {
       if (!userEmailRef.current) { showModal("请先登录以使用 AI 分析"); return; }
-      setAiAnalysisData((e as CustomEvent).detail);
+      const detail = (e as CustomEvent).detail;
+      setAiAnalysisData({ ...detail, email: userEmailRef.current });
     };
     document.addEventListener("open-ai-analysis", h);
     return () => document.removeEventListener("open-ai-analysis", h);

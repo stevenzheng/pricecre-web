@@ -66,8 +66,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "APPROVED") {
-      // Send activation email
+      // Generate activation code and save to submission
       const code = generateAuthCode(submission.email);
+      await (prisma as any).submission?.update?.({
+        where: { id: submissionId },
+        data: { activationCode: code },
+      });
       await sendEmail({
         to: submission.email,
         subject: "PriceCRE 数据核验通过 · 激活码已就绪",

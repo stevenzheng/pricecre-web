@@ -1,13 +1,16 @@
 "use client";
 import { showModal } from "@/components/Toast";
+import CreditPanel from "@/components/CreditPanel";
 
 import { useState, useEffect } from "react";
 
 type Step = "login" | "register" | "verify" | "done";
 
-export default function ProfilePanel({ credits, totalCredits }: { 
+export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats }: { 
   credits?: { referral: number; purchased: number };
   totalCredits?: number;
+  chatTokens?: { total: number; used: number };
+  creditStats?: { viewCount: number; unlockCount: number; conversations: number };
 }) {
   const [step, setStep] = useState<Step>("login");
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
@@ -490,31 +493,22 @@ export default function ProfilePanel({ credits, totalCredits }: {
           </div>
           <div>
             <div className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>用户</div>
-            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{form.email}</div>
+            <div style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-sans)", color: "var(--text-muted)" }}>{form.email}</div>
           </div>
-          <button onClick={() => { setLoggedIn(false); setStep("login"); }} className="ml-auto text-[10px] font-medium hover:underline" style={{ color: "var(--text-muted)" }}>退出登录</button>
-        </div>
-        <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "var(--panel)" }}>
-          <div className="w-3 h-3 rounded-full" style={{ background: activated && quota > 0 ? "var(--positive)" : "var(--text-hint)" }} />
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 400, fontFamily: "var(--font-sans)", color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
-              {!activated ? "尚未激活权益" : quota > 0 ? `可用权益：${quota} 次` : "权益已用完"}
-            </div>
-            <div style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-sans)", color: "var(--text-muted)", marginTop: 2 }}>{!activated ? "提交数据或购买权益即可激活" : ""}</div>
-          </div>
+          <button onClick={() => { setLoggedIn(false); setStep("login"); }} style={{ fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}>退出登录</button>
         </div>
       </div>
-      <div className="card p-5">
-        <div className="section-title">账户统计</div>
-        <div className="grid grid-cols-3 gap-3">
-          {[{ label: "累计提报", value: 0 }, { label: "累计购买", value: 0 }, { label: "已确权", value: viewHistory.length }].map((s) => (
-            <div key={s.label} className="text-center py-2 rounded-lg" style={{ background: "var(--panel)" }}>
-              <div style={{ fontSize: 20, fontWeight: 300, color: "#171717", fontFamily: "var(--font-mono)", letterSpacing: "-0.03em" }}>{s.value}</div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginTop: 2 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+
+      {/* CreditPanel — 统一额度面板 */}
+      <CreditPanel
+        credits={{
+          shared: 0,
+          referral: credits?.referral || 0,
+          purchased: credits?.purchased || 0,
+        }}
+        chatTokens={chatTokens || { total: 0, used: 0 }}
+        creditStats={creditStats || { viewCount: 0, unlockCount: 0, conversations: 0 }}
+      />
 
       {/* 查看记录 */}
       {viewHistory.length > 0 && (

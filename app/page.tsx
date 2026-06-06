@@ -870,7 +870,7 @@ export default function Home() {
         {mobileTab === "share" && <ShareCenter />}
 
         {/* Profile Tab */}
-        {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} />}
+        {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} chatTokens={chatTokens} creditStats={creditStats} />}
       </main>
 
       {/* ====== Footer ====== */}

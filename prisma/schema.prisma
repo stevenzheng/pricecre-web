@@ -65,18 +65,48 @@ model Referral {
   createdAt     DateTime @default(now())
 }
 
+enum OrderStatus {
+  PENDING_PAYMENT   // 0: 待支付
+  PAID              // 1: 已支付（额度已发放）
+  CANCELLED         // 2: 已取消
+  REFUNDED          // 3: 已退款
+  REFUNDING         // 4: 退款处理中
+  COMPLETED         // 5: 已完成
+}
+
 model Order {
-  id            String    @id @default(uuid())
-  orderNo       String    @unique 
+  id            String      @id @default(uuid())
+  orderNo       String      @unique
   userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productType   Int       
-  amount        Decimal   @db.Decimal(10, 2)
-  paymentMethod String    
-  status        Int       @default(0) 
-  tradeNo       String?   
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productType   Int         // 1=查看额度, 2=AI对话额度, 3=VIP会员
+  amount        Decimal     @db.Decimal(10, 2)
+  paymentMethod String      // wechat, alipay, admin_manual
+  status        Int         @default(0) // OrderStatus enum
+  tradeNo       String?
   paidAt        DateTime?
-  createdAt     DateTime  @default(now())
+  cancelledAt   DateTime?
+  completedAt   DateTime?
+  refundReason  String?
+  refundAmount  Decimal?    @db.Decimal(10, 2)
+  refundedAt    DateTime?
+  note          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productType  String   // view_quota | chat_quota | vip
+  productName  String
+  quantity     Int
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  totalPrice   Decimal  @db.Decimal(10, 2)
+  creditsAdded Int?     // 该商品项授予的额度/次数
+  createdAt    DateTime @default(now())
 }
 
 model UserViewLog {
@@ -182,4 +212,54 @@ model DataSourceRegistry {
   updatedAt   DateTime   @updatedAt
 
   @@index([isActive, sourceType])
+}
+
+model AiAnalysisCache {
+  id           String   @id @default(uuid())
+  cacheKey     String
+  projectName  String
+  city         String
+  district     String
+  propertyType String
+  analysisData Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([cacheKey])
+}
+
+model UserCredit {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  referralCredits  Int      @default(10) // 新用户默认 10 次查看权益
+  purchasedCredits Int      @default(0)
+  totalUsed        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email])
+}
+
+model UserChatToken {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  tokens    Int      @default(100) // 新用户默认 100 条 AI 对话额度
+  totalUsed Int      @default(0)   // 已使用条数
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model CreditAuditLog {
+  id         String   @id @default(uuid())
+  email      String
+  type       String // add_credits | set_credits | add_tokens | set_tokens | consume_view | consume_chat
+  amount     Int
+  balance    Int
+  adminEmail String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([email])
 }

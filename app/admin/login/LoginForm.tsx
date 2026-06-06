@@ -38,50 +38,35 @@ function LoginFormInner() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "var(--bg)",
+      background: "#F7F7F7",
     }}>
       <div style={{
         width: 380,
         maxWidth: "90vw",
         padding: "40px 32px",
-        borderRadius: 12,
-        background: "var(--bg-surface)",
-        border: "1px solid var(--line)",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+        borderRadius: 6,
+        background: "#FFFFFF",
+        border: "1px solid #E5E5E5",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{
-            width: 40, height: 40,
-            background: "var(--accent)",
-            borderRadius: 8,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px",
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2">
-              <rect x="8" y="2" width="8" height="4" rx="1" />
-              <rect x="8" y="10" width="8" height="4" rx="1" />
-              <rect x="8" y="18" width="8" height="4" rx="1" />
-              <rect x="2" y="6" width="6" height="3" rx="1" />
-              <rect x="2" y="14" width="6" height="3" rx="1" />
-              <rect x="2" y="22" width="6" height="3" rx="1" />
-              <rect x="16" y="6" width="6" height="3" rx="1" />
-              <rect x="16" y="14" width="6" height="3" rx="1" />
-            </svg>
-          </div>
+          <img src="/og-image.png" alt="PriceCRE" style={{ width: 40, height: 40, borderRadius: 8, display: "block", margin: "0 auto 16px", background: "#fff" }} />
           <h2 style={{
-            fontSize: 18, fontWeight: 600, color: "var(--text-strong)", margin: "0 0 4px"
+            fontSize: 16, fontWeight: 600, color: "#171717", margin: "0 0 4px",
+            fontFamily: "var(--font-sans)", letterSpacing: "-0.02em",
           }}>
-            PriceCRE 管理后台
+            PriceCRE · 地产价值
           </h2>
-          <p style={{ fontSize: 12, color: "var(--text-hint)", margin: 0 }}>
-            数据治理中心 · 登录
+          <p style={{ fontSize: 12, color: "#737373", margin: 0, fontFamily: "var(--font-sans)", letterSpacing: "-0.01em" }}>
+            Admin Console · 数据治理中心
           </p>
         </div>
 
         {authError && (
           <div style={{
-            background: "var(--negative-soft)", color: "var(--negative)",
-            padding: "8px 12px", borderRadius: 8, fontSize: 12, marginBottom: 16, textAlign: "center"
+            background: "rgba(238,0,0,0.06)", color: "#EE0000",
+            padding: "8px 12px", borderRadius: 6, fontSize: 12, marginBottom: 16, textAlign: "center",
+            fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
           }}>
             登录已过期，请重新登录
           </div>
@@ -89,8 +74,9 @@ function LoginFormInner() {
 
         {error && (
           <div style={{
-            background: "var(--negative-soft)", color: "var(--negative)",
-            padding: "8px 12px", borderRadius: 8, fontSize: 12, marginBottom: 16, textAlign: "center"
+            background: "rgba(238,0,0,0.06)", color: "#EE0000",
+            padding: "8px 12px", borderRadius: 6, fontSize: 12, marginBottom: 16, textAlign: "center",
+            fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
           }}>
             {error}
           </div>
@@ -100,7 +86,8 @@ function LoginFormInner() {
           <div style={{ marginBottom: 16 }}>
             <label style={{
               display: "block", fontSize: 12, fontWeight: 500,
-              color: "var(--text-muted)", marginBottom: 6
+              color: "#737373", marginBottom: 6,
+              fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
             }}>
               邮箱
             </label>
@@ -111,10 +98,11 @@ function LoginFormInner() {
               placeholder="admin@pricecre.com"
               required
               style={{
-                width: "100%", padding: "10px 12px",
-                borderRadius: 8, border: "1px solid var(--line)",
-                background: "var(--panel)", color: "var(--text)",
-                fontSize: 14, outline: "none", boxSizing: "border-box"
+                width: "100%", padding: "8px 12px",
+                borderRadius: 6, border: "1px solid #D4D4D4",
+                background: "#FFFFFF", color: "#171717",
+                fontSize: 14, outline: "none", boxSizing: "border-box",
+                fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
               }}
             />
           </div>
@@ -122,7 +110,8 @@ function LoginFormInner() {
           <div style={{ marginBottom: 24 }}>
             <label style={{
               display: "block", fontSize: 12, fontWeight: 500,
-              color: "var(--text-muted)", marginBottom: 6
+              color: "#737373", marginBottom: 6,
+              fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
             }}>
               密码
             </label>
@@ -133,10 +122,11 @@ function LoginFormInner() {
               placeholder="••••••••"
               required
               style={{
-                width: "100%", padding: "10px 12px",
-                borderRadius: 8, border: "1px solid var(--line)",
-                background: "var(--panel)", color: "var(--text)",
-                fontSize: 14, outline: "none", boxSizing: "border-box"
+                width: "100%", padding: "8px 12px",
+                borderRadius: 6, border: "1px solid #D4D4D4",
+                background: "#FFFFFF", color: "#171717",
+                fontSize: 14, outline: "none", boxSizing: "border-box",
+                fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
               }}
             />
           </div>
@@ -145,11 +135,13 @@ function LoginFormInner() {
             type="submit"
             disabled={loading}
             style={{
-              width: "100%", padding: "12px 16px",
-              borderRadius: 8, border: "none",
-              background: loading ? "var(--text-hint)" : "var(--accent)",
-              color: "var(--text-inverse)", fontSize: 14, fontWeight: 600,
+              width: "100%", padding: "8px 16px",
+              borderRadius: 6, border: "none",
+              background: loading ? "#A3A3A3" : "#0070F3",
+              color: "#FFFFFF", fontSize: 14, fontWeight: 500,
               cursor: loading ? "not-allowed" : "pointer",
+              fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
+              transition: "background 0.12s ease",
             }}
           >
             {loading ? "验证中..." : "登录"}
@@ -163,8 +155,8 @@ function LoginFormInner() {
 export function LoginForm() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-        <div style={{ color: "var(--text-hint)", fontSize: 14 }}>加载中...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F7F7" }}>
+        <div style={{ color: "#737373", fontSize: 14, fontFamily: "var(--font-sans)" }}>加载中...</div>
       </div>
     }>
       <LoginFormInner />

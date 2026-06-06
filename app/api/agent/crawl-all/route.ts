@@ -4,9 +4,9 @@ import { NextResponse } from "next/server";
 import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
 import { SsrHydrationScraper } from "@/agent/scrapers/ssr-hydration-scraper";
 import { batchUploadAssets } from "@/agent/uploader";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
 
 export async function POST() {
   const now = new Date();

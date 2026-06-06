@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  display: "swap",
+  preload: true,
+});
+
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  display: "swap",
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: "PriceCRE · 地产价值 — 商业地产量化精算终端",
@@ -60,13 +75,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
-      <body
-        className="antialiased"
-        style={{
-          fontFamily: "var(--font-sans)",
-        }}
-      >
+    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="antialiased">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

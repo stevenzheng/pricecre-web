@@ -1,9 +1,7 @@
 // app/api/admin/review-queue/batch/route.ts
 // POST { ids: string[], action: "approve" | "reject" } — 批量操作
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {

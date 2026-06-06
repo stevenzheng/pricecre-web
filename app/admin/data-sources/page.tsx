@@ -37,24 +37,24 @@ export default function DataSourcesPage() {
   };
 
   return (
-    <div className="gh-content-inner">
-      <div className="gh-page-header">
-        <h1 className="gh-page-title">数据源管理</h1>
-        <p className="gh-page-desc">
+    <div className="vl-content-inner">
+      <div className="vl-page-header">
+        <h1 className="vl-page-title">数据源管理</h1>
+        <p className="vl-page-desc">
           {sources.length} 个数据源 · {sources.filter(s => s.isActive).length} 活跃 · 累计产出 {sources.reduce((s, x) => s + (x.lastPipelineCount || 0), 0)} 条
         </p>
       </div>
 
       {loading ? (
-        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
+        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
       ) : sources.length === 0 ? (
-        <div className="gh-empty">
-          <p className="gh-empty-title">暂无数据源</p>
-          <p className="gh-empty-desc">前往「爬取计划」添加数据源</p>
+        <div className="vl-empty">
+          <p className="vl-empty-title">暂无数据源</p>
+          <p className="vl-empty-desc">前往「爬取计划」添加数据源</p>
         </div>
       ) : (
-        <div className="gh-table-wrap">
-          <table className="gh-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr>
                 <th>站点名称</th>
@@ -71,23 +71,23 @@ export default function DataSourcesPage() {
               {sources.map((s) => (
                 <tr key={s.id}>
                   <td style={{ fontWeight: 600 }}>{s.label}</td>
-                  <td className="gh-td-hint" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <td className="vl-td-hint" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {s.targetUrl}
                   </td>
-                  <td><span className="gh-badge gh-badge-neutral">{typeLabel[s.propertyType] || s.propertyType}</span></td>
-                  <td className="gh-td-muted">{s.city} · {s.district}</td>
+                  <td><span className="vl-badge vl-badge-neutral">{typeLabel[s.propertyType] || s.propertyType}</span></td>
+                  <td className="vl-td-muted">{s.city} · {s.district}</td>
                   <td>
-                    <span className={`gh-badge ${s.isActive ? "gh-badge-success" : "gh-badge-neutral"}`}>
+                    <span className={`vl-badge ${s.isActive ? "vl-badge-success" : "vl-badge-neutral"}`}>
                       {s.isActive ? "Active" : "Paused"}
                     </span>
                   </td>
-                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{s.lastPipelineCount || 0}</td>
-                  <td className="gh-td-hint">
+                  <td className="vl-td-mono" style={{ textAlign: "right" }}>{s.lastPipelineCount || 0}</td>
+                  <td className="vl-td-hint">
                     {s.lastRunAt ? new Date(s.lastRunAt).toLocaleString("zh-CN") : "—"}
                   </td>
                   <td>
-                    <button onClick={() => toggleActive(s)} className={`gh-btn-text gh-btn-sm`}
-                      style={{ color: s.isActive ? "#E64C4C" : "#30CF43" }}>
+                    <button onClick={() => toggleActive(s)} className={`vl-btn-ghost vl-btn-sm`}
+                      style={{ color: s.isActive ? "#EE0000" : "#0070F3" }}>
                       {s.isActive ? "停用" : "启用"}
                     </button>
                   </td>

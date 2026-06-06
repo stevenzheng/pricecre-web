@@ -2,9 +2,7 @@
 // GET  — 列出 AgentReviewQueue 待审资产
 // POST — 创建新审核条目
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   try {

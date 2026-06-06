@@ -2,9 +2,7 @@
 // GET  — 获取单个资产全部47项指标
 // PUT  — 更新指标数据
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {

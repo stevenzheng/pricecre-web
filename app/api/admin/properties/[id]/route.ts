@@ -1,8 +1,6 @@
 // app/api/admin/properties/[id]/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
@@ -30,6 +28,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       },
     });
     return NextResponse.json({ ...item, faceRent: Number(item.faceRent) });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+  try {
+    await prisma.commercialProperty.delete({ where: { id: params.id } });
+    return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

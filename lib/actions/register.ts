@@ -1,9 +1,9 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 
-const prisma = new PrismaClient();
+
 const GENERIC_AUTH_ERROR = "账号或密码错误";
 
 export async function registerUser(data: { email: string; password?: string; referralCode?: string }) {
@@ -27,6 +27,21 @@ export async function registerUser(data: { email: string; password?: string; ref
               lifetimeReferralEarned: { increment: 5 },
             },
           });
+          // 同步更新 UserCredit 邀约额度
+          const referrerCredit = await tx.userCredit.findUnique({ where: { email: referrer.email! } });
+          if (referrerCredit) {
+            await tx.userCredit.update({
+              where: { email: referrer.email! },
+              data: { referralCredits: { increment: 5 } },
+            });
+          } else {
+            await tx.userCredit.create({
+              data: { email: referrer.email!, referralCredits: 5, purchasedCredits: 0, totalUsed: 0 },
+            });
+          }
+          await tx.creditAuditLog.create({
+            data: { email: referrer.email!, type: "add_credits", amount: 5, balance: (referrerCredit?.referralCredits || 0) + (referrerCredit?.purchasedCredits || 0) + 5, note: "邀请用户注册奖励" },
+          });
         }
       }
 
@@ -35,9 +50,19 @@ export async function registerUser(data: { email: string; password?: string; ref
           email: data.email,
           password: hashedPassword,
           myReferralCode: generatedCode,
-          referralViewCount: 3,
+          referralViewCount: 10,    // 新用户默认 10 次查看权益
           lifetimeReferralEarned: 0,
         },
+      });
+
+      // 创建 UserCredit（查看权益池）
+      await tx.userCredit.create({
+        data: { email: data.email, referralCredits: 10, purchasedCredits: 0, totalUsed: 0 },
+      });
+
+      // 创建 UserChatToken（AI 对话额度池）
+      await tx.userChatToken.create({
+        data: { email: data.email, tokens: 100, totalUsed: 0 },
       });
 
       const { password, ...userWithoutPassword } = newUser;

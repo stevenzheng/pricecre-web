@@ -2,7 +2,7 @@
 import { showModal } from "@/components/Toast";
 import { indicatorExplanations } from "@/lib/indicator-explanations";
 
-import { useReducer, useMemo, useCallback } from "react";
+import { useReducer, useMemo, useCallback, useState, useEffect } from "react";
 import {
   CommercialProperty,
   DynamicIndicators,
@@ -53,19 +53,17 @@ interface IndicatorField {
 
 type FieldDef = Pick<IndicatorField, "key" | "abbr" | "label" | "format" | "isLocked" | "isPositive">;
 
-function getIndicatorFields(
-  indicators: DynamicIndicators,
-  propertyType: PropertyType
-): IndicatorField[] {
-  /* ===== Sector-specific field lists ===== */
-
-  const officeFields: FieldDef[] = [
+function getIndicatorFields(indicators: DynamicIndicators, _propertyType: PropertyType): IndicatorField[] {
+  const allFields: FieldDef[] = [
+    { key: "netEffectiveRent", abbr: "NER", label: "净有效租金", format: "currency", isLocked: true },
+    { key: "capRate", abbr: "CAP", label: "资本化率", format: "percent", isLocked: true },
+    { key: "priceToRentRatio", abbr: "PTR", label: "售租比", format: "ratio", isLocked: true },
+    { key: "wale", abbr: "WALE", label: "平均租期", format: "number", isLocked: true },
+    { key: "retentionRate", abbr: "RET", label: "租户留存率", format: "percent", isLocked: true },
+    { key: "tenantConcentration", abbr: "TC", label: "租户集中度", format: "percent", isLocked: true },
     { key: "netAbsorption", abbr: "ABS", label: "净吸纳量", format: "number", isLocked: true },
     { key: "reversionRate", abbr: "REV", label: "续租调升率", format: "percent", isLocked: true },
     { key: "spaceUtilization", abbr: "SU", label: "空间利用", format: "percent", isLocked: true },
-  ];
-
-  const shopFields: FieldDef[] = [
     { key: "salesEfficiency", abbr: "PXF", label: "坪效", format: "currency", isLocked: true },
     { key: "rentToSalesRatio", abbr: "RSR", label: "租售比", format: "percent", isLocked: true },
     { key: "footfallTicketSize", abbr: "FTS", label: "客单价", format: "text", isLocked: true },
@@ -73,73 +71,34 @@ function getIndicatorFields(
     { key: "merchantChurnRate", abbr: "MCR", label: "掉铺率", format: "percent", isLocked: true, isPositive: false },
     { key: "firstStoreRatio", abbr: "FSR", label: "首店占比", format: "percent", isLocked: true },
     { key: "openToCloseRatio", abbr: "OCR", label: "开闭店比", format: "ratio", isLocked: true },
-    { key: "tradeAreaPopulation", abbr: "TAP", label: "商圈人口", format: "number", isLocked: true },
-    { key: "demographicPremiumScore", abbr: "DPS", label: "人口红利", format: "number", isLocked: true },
-  ];
-
-  const industrialFields: FieldDef[] = [
-    { key: "electricityOutputRatio", abbr: "EOR", label: "电产比", format: "percent", isLocked: true },
-    { key: "taxCovenantRate", abbr: "TCR", label: "亩均税收", format: "percent", isLocked: true },
-    { key: "loadingDockRatio", abbr: "LDR", label: "车位配比", format: "ratio", isLocked: true },
-  ];
-
-  /* ===== Universal fields (all sectors, in exact PRD order) ===== */
-
-  const universalFields: FieldDef[] = [
-    { key: "capRate", abbr: "CAP", label: "资本化率", format: "percent", isLocked: true },
-    { key: "priceToRentRatio", abbr: "PTR", label: "售租比", format: "ratio", isLocked: true },
-    { key: "wale", abbr: "WALE", label: "平均租期", format: "number", isLocked: true },
-    { key: "retentionRate", abbr: "RET", label: "租户留存率", format: "percent", isLocked: true },
-    { key: "tenantConcentration", abbr: "TC", label: "租户集中度", format: "percent", isLocked: true },
     { key: "esgCertification", abbr: "ESG", label: "绿色认证", format: "text", isLocked: true },
     { key: "landFloorPrice", abbr: "LFP", label: "土地楼面价", format: "currency", isLocked: true },
     { key: "capexIntensity", abbr: "CAPEX", label: "单位投入", format: "currency", isLocked: true },
     { key: "npiMargin", abbr: "NPI", label: "利润率", format: "percent", isLocked: true },
     { key: "collectionRate", abbr: "COL", label: "收缴率", format: "percent", isLocked: true },
     { key: "compTxPrice", abbr: "CTX", label: "大宗单价", format: "currency", isLocked: true },
-    { key: "noiCagr3Y", abbr: "NOI增速", label: "净收入增速", format: "percent", isLocked: true },
+    { key: "noiCagr3Y", abbr: "NOI", label: "净收入增速", format: "percent", isLocked: true },
     { key: "submarketVacancy", abbr: "VAC", label: "商圈空置", format: "percent", isLocked: true, isPositive: false },
     { key: "policyIncentiveLevel", abbr: "POL", label: "政策级数", format: "number", isLocked: true },
     { key: "yieldSpread", abbr: "YLD", label: "收益利差", format: "percent", isLocked: true },
     { key: "kolBuzzIndex", abbr: "KOL", label: "热度指数", format: "number", isLocked: true },
     { key: "negativeSentimentRate", abbr: "NSR", label: "负面声量", format: "percent", isLocked: true, isPositive: false },
-    { key: "employeeHappinessScore", abbr: "EHS", label: "幸福评分", format: "number", isLocked: true },
+    { key: "electricityOutputRatio", abbr: "EOR", label: "电产比", format: "ratio", isLocked: true },
+    { key: "taxCovenantRate", abbr: "TCR", label: "亩均税收", format: "percent", isLocked: true },
     { key: "netCorporateMigration", abbr: "NCM", label: "企业迁入", format: "percent", isLocked: true },
     { key: "hqSupplyChainRatio", abbr: "HQSC", label: "总部集聚", format: "percent", isLocked: true },
-    { key: "corporateInquiryIndex", abbr: "CII", label: "选址活跃", format: "number", isLocked: true },
     { key: "culturalRadianceLevel", abbr: "CRL", label: "文化辐射", format: "number", isLocked: true },
-  ];
-
-  /* ===== Investment leverage fields ===== */
-
-  const leverageFields: FieldDef[] = [
+    { key: "footfallPulseRate", abbr: "FPR", label: "客流脉冲", format: "ratio", isLocked: true },
+    { key: "pmOperatorTier", abbr: "PM", label: "品牌名称", format: "text", isLocked: false },
+    { key: "facilitySlaRating", abbr: "SLA", label: "设施SLA", format: "number", isLocked: true },
     { key: "ltvRatio", abbr: "LTV", label: "贷款价值比", format: "percent", isLocked: true },
     { key: "debtYield", abbr: "DEBT", label: "债务收益率", format: "percent", isLocked: true },
     { key: "cashOnCashReturn", abbr: "COC", label: "现金回报率", format: "percent", isLocked: true },
-    { key: "projectedIrr5Y", abbr: "5年预测IRR", label: "5年预测IRR", format: "percent", isLocked: true },
+    { key: "projectedIrr5Y", abbr: "IRR", label: "5年预测IRR", format: "percent", isLocked: true },
+    { key: "tradeAreaPopulation", abbr: "TAP", label: "商圈人口", format: "number", isLocked: true },
+    { key: "demographicPremiumScore", abbr: "DPS", label: "人口红利", format: "number", isLocked: true },
   ];
-
-  /* ===== Assemble based on property type ===== */
-
-  let fieldDefs: FieldDef[] = [...universalFields];
-
-  if (propertyType === PropertyType.OFFICE) {
-    fieldDefs = [...universalFields, ...officeFields, ...leverageFields];
-  } else if (propertyType === PropertyType.SHOPS) {
-    fieldDefs = [...universalFields, ...shopFields];
-  } else if (propertyType === PropertyType.INDUSTRIAL) {
-    fieldDefs = [...universalFields, ...industrialFields, ...leverageFields];
-  }
-
-  return fieldDefs
-    .filter((def) => {
-      const val = indicators[def.key as keyof DynamicIndicators];
-      return val !== undefined && val !== null;
-    })
-    .map((def) => ({
-      ...def,
-      value: indicators[def.key as keyof DynamicIndicators] as string | number | undefined,
-    }));
+  return allFields.filter(def => { const v = indicators[def.key as keyof DynamicIndicators]; return v !== undefined && v !== null; }).map(def => ({ ...def, value: indicators[def.key as keyof DynamicIndicators] as string | number | undefined }));
 }
 
 /* ===== Formatter ===== */
@@ -193,6 +152,42 @@ const propertyTypeIconMap: Record<PropertyType, React.ReactNode> = {
   [PropertyType.INDUSTRIAL]: <IconFactory />,
 };
 
+/* ===== Distance Component ===== */
+
+const cityCoords: Record<string, [number, number]> = {
+  "上海-浦东新区": [31.235, 121.543],
+  "上海-静安区": [31.229, 121.452],
+  "上海-黄浦区": [31.231, 121.469],
+  "上海-徐汇区": [31.188, 121.437],
+  "上海-长宁区": [31.224, 121.424],
+  "北京-朝阳区": [39.921, 116.443],
+  "北京-海淀区": [39.960, 116.298],
+  "深圳-南山区": [22.533, 113.930],
+};
+
+function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function Distance({ city, district }: { city: string; district: string }) {
+  const [dist, setDist] = useState<string | null>(null);
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const key = `${city}-${district}`;
+    const coords = cityCoords[key];
+    navigator.geolocation.getCurrentPosition(pos => {
+      const d = haversine(pos.coords.latitude, pos.coords.longitude, coords?.[0] ?? 31.23, coords?.[1] ?? 121.47);
+      setDist(d < 1 ? `${(d*1000).toFixed(0)}m` : `${d.toFixed(1)}km`);
+    }, () => {}, { enableHighAccuracy: false, timeout: 3000 });
+  }, [city, district]);
+  if (!dist) return null;
+  return <span style={{ color: "var(--text-hint)", fontSize: 11, marginLeft: 6 }}>· 距您 {dist}</span>;
+}
+
 /* ===== Main Component ===== */
 
 export default function PropertyCard({
@@ -243,6 +238,17 @@ export default function PropertyCard({
   const typeLabel = propertyTypeLabels[property.propertyType];
   const typeIcon = propertyTypeIconMap[property.propertyType];
 
+  const openChat = () => {
+    const evt = new CustomEvent("open-property-chat", {
+      detail: {
+        projectName: property.projectName, city: property.city, district: property.district,
+        propertyType: typeLabel, faceRent: property.faceRent,
+        indicators: sortedFields.map(f => ({ key: f.key, label: f.label, value: formatValue(f.value, f.format) })),
+      },
+    });
+    document.dispatchEvent(evt);
+  };
+
   return (
     <div id={`property-${property.id}`} className={`card overflow-hidden ${state.isExpanded ? "ring-1" : ""}`} style={{ borderColor: state.isExpanded ? "var(--accent-border)" : "var(--line)" }}>
       {/* ---- Collapsed Header ---- */}
@@ -283,6 +289,14 @@ export default function PropertyCard({
                 热度 {property.dynamicIndicators.kolBuzzIndex}
               </span>
             )}
+            {typeof property.dynamicIndicators.pmOperatorTier === "string" && (
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{
+                background: "#F5F3FF",
+                color: "#7C3AED",
+              }}>
+                {property.dynamicIndicators.pmOperatorTier}
+              </span>
+            )}
           </div>
         </div>
 
@@ -295,6 +309,7 @@ export default function PropertyCard({
         <div className="flex items-start justify-between mb-4 gap-3">
           <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
             {property.city} · {property.district}
+            <Distance city={property.city} district={property.district} />
           </p>
           <div className="text-right text-[11px] leading-snug" style={{ color: "var(--text-hint)" }}>
             {(property.dynamicIndicators.kolBuzzIndex ?? 0) > 80 ? "🔥 高热度商圈" : 
@@ -388,7 +403,7 @@ export default function PropertyCard({
                 </div>
                 {netEffectiveRent !== null ? (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-medium" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
+                    <span className="text-xl sm:text-2xl font-medium" style={{ color: "var(--positive)", fontFamily: "var(--font-mono)" }}>
                       ¥{netEffectiveRent.toFixed(1)}
                     </span>
                     <span className="text-[10px] sm:text-xs" style={{ color: "var(--text-muted)" }}>/㎡/天</span>
@@ -405,7 +420,7 @@ export default function PropertyCard({
               <div className="flex items-center gap-2">
                 {/* AI Analysis Button (unlocked only) — Gemini sparkle icon */}
                 {isUnlocked && (
-                  <button
+                  <><button
                     onClick={(e) => {
                       e.stopPropagation();
                       const aiEvent = new CustomEvent("open-ai-analysis", {
@@ -425,7 +440,7 @@ export default function PropertyCard({
                       });
                       document.dispatchEvent(aiEvent);
                     }}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 hover:scale-105"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all duration-200 hover:scale-105"
                     style={{
                       background: "var(--accent)",
                       color: "var(--text-inverse)",
@@ -437,36 +452,20 @@ export default function PropertyCard({
                     </svg>
                     AI 分析
                   </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openChat(); }}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-all duration-200 hover:scale-105"
+                    style={{
+                      background: "#0D9488",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    AI 助理
+                  </button></>
                 )}
-
-                {/* Share Button (always visible, 2x icon) */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const evt = new CustomEvent("open-wechat-card", {
-                      detail: {
-                        projectName: property.projectName,
-                        city: property.city,
-                        district: property.district,
-                        faceRent: property.faceRent,
-                        propertyType: typeLabel,
-                        indicators: sortedFields
-                          .filter(f => !f.isLocked || isUnlocked)
-                          .slice(0, 9)
-                          .map(f => ({ label: f.label, value: isUnlocked ? formatValue(f.value, f.format) : "****" })),
-                      },
-                    });
-                    document.dispatchEvent(evt);
-                  }}
-                  className="p-2 rounded-lg transition-all duration-200 hover:bg-[var(--accent-soft)] hover:scale-110"
-                  aria-label="生成微信分享卡片"
-                  title="生成微信分享卡片"
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8">
-                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                  </svg>
-                </button>
 
                 {/* Unlock button when locked */}
                 {!isUnlocked && (

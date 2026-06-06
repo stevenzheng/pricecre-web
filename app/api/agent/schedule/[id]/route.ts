@@ -1,8 +1,8 @@
 // app/api/agent/schedule/[id]/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {

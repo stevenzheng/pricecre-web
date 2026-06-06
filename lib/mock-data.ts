@@ -675,7 +675,8 @@ export const mockProperties: Property[] = [
         "reversionRate": -3.0,
         "spaceUtilization": 66.8,
         "netAbsorption": 21840.0,
-        "electricityOutputRatio": 280.2
+        "electricityOutputRatio": 280.2,
+        "pmOperatorTier": "新鸿基地产"
     }
   },
   {

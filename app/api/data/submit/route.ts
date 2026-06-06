@@ -7,9 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail, activationEmailTemplate } from "@/lib/email";
 import { createHash } from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
 
 function generateAuthCode(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";

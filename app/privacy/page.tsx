@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 28 }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "var(--text-strong)" }}>信息收集</h2>
         <p style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>
-          注册时我们收集您的邮箱地址用于身份验证和额度管理。提交租金数据时收集的项目信息
+          注册时我们收集您的邮箱地址用于身份验证和权益管理。提交租金数据时收集的项目信息
           用于数据核验和行业分析。所有数据存储于加密数据库，不向第三方出售或转让。
         </p>
       </section>

@@ -5,12 +5,12 @@
 // GET  /api/agent/pipeline — Vercel Cron 定时任务（从 DB 读取计划）
 // ============================================================
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
 import { SsrHydrationScraper } from "@/agent/scrapers/ssr-hydration-scraper";
 import { batchUploadAssets } from "@/agent/uploader";
 
-const prisma = new PrismaClient();
+
 
 export async function POST(request: Request) {
   try {

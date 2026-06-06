@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma, PrismaClient, PropertyType } from "@prisma/client";
+import { Prisma, PropertyType } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
 
 type AgentPropertyType = "OFFICE" | "SHOPS" | "INDUSTRIAL";
 

@@ -1,9 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 const GENERIC_AUTH_ERROR = "账号或密码错误";
 
 export const authOptions: NextAuthOptions = {

@@ -44,11 +44,11 @@ export default function TermsPage() {
       </section>
 
       <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "var(--text-strong)" }}>5. 费用及会员额度</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: "var(--text-strong)" }}>5. 费用及会员权益</h2>
         <p style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>
           平台提供免费基础浏览与付费深度解锁相结合的服务模式。用户可通过提交真实租金数据、
-          邀请好友注册等方式获取额度，也可直接购买查看额度（99元/50次）或包月不限次查看（299元/月）。
-          所有费用支付后不支持退款，额度有效期自获取之日起180天内有效。
+          邀请好友注册等方式获取额度，也可直接购买查询权益（99元/50次）或包月不限次查看（299元/月）。
+          所有费用支付后不支持退款，权益有效期自获取之日起180天内有效。
         </p>
       </section>
 

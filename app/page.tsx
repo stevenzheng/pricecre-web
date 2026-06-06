@@ -13,16 +13,38 @@ import AIAnalysis from "@/components/AIAnalysis";
 import { showModal } from "@/components/Toast";
 
 import MapView from "@/components/MapView";
+import PropertyChat from "@/components/PropertyChat";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
 import { mockProperties } from "@/lib/mock-data";
 import { PropertyType } from "@/types/indicators";
 
+// Fetch real properties alongside mock data
+function useRealProperties() {
+  const [real, setReal] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/properties").then(r => r.json()).then(d => {
+      if (d.properties?.length) setReal(d.properties);
+    }).catch(() => {});
+  }, []);
+  return real;
+}
+
 export default function Home() {
+  const realProperties = useRealProperties();
   // Filters
   const [activeCity, setActiveCity] = useState<string>("全部");
   const [activeType, setActiveType] = useState<PropertyType | "ALL">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statFilter, setStatFilter] = useState<string | null>(null);
+
+  // Global Property Chat — mounted at page level, not inside cards
+  const [chatProp, setChatProp] = useState<any>(null);
+  useEffect(() => {
+    const handler = (e: Event) => setChatProp((e as CustomEvent).detail);
+    document.addEventListener("open-property-chat", handler);
+    return () => document.removeEventListener("open-property-chat", handler);
+  }, []);
 
   // UI State
   const [menuOpen, setMenuOpen] = useState(false);
@@ -61,13 +83,13 @@ export default function Home() {
     const urlParams = new URLSearchParams(window.location.search);
     const refFromUrl = urlParams.get("ref");
     if (refFromUrl) {
-      setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 3 次查看额度`);
+      setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 3 次查询权益`);
     } else {
       // Check localStorage for previously stored referral
       try {
         const stored = JSON.parse(localStorage.getItem("pricecre_referral") || "null");
         if (stored?.code) {
-          setReferralToast(`你已通过邀请链接进入，注册后双方各得 3 次查看额度`);
+          setReferralToast(`你已通过邀请链接进入，注册后双方各得 3 次查询权益`);
         }
       } catch {}
     }
@@ -196,7 +218,9 @@ export default function Home() {
           const resolved = resolveCity(cityName);
           if (resolved) { setActiveCity(resolved); setUserCity(resolved); }
         } catch {
-          // Silently fail — show all cities
+          // Fallback: default to Shanghai if all geo APIs fail
+          setActiveCity("上海");
+          setUserCity("上海");
         }
       }
       setGeoDetected(true);
@@ -238,11 +262,32 @@ export default function Home() {
     }
   }, [geoDetected]);
 
+  // Merge real + mock properties (real data takes priority)
+  const allProperties = useMemo(() => {
+    const merged = [...realProperties, ...mockProperties.filter(m => !realProperties.some(r => r.projectName === m.projectName))];
+    return merged.map(p => ({
+      ...p,
+      id: p.id || "",
+      projectName: p.projectName || "",
+      city: p.city || "",
+      district: p.district || "",
+      propertyType: p.propertyType || "OFFICE",
+      faceRent: Number(p.faceRent) || 0,
+      dataSource: p.dataSource || "",
+      dynamicIndicators: p.dynamicIndicators || {},
+    }));
+  }, [realProperties]);
+
   // Filtered data
   const filteredProperties = useMemo(() => {
-    return mockProperties.filter((p) => {
+    return allProperties.filter((p) => {
       if (activeCity !== "全部" && p.city !== activeCity) return false;
       if (activeType !== "ALL" && p.propertyType !== activeType) return false;
+      if (statFilter === "unlocked") {
+        const unlockedIds = new Set(JSON.parse(localStorage.getItem("pricecre_unlocked") || "[]"));
+        if (!unlockedIds.has(p.id as any)) return false;
+      }
+      if (statFilter === "recent" && p.dataSource !== "成交量") return false;
       if (
         searchQuery &&
         !p.projectName.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -320,11 +365,13 @@ export default function Home() {
 
   const handleCityChange = useCallback((city: string) => {
     setActiveCity(city);
+    setMobileTab("market");
     setMenuOpen(false);
   }, []);
 
   const handleTypeChange = useCallback((type: PropertyType | "ALL") => {
     setActiveType(type);
+    setMobileTab("market");
     setMenuOpen(false);
   }, []);
 
@@ -537,6 +584,13 @@ export default function Home() {
               style={{ background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent)", borderColor: "var(--accent)", opacity: 0.9 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/></svg>
               {referralToast}
+              <a href="/?tab=profile"
+                style={{
+                  marginLeft: 4, padding: "3px 12px", borderRadius: 9999, background: "var(--accent)", color: "#FFFFFF",
+                  fontSize: 11, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap", cursor: "pointer",
+                }}>
+                立即注册
+              </a>
               <button onClick={() => setReferralToast(null)} className="ml-auto text-[var(--text-hint)] hover:text-[var(--text)]">&times;</button>
             </div>
           </div>
@@ -547,19 +601,25 @@ export default function Home() {
         <div className="border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="grid grid-cols-4 gap-0">
-              <div className="stat-item">
+              <div className="stat-item" onClick={() => { setActiveCity("全部"); setActiveType("ALL"); setSearchQuery(""); setStatFilter(null); }}
+                style={{ cursor: "pointer" }} title="点击查看全部资产">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>覆盖资产</div>
                 <div className="stat-value">{stats.total}</div>
               </div>
-              <div className="stat-item">
+              <div className="stat-item" onClick={() => setStatFilter(statFilter === "unlocked" ? null : "unlocked")}
+                style={{ cursor: "pointer", background: statFilter === "unlocked" ? "rgba(0,197,112,0.06)" : undefined, borderRadius: statFilter === "unlocked" ? 8 : undefined }}
+                title="点击筛选已解锁资产">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z"/><path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z"/></svg>已解锁</div>
-                <div className="stat-value" style={{ color: "var(--positive)" }}>{stats.unlocked}</div>
+                <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{stats.unlocked}</div>
               </div>
-              <div className="stat-item">
+              <div className="stat-item" onClick={() => setMobileTab("market")}
+                style={{ cursor: "pointer" }} title="点击查看城市分布">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>覆盖城市</div>
                 <div className="stat-value">{stats.cities}</div>
               </div>
-              <div className="stat-item">
+              <div className="stat-item" onClick={() => setStatFilter(statFilter === "recent" ? null : "recent")}
+                style={{ cursor: "pointer", background: statFilter === "recent" ? "rgba(0,112,243,0.06)" : undefined, borderRadius: statFilter === "recent" ? 8 : undefined }}
+                title="点击筛选近期成交">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>成交量</div>
                 <div className="stat-value">{stats.volume}</div>
               </div>
@@ -657,7 +717,7 @@ export default function Home() {
         {/* Property Cards */}
         <div className="max-w-7xl mx-auto px-4 pb-4">
           {filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {filteredProperties.map((property) => {
                 const isRealUnlocked = unlockedIds.has(property.id);
                 const realIndicators = unlockedData[property.id];
@@ -721,10 +781,10 @@ export default function Home() {
             </div>
 
             <h3 className="text-base font-bold mb-1.5" style={{ color: "var(--text-inverse)" }}>
-              邀请好友 · 双方各得查看额度
+              邀请好友 · 双方各得查询权益
             </h3>
             <p className="text-xs mb-4 opacity-80" style={{ color: "var(--text-inverse)" }}>
-              好友通过你的专属链接注册，双方各获得 3 次免费查看额度
+              好友通过你的专属链接注册，双方各获得 3 次免费查询权益
             </p>
 
             <div className="flex items-center gap-2 max-w-xs mx-auto">
@@ -770,7 +830,7 @@ export default function Home() {
         )}
 
         {/* Map Tab */}
-        {mobileTab === "map" && <MapView onSelectProperty={handleMapSelectProperty} userCoords={userCoords} />}
+        {mobileTab === "map" && <MapView properties={allProperties} onSelectProperty={handleMapSelectProperty} userCoords={userCoords} />}
 
         {/* Share Tab */}
         {mobileTab === "share" && <ShareCenter />}
@@ -792,6 +852,7 @@ export default function Home() {
       <Modal />
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
+      {chatProp && <PropertyChat property={chatProp} onClose={() => setChatProp(null)} />}
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
   );

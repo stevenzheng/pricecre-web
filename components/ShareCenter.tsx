@@ -87,10 +87,10 @@ export default function ShareCenter() {
       {/* Title */}
       <div className="text-center">
         <h2 className="text-lg font-medium mb-1" style={{ color: "var(--text-strong)" }}>
-          提交租金数据，获取累计查看额度
+          提交租金数据，获取累计查询权益
         </h2>
         <p className="text-[11px] mt-2 px-4 py-2 rounded-lg inline-block" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-          每提交一次真实确认的租金交易数据，可获得 8 次资产数据查看额度
+          每提交一次真实确认的租金交易数据，可获得 8 次资产数据查询权益
         </p>
       </div>
 
@@ -179,14 +179,14 @@ export default function ShareCenter() {
                 <span className="text-xs font-medium" style={{ color: "var(--positive)" }}>数据已提报 · 审核通过后自动并网</span>
               </div>
               <code className="px-5 py-2 rounded-lg text-lg font-medium inline-block" style={{ background: "var(--bg-surface)", color: "var(--accent)", fontFamily: "var(--font-mono)", letterSpacing: "0.15em" }}>{redeemCode}</code>
-              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>数据核准后额度自动到账 · 也可手动输入兑换码激活</div>
+              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>数据核准后权益自动到账 · 也可手动输入兑换码激活</div>
             </div>
           ) : (
             <button type="submit" className="btn-primary w-full text-sm">提交真实成交数据</button>
           )}
           {!submitted && (
             <p className="text-[10px] text-center leading-relaxed px-2" style={{ color: "var(--text-hint)" }}>
-              提交数据后需经平台核验，验证通过后通过您的注册邮箱发送激活码。请确保提交的信息真实有效，虚假数据将被驳回且不予发放额度。
+              提交数据后需经平台核验，验证通过后通过您的注册邮箱发送激活码。请确保提交的信息真实有效，虚假数据将被驳回且不予发放权益。
             </p>
           )}
         </form>
@@ -201,7 +201,7 @@ export default function ShareCenter() {
           <span className="text-xs font-medium" style={{ color: "var(--accent)" }}>激活码兑换</span>
         </div>
         <p className="text-[10px] mb-3" style={{ color: "var(--text-hint)" }}>
-          通过邮箱收到的 6 位激活码在此兑换，激活后额度自动到账
+          通过邮箱收到的 6 位激活码在此兑换，激活后权益自动到账
         </p>
         <div className="flex gap-2">
           <input
@@ -230,7 +230,7 @@ export default function ShareCenter() {
                 });
                 const data = await res.json();
                 if (data.success) {
-                  showModal(`激活成功！${data.credits} 次查看额度已到账`);
+                  showModal(`激活成功！${data.credits} 次查询权益已到账`);
                 } else {
                   showModal(data.error || "激活码无效");
                 }

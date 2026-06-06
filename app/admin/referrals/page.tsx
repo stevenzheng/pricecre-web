@@ -39,30 +39,30 @@ export default function ReferralsAdminPage() {
   };
 
   return (
-    <div className="gh-content-inner">
-      <div className="gh-page-header">
-        <h1 className="gh-page-title">邀请码管理</h1>
-        <p className="gh-page-desc">{users.length} 个用户 · {users.reduce((s, u) => s + u.referralsCount, 0)} 次裂变转化</p>
+    <div className="vl-content-inner">
+      <div className="vl-page-header">
+        <h1 className="vl-page-title">邀请码管理</h1>
+        <p className="vl-page-desc">{users.length} 个用户 · {users.reduce((s, u) => s + u.referralsCount, 0)} 次裂变转化</p>
       </div>
 
-      {toast && <div className="gh-toast" style={{ marginBottom: 16 }} onClick={() => setToast("")}>{toast}</div>}
+      {toast && <div className="vl-toast" style={{ marginBottom: 16 }} onClick={() => setToast("")}>{toast}</div>}
 
-      <div className="gh-action-bar">
-        <div className="gh-filter-tabs">
+      <div className="vl-action-bar">
+        <div className="vl-filter-tabs">
           {(["users", "records"] as const).map((t) => (
-            <button key={t} className={`gh-filter-tab${tab === t ? " active" : ""}`} onClick={() => setTab(t)}>
+            <button key={t} className={`vl-filter-tab${tab === t ? " active" : ""}`} onClick={() => setTab(t)}>
               {t === "users" ? "用户邀请码" : "裂变记录"}
             </button>
           ))}
         </div>
-        <button onClick={fetchData} className="gh-btn-text">刷新</button>
+        <button onClick={fetchData} className="vl-btn-ghost">刷新</button>
       </div>
 
       {loading ? (
-        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
+        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
       ) : tab === "users" ? (
-        <div className="gh-table-wrap">
-          <table className="gh-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr>
                 <th>用户邮箱</th><th>邀请码</th><th style={{ width: 100 }}>链接</th>
@@ -75,20 +75,20 @@ export default function ReferralsAdminPage() {
               {users.map((u) => (
                 <tr key={u.id}>
                   <td style={{ fontWeight: 600 }}>{u.email}</td>
-                  <td className="gh-td-mono">{u.myReferralCode || "—"}</td>
-                  <td className="gh-td-hint" style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis" }}>pricecre.com/r/{u.myReferralCode}</td>
-                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{u.referralViewCount}</td>
-                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{u.purchasedViewCount}</td>
-                  <td className="gh-td-mono" style={{ textAlign: "right", color: (u.lifetimeReferralEarned ?? 0) >= 100 ? "#E64C4C" : "#30CF43" }}>
+                  <td className="vl-td-mono">{u.myReferralCode || "—"}</td>
+                  <td className="vl-td-hint" style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis" }}>pricecre.com/r/{u.myReferralCode}</td>
+                  <td className="vl-td-mono" style={{ textAlign: "right" }}>{u.referralViewCount}</td>
+                  <td className="vl-td-mono" style={{ textAlign: "right" }}>{u.purchasedViewCount}</td>
+                  <td className="vl-td-mono" style={{ textAlign: "right", color: (u.lifetimeReferralEarned ?? 0) >= 100 ? "#EE0000" : "#0070F3" }}>
                     {u.lifetimeReferralEarned ?? 0}
                     {(u.lifetimeReferralEarned ?? 0) >= 100 && " 🔒"}
                   </td>
-                  <td className="gh-td-mono" style={{ textAlign: "right" }}>{u.referralsCount}</td>
+                  <td className="vl-td-mono" style={{ textAlign: "right" }}>{u.referralsCount}</td>
                   <td>
                     <div style={{ display: "flex", gap: 4 }}>
-                      <button onClick={() => handleRegenerate(u.id)} className="gh-btn-ghost gh-btn-sm">重生成</button>
+                      <button onClick={() => handleRegenerate(u.id)} className="vl-btn-ghost vl-btn-sm">重生成</button>
                       {(u.lifetimeReferralEarned ?? 0) >= 100 && (
-                        <button onClick={() => handleResetLifetime(u.id)} className="gh-btn-danger gh-btn-sm">解锁</button>
+                        <button onClick={() => handleResetLifetime(u.id)} className="vl-btn-danger vl-btn-sm">解锁</button>
                       )}
                     </div>
                   </td>
@@ -98,8 +98,8 @@ export default function ReferralsAdminPage() {
           </table>
         </div>
       ) : (
-        <div className="gh-table-wrap">
-          <table className="gh-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr>
                 <th>邀请人</th><th>邀请码</th><th>被邀请人</th><th>状态</th><th>时间</th>
@@ -109,10 +109,10 @@ export default function ReferralsAdminPage() {
               {records.map((r) => (
                 <tr key={r.id}>
                   <td style={{ fontWeight: 600 }}>{r.referrerEmail}</td>
-                  <td className="gh-td-mono">{r.referrerCode}</td>
+                  <td className="vl-td-mono">{r.referrerCode}</td>
                   <td>{r.refereeEmail}</td>
-                  <td><span className={`gh-badge ${r.rewarded ? "gh-badge-success" : "gh-badge-warning"}`}>{r.rewarded ? "已奖励" : "待奖励"}</span></td>
-                  <td className="gh-td-hint">{new Date(r.createdAt).toLocaleString("zh-CN")}</td>
+                  <td><span className={`vl-badge ${r.rewarded ? "vl-badge-success" : "vl-badge-warning"}`}>{r.rewarded ? "已奖励" : "待奖励"}</span></td>
+                  <td className="vl-td-hint">{new Date(r.createdAt).toLocaleString("zh-CN")}</td>
                 </tr>
               ))}
             </tbody>

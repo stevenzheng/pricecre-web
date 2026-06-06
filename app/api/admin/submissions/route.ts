@@ -3,11 +3,9 @@
  * POST /api/admin/submissions — approve/reject a submission
  */
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { sendEmail, activationEmailTemplate } from "@/lib/email";
 import { createHash } from "crypto";
-
-const prisma = new PrismaClient();
 
 function generateAuthCode(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";

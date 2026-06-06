@@ -55,17 +55,73 @@ const districtCoords: Record<string, [number, number]> = {
   "灞桥区": [34.27, 109.07], "高陵区": [34.53, 109.09], "临潼区": [34.37, 109.22], "西咸新区": [34.26, 108.77], "阎良区": [34.66, 109.23],
 };
 
+// Precise coordinates for known properties (projectName → [lat, lng])
+const propertyCoords: Record<string, [number, number]> = {
+  "上海中心大厦": [31.235, 121.501],
+  "上海环球金融中心": [31.237, 121.503],
+  "金茂大厦": [31.237, 121.502],
+  "上海国金中心": [31.236, 121.501],
+  "恒隆广场": [31.230, 121.451],
+  "上海来福士广场": [31.233, 121.477],
+  "港汇恒隆广场": [31.195, 121.437],
+  "上海嘉里中心": [31.226, 121.450],
+  "上海太平金融大厦": [31.237, 121.504],
+  "上海东亚银行大厦": [31.238, 121.504],
+  "长泰国际金融中心": [31.234, 121.515],
+  "上海会德丰国际广场": [31.224, 121.447],
+  "上海企业天地": [31.231, 121.472],
+  "上海环贸广场": [31.209, 121.451],
+  "上海新天地": [31.219, 121.474],
+  "上海K11购物艺术中心": [31.228, 121.473],
+  "上海太古汇": [31.226, 121.453],
+  "上海大悦城": [31.242, 121.469],
+  "上海正大广场": [31.239, 121.495],
+  "上海龙之梦购物中心": [31.221, 121.420],
+  "上海月星环球港": [31.234, 121.412],
+  "上海万象城": [31.165, 121.371],
+  "上海张江高科技园": [31.205, 121.598],
+  "上海漕河泾开发区": [31.165, 121.395],
+  "上海金桥出口加工区": [31.263, 121.619],
+  "上海外高桥保税区": [31.347, 121.590],
+  "上海紫竹科学园区": [31.022, 121.448],
+  "上海临港产业区": [30.910, 121.920],
+  "上海康桥工业园": [31.130, 121.583],
+  "上海松江经济技术开发区": [31.033, 121.223],
+  "紫荆广场": [31.229, 121.545],
+};
+
+interface Property {
+  id: string;
+  projectName: string;
+  city: string;
+  district: string;
+  propertyType: string;
+  faceRent: number;
+}
+
 interface MapViewProps {
+  properties?: Property[];
   onSelectProperty?: (id: string) => void;
   userCoords?: { lat: number; lng: number } | null;
 }
 
-export default function MapView({ onSelectProperty, userCoords }: MapViewProps) {
+// Hash the project name to a deterministic seed for jitter
+function seedFromName(name: string): number {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+  return h;
+}
+
+export default function MapView({ properties, onSelectProperty, userCoords }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [activeCity, setActiveCity] = useState<string>("上海");
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // Use provided properties or fallback to mock data
+  const displayProperties = properties && properties.length > 0 ? properties : mockProperties;
 
   // Load Leaflet once
   useEffect(() => {
@@ -127,16 +183,23 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       }
     });
 
-    const cityProps = mockProperties.filter((p) => p.city === activeCity);
+    const cityProps = displayProperties.filter((p) => p.city === activeCity);
     const usedCoords = new Set<string>();
 
     cityProps.forEach((p) => {
-      let [lat, lng] = districtCoords[p.district] || cityCenter[activeCity] || [31.23, 121.47];
-
-      // Add slight jitter to avoid exact overlap
-      const jitter = 0.003;
-      lat += (Math.random() - 0.5) * jitter;
-      lng += (Math.random() - 0.5) * jitter;
+      // Use precise coordinate if available, otherwise fall back to district center
+      let lat: number, lng: number;
+      const exact = propertyCoords[p.projectName];
+      const jitter = 0.004;
+      if (exact) {
+        [lat, lng] = exact;
+      } else {
+        [lat, lng] = districtCoords[p.district] || cityCenter[activeCity] || [31.23, 121.47];
+        // Deterministic jitter based on project name (not random)
+        const seed = seedFromName(p.projectName);
+        lat += ((seed % 100) / 100 - 0.5) * jitter;
+        lng += (((seed >> 8) % 100) / 100 - 0.5) * jitter;
+      }
 
       const coordKey = `${lat.toFixed(5)},${lng.toFixed(5)}`;
       if (usedCoords.has(coordKey)) {
@@ -153,16 +216,15 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
       const accent = isDark ? "#00C570" : "#2563EB";
       const textHint = isDark ? "#71717A" : "#9CA3AF";
 
-      const labelHtml = `<div style="background:${bg};border:1px solid ${border};border-radius:10px;padding:4px 10px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,0.18);font-size:11px;cursor:pointer;font-family:var(--font-sans),sans-serif;pointer-events:auto">
-          <span style="font-weight:600;color:${textStrong}">${p.projectName}</span>
-          <span style="margin-left:8px;font-family:monospace;font-weight:700;color:${accent}">¥${p.faceRent.toFixed(0)}</span>
-          <span style="font-size:9px;color:${textHint}">/㎡/天</span>
+      const labelHtml = `<div style="background:${bg};border:1px solid ${border};border-radius:10px;padding:6px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.18);cursor:pointer;font-family:var(--font-sans),sans-serif;pointer-events:auto;text-align:center;line-height:1.35">
+          <div style="font-weight:600;color:${textStrong};white-space:nowrap;font-size:12px">${p.projectName}</div>
+          <div style="font-family:monospace;font-weight:700;color:${accent};font-size:13px">¥${p.faceRent.toFixed(0)}<span style="font-size:10px;font-weight:400;color:${textHint}">/㎡/天</span></div>
         </div>`;
 
       const icon = L.divIcon({
         className: "pricecre-map-marker",
         html: labelHtml,
-        iconSize: [140, 28],
+        iconSize: [140, 42],
         iconAnchor: [70, 14],
       });
 
@@ -205,13 +267,18 @@ export default function MapView({ onSelectProperty, userCoords }: MapViewProps) 
             {city}
           </button>
         ))}
+        <button onClick={() => setFullscreen(!fullscreen)} className="ml-auto w-7 h-7 rounded flex items-center justify-center hover:bg-[var(--panel)]" title={fullscreen ? "退出全屏" : "全屏显示"}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2">
+            {fullscreen ? <><polyline points="4 14 4 20 10 20"/><polyline points="20 10 20 4 14 4"/><line x1="14" y1="10" x2="20" y2="4"/><line x1="4" y1="20" x2="10" y2="14"/></> : <><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></>}
+          </svg>
+        </button>
       </div>
 
       {/* Map container */}
       <div
         ref={mapRef}
         className="flex-1 w-full"
-        style={{ minHeight: "300px", background: "#d5d5d5" }}
+        style={{ minHeight: fullscreen ? "100vh" : "300px", background: "#d5d5d5", ...(fullscreen ? { position: "fixed", inset: 0, zIndex: 2000 } : {}) }}
       >
         {!loaded && (
           <div className="w-full h-full flex items-center justify-center">

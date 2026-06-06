@@ -77,7 +77,7 @@ export interface DynamicIndicators {
   culturalPremiumScore?: number;
 
   // 物业服务
-  pmOperatorTier?: number;
+  pmOperatorTier?: number | string;
   facilitySlaRating?: number;
   maintenanceScore?: number;
 

@@ -2,9 +2,9 @@
 // GET /api/agent/schedule — 列出所有计划
 // POST /api/agent/schedule — 创建新计划
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
 
 export async function GET() {
   try {

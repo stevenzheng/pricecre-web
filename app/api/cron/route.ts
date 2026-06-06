@@ -3,12 +3,12 @@
  * Automatically runs full crawl pipeline on schedule
  */
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
 import { SsrHydrationScraper } from "@/agent/scrapers/ssr-hydration-scraper";
 import { batchUploadAssets } from "@/agent/uploader";
 
-const prisma = new PrismaClient();
+
 
 export async function GET(request: NextRequest) {
   // Verify cron secret to prevent unauthorized access

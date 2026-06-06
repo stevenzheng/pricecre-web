@@ -1,8 +1,6 @@
 // app/api/admin/field-settings/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,6 +11,39 @@ export async function GET(request: Request) {
       orderBy: { sortOrder: "asc" },
     });
     return NextResponse.json({ fields });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const fields: any[] = body.fields || [];
+    const moduleType = (body.moduleType || "OFFICE") as any;
+
+    // Upsert each field to persist label, active state, etc.
+    for (const f of fields) {
+      await prisma.fieldMetadata.upsert({
+        where: { fieldKey_moduleType: { fieldKey: f.key, moduleType } },
+        create: {
+          fieldKey: f.key,
+          fieldName: f.label,
+          fieldType: f.format || "text",
+          moduleType,
+          isDisplayed: f.isActive,
+          isLocked: f.isPremium ?? true,
+          sortOrder: 0,
+        },
+        update: {
+          fieldName: f.label,
+          isDisplayed: f.isActive,
+          isLocked: f.isPremium ?? true,
+        },
+      });
+    }
+
+    return NextResponse.json({ success: true, count: fields.length });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

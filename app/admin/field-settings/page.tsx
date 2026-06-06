@@ -1,157 +1,302 @@
-// app/admin/field-settings/page.tsx — Ghost Admin Field Settings
+// app/admin/field-settings/page.tsx — Field Settings (3 property-type tabs, categorized, Vercel-style)
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface FieldMeta {
   key: string; label: string; category: string;
   isActive: boolean; isPremium: boolean; format: string;
+  propertyType: "OFFICE" | "SHOPS" | "INDUSTRIAL";
 }
 
-const CATEGORIES: Record<string, string> = {
-  core: "核心指标", valuation: "估值指标", lease: "租约质量",
-  office: "写字楼效率", shops: "商业零售", macro: "宏观合规",
-  dev: "投前建造", ops: "运营效率", exit: "投后退出",
-  economy: "经济政策", social: "舆情社群", industrial: "产业园",
-  retail: "零售生态", migration: "企业迁入", brand: "品牌选址",
-  culture: "文化艺术", service: "物业品牌", debt: "资本债务", population: "人口统计",
+const TYPE_LABELS: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业零售", INDUSTRIAL: "产业园" };
+
+const TYPE_CATEGORIES: Record<string, Record<string, string>> = {
+  OFFICE: {
+    core: "核心指标", valuation: "估值指标", lease: "租约质量",
+    office: "写字楼效率", ops: "运营效率", exit: "投后退出",
+    service: "物业品牌", debt: "资本债务",
+    macro: "宏观合规", social: "舆情社群", migration: "企业迁入",
+  },
+  SHOPS: {
+    core: "核心指标", valuation: "估值指标", lease: "租约质量",
+    shops: "商业零售", retail: "零售生态", brand: "品牌选址",
+    ops: "运营效率", debt: "资本债务",
+    macro: "宏观合规", social: "舆情社群", culture: "文化艺术",
+  },
+  INDUSTRIAL: {
+    core: "核心指标", valuation: "估值指标",
+    industrial: "产业园", ops: "运营效率", exit: "投后退出",
+    service: "物业品牌", debt: "资本债务",
+    macro: "宏观合规", migration: "企业迁入",
+  },
+};
+
+const catIcons: Record<string, string> = {
+  "核心指标": "◆", "估值指标": "◈", "租约质量": "◎", "写字楼效率": "◇", "商业零售": "▣",
+  "宏观合规": "○", "投前建造": "△", "运营效率": "◉", "投后退出": "▽",
+  "经济政策": "◊", "舆情社群": "☆", "产业园": "⬡", "零售生态": "▨",
+  "企业迁入": "▷", "品牌选址": "◁", "文化艺术": "♢", "物业品牌": "✧",
+  "资本债务": "⬟", "人口统计": "⬢",
 };
 
 export default function FieldSettingsPage() {
   const [fields, setFields] = useState<FieldMeta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [activeType, setActiveType] = useState<"OFFICE" | "SHOPS" | "INDUSTRIAL">("OFFICE");
   const [filter, setFilter] = useState("all");
+  const [saving, setSaving] = useState(false);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/admin/field-settings").then((r) => r.json()).then((d) => {
-      setFields(d.fields?.length ? d.fields : getDefaultFields());
-    }).catch(() => setFields(getDefaultFields())).finally(() => setLoading(false));
-  }, []);
+    fetch("/api/admin/field-settings?type=" + activeType).then(r => r.json()).then(d => {
+      if (d.fields?.length) {
+        // Map API response: moduleType → propertyType, fieldName → label, fieldKey → key, isDisplayed → isActive
+        setFields(d.fields.map((f: any) => ({
+          key: f.fieldKey, label: f.fieldName, category: f.category || "core",
+          isActive: f.isDisplayed, isPremium: f.isLocked, format: f.fieldType || "text",
+          propertyType: f.moduleType || activeType,
+        })));
+      } else {
+        setFields(getDefaultFields(activeType));
+      }
+    }).catch(() => setFields(getDefaultFields(activeType))).finally(() => setLoading(false));
+  }, [activeType]);
 
-  const toggleField = (key: string) => {
-    setFields((prev) => prev.map((f) => (f.key === key ? { ...f, isActive: !f.isActive } : f)));
-  };
-
-  const handleSave = async () => {
+  const toggleField = async (key: string, currentActive: boolean) => {
+    setFields(prev => prev.map(f => f.key === key ? { ...f, isActive: !f.isActive } : f));
     setSaving(true);
-    try { await fetch("/api/admin/field-settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields }) }); } catch {}
+    try {
+      const updated = fields.map(f => f.key === key ? { ...f, isActive: !currentActive } : f);
+      await fetch("/api/admin/field-settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: updated, moduleType: activeType }),
+      });
+    } catch { }
     setSaving(false);
   };
 
-  const filtered = filter === "all" ? fields : fields.filter((f) => f.isActive === (filter === "active"));
+  const startEdit = (f: FieldMeta) => { setEditingKey(f.key); setEditValue(f.label); setTimeout(() => inputRef.current?.focus(), 50); };
+
+  const saveEdit = async () => {
+    if (!editingKey) return;
+    const newLabel = editValue.trim();
+    if (!newLabel) { setEditingKey(null); return; }
+    setFields(prev => prev.map(f => f.key === editingKey ? { ...f, label: newLabel } : f));
+    setEditingKey(null);
+    setSaving(true);
+    try {
+      const updated = fields.map(f => f.key === editingKey ? { ...f, label: newLabel } : f);
+      await fetch("/api/admin/field-settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: updated, moduleType: activeType }),
+      });
+    } catch { }
+    setSaving(false);
+  };
+
+  const typeFields = fields.filter(f => f.propertyType === activeType);
+  const activeCount = typeFields.filter(f => f.isActive).length;
+  const filtered = filter === "all" ? typeFields : typeFields.filter(f => f.isActive === (filter === "active"));
+
+  const catMap = new Map<string, FieldMeta[]>();
+  const cats = TYPE_CATEGORIES[activeType];
+  for (const [ck, cn] of Object.entries(cats)) {
+    catMap.set(cn, []);
+  }
+  for (const f of filtered) {
+    const cn = cats[f.category as keyof typeof cats] || f.category;
+    if (catMap.has(cn)) catMap.get(cn)!.push(f);
+  }
 
   return (
-    <div className="gh-content-inner">
-      <div className="gh-page-header">
-        <h1 className="gh-page-title">字段配置</h1>
-        <p className="gh-page-desc">47 项精算指标 · {fields.filter((f) => f.isActive).length} 项启用</p>
+    <div className="vl-content-inner">
+      <div className="vl-page-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <div>
+          <h1 className="vl-page-title">字段配置</h1>
+          <p className="vl-page-desc">
+            {TYPE_LABELS[activeType]} · {typeFields.length} 项指标 · {activeCount} 项启用
+            {saving && <span style={{ color: "#0070F3", marginLeft: 8, fontSize: 12 }}>⏳ 保存中...</span>}
+          </p>
+        </div>
       </div>
 
-      <div className="gh-action-bar">
-        <div className="gh-filter-tabs">
-          {(["all", "active", "inactive"] as const).map((s) => (
-            <button key={s} className={`gh-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}>
+      {/* Property Type Tabs */}
+      <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #E5E5E5", marginBottom: 20 }}>
+        {(["OFFICE", "SHOPS", "INDUSTRIAL"] as const).map(t => (
+          <button key={t} onClick={() => { setActiveType(t); setFilter("all"); }}
+            style={{
+              padding: "8px 20px", border: "none", borderBottom: `2px solid ${activeType === t ? "#171717" : "transparent"}`,
+              borderRadius: 0, background: "transparent",
+              fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: activeType === t ? 600 : 500,
+              color: activeType === t ? "#171717" : "#737373", letterSpacing: "-0.01em",
+              cursor: "pointer", marginBottom: -1, transition: "all 0.12s",
+            }}
+            onMouseEnter={e => { if (activeType !== t) e.currentTarget.style.color = "#171717"; }}
+            onMouseLeave={e => { if (activeType !== t) e.currentTarget.style.color = "#737373"; }}
+          >
+            {TYPE_LABELS[t]}
+          </button>
+        ))}
+      </div>
+
+      {/* Filter tabs */}
+      <div className="vl-action-bar" style={{ marginBottom: 16 }}>
+        <div className="vl-filter-tabs" style={{ borderBottom: "none" }}>
+          {(["all", "active", "inactive"] as const).map(s => (
+            <button key={s} className={`vl-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}
+              style={{ borderBottom: filter === s ? "2px solid #171717" : "2px solid transparent", padding: "6px 14px" }}>
               {s === "all" ? "全部" : s === "active" ? "已启用" : "已隐藏"}
             </button>
           ))}
         </div>
-        <button onClick={handleSave} disabled={saving} className="gh-btn-primary" style={{ fontSize: 13 }}>
-          {saving ? "保存中..." : "保存配置"}
-        </button>
       </div>
 
+      {/* Content */}
       {loading ? (
-        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
+        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
       ) : (
-        <div className="gh-table-wrap">
-          <table className="gh-table">
-            <thead>
-              <tr>
-                <th style={{ width: 40 }}>#</th>
-                <th>指标名称</th>
-                <th>分类</th>
-                <th>格式</th>
-                <th style={{ width: 80 }}>状态</th>
-                <th style={{ width: 80 }} />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((f, i) => (
-                <tr key={f.key} style={{ opacity: f.isActive ? 1 : 0.5 }}>
-                  <td className="gh-td-hint">{i + 1}</td>
-                  <td style={{ fontWeight: 600 }}>{f.label}</td>
-                  <td className="gh-td-hint">{CATEGORIES[f.category] || f.category}</td>
-                  <td className="gh-td-mono">{f.format}</td>
-                  <td>
-                    <span className={`gh-badge ${f.isActive ? "gh-badge-success" : "gh-badge-danger"}`}>
-                      {f.isActive ? "启用" : "隐藏"}
-                    </span>
-                  </td>
-                  <td>
-                    <button onClick={() => toggleField(f.key)} className="gh-btn-text gh-btn-sm"
-                      style={{ color: f.isActive ? "#E64C4C" : "#30CF43" }}>
-                      {f.isActive ? "隐藏" : "启用"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {Array.from(catMap.entries()).map(([catName, catFields], ci) => {
+            if (catFields.length === 0) return null;
+            const bgColors = ["#F8FAFC", "#F5F7FA", "transparent"];
+            const bg = bgColors[ci % 3];
+            return (
+              <div key={catName} style={{
+                background: bg, borderRadius: 8, padding: "12px 14px",
+                border: bg === "transparent" ? "none" : "1px solid rgba(0,0,0,0.04)",
+              }}>
+                <h3 style={{ fontSize: 11, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-sans)", letterSpacing: "-0.01em", margin: "0 0 8px" }}>
+                  {catIcons[catName] && <span style={{ marginRight: 6, fontSize: 10 }}>{catIcons[catName]}</span>}
+                  {catName} · {catFields.filter(f => f.isActive).length}/{catFields.length}
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 5 }}>
+                  {catFields.map(f => (
+                    <div key={f.key} style={{
+                      display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6,
+                      background: "#FFFFFF", border: "1px solid #E5E5E5",
+                      opacity: f.isActive ? 1 : 0.45, transition: "opacity 0.15s",
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {editingKey === f.key ? (
+                          <input ref={inputRef} className="vl-input" value={editValue}
+                            onChange={e => setEditValue(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingKey(null); }}
+                            onBlur={saveEdit} style={{ padding: "3px 6px", fontSize: 12 }} />
+                        ) : (
+                          <span onClick={() => startEdit(f)}
+                            style={{ fontSize: 12, fontWeight: 600, color: f.isActive ? "#171717" : "#A3A3A3", fontFamily: "var(--font-sans)", cursor: "pointer", borderBottom: "1px dashed transparent", textDecoration: f.isActive ? "none" : "line-through" }}
+                            onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "#D4D4D4")}
+                            onMouseLeave={e => (e.currentTarget.style.borderBottomColor = "transparent")}>{f.label}</span>
+                        )}
+                      </div>
+                      <button onClick={() => toggleField(f.key, f.isActive)}
+                        style={{ flexShrink: 0, width: 36, height: 20, borderRadius: 9999, border: "none", cursor: "pointer", background: f.isActive ? "#171717" : "#D4D4D4", position: "relative", transition: "background 0.15s" }}>
+                        <span style={{ position: "absolute", top: "50%", left: f.isActive ? "auto" : 2, right: f.isActive ? 2 : "auto", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: "#FFFFFF", transition: "all 0.15s" }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function getDefaultFields(): FieldMeta[] {
-  return [
-    { key: "netEffectiveRent", label: "净有效租金", category: "core", isActive: true, isPremium: true, format: "currency" },
-    { key: "capRate", label: "资本化率", category: "valuation", isActive: true, isPremium: true, format: "percent" },
-    { key: "priceToRent", label: "售租比", category: "valuation", isActive: true, isPremium: true, format: "ratio" },
-    { key: "wale", label: "加权平均租期", category: "lease", isActive: true, isPremium: true, format: "number" },
-    { key: "retentionRate", label: "租户留存率", category: "lease", isActive: true, isPremium: true, format: "percent" },
-    { key: "tenantConcentration", label: "租户集中度", category: "lease", isActive: true, isPremium: true, format: "percent" },
-    { key: "netAbsorption", label: "净吸纳量", category: "office", isActive: true, isPremium: false, format: "number" },
-    { key: "reversionRate", label: "续租调升率", category: "office", isActive: true, isPremium: false, format: "percent" },
-    { key: "spaceDensity", label: "工位利用率", category: "office", isActive: true, isPremium: false, format: "percent" },
-    { key: "salesEfficiency", label: "坪效", category: "shops", isActive: true, isPremium: false, format: "currency" },
-    { key: "rentToSales", label: "租金占营业额比", category: "shops", isActive: true, isPremium: false, format: "percent" },
-    { key: "footfallTicketSize", label: "客单价", category: "shops", isActive: false, isPremium: false, format: "text" },
-    { key: "esgCertification", label: "绿色认证", category: "macro", isActive: true, isPremium: false, format: "text" },
-    { key: "landAcquisitionCost", label: "土地获取楼面价", category: "dev", isActive: false, isPremium: true, format: "currency" },
-    { key: "capex", label: "单位面积CapEx", category: "dev", isActive: false, isPremium: true, format: "currency" },
-    { key: "npiMargin", label: "净物业收入利润率", category: "ops", isActive: true, isPremium: true, format: "percent" },
-    { key: "collectionRate", label: "租金收缴率", category: "ops", isActive: true, isPremium: true, format: "percent" },
-    { key: "exitCapRate", label: "大宗交易对标单价", category: "exit", isActive: false, isPremium: true, format: "currency" },
-    { key: "noiGrowthCagr", label: "3年NOI复合增长率", category: "exit", isActive: true, isPremium: true, format: "percent" },
-    { key: "submarketVacancy", label: "商圈空置率", category: "economy", isActive: true, isPremium: false, format: "percent" },
-    { key: "policySubsidyLevel", label: "政策扶持级数", category: "economy", isActive: false, isPremium: false, format: "text" },
-    { key: "yieldSpread", label: "无风险利率利差", category: "economy", isActive: false, isPremium: true, format: "percent" },
-    { key: "kolBuzzIndex", label: "KOL热度指数", category: "social", isActive: true, isPremium: false, format: "number" },
-    { key: "negativeSentimentRate", label: "负面声量率", category: "social", isActive: true, isPremium: true, format: "percent" },
-    { key: "employeeSatisfaction", label: "员工幸福度", category: "social", isActive: false, isPremium: false, format: "number" },
-    { key: "energyOutputRatio", label: "综合电产比", category: "industrial", isActive: false, isPremium: false, format: "ratio" },
-    { key: "taxPerMu", label: "亩均税收达成率", category: "industrial", isActive: false, isPremium: false, format: "percent" },
-    { key: "heavyLoadRatio", label: "重载车位配比", category: "industrial", isActive: false, isPremium: false, format: "text" },
-    { key: "anchorRatio", label: "主力店面积占比", category: "retail", isActive: false, isPremium: false, format: "percent" },
-    { key: "churnRate", label: "商户掉铺率", category: "retail", isActive: true, isPremium: false, format: "percent" },
-    { key: "netCorporateMigration", label: "企业净迁入率", category: "migration", isActive: true, isPremium: true, format: "percent" },
-    { key: "supplyChainDensity", label: "供应链集聚度", category: "migration", isActive: false, isPremium: false, format: "text" },
-    { key: "inquiryActivityIndex", label: "选址带看活跃度", category: "migration", isActive: false, isPremium: false, format: "number" },
-    { key: "flagshipRatio", label: "首店旗舰占比", category: "brand", isActive: false, isPremium: false, format: "percent" },
-    { key: "openCloseRatio", label: "开店闭店比率", category: "brand", isActive: true, isPremium: true, format: "ratio" },
-    { key: "cultureRadiance", label: "文化地标辐射级", category: "culture", isActive: false, isPremium: false, format: "number" },
-    { key: "eventBurstCoeff", label: "演出客流脉冲系数", category: "culture", isActive: false, isPremium: true, format: "ratio" },
-    { key: "culturePremiumScore", label: "文化配套溢价分", category: "culture", isActive: false, isPremium: false, format: "number" },
-    { key: "propertyServiceBrand", label: "物业品牌等级", category: "service", isActive: false, isPremium: false, format: "text" },
-    { key: "serviceScore", label: "物管服务口碑分", category: "service", isActive: false, isPremium: false, format: "number" },
-    { key: "greenMepScore", label: "绿色能耗管理分", category: "service", isActive: false, isPremium: false, format: "number" },
-    { key: "ltvRatio", label: "贷款价值比", category: "debt", isActive: false, isPremium: true, format: "percent" },
-    { key: "debtYield", label: "债务收益率", category: "debt", isActive: false, isPremium: true, format: "percent" },
-    { key: "cashOnCashReturn", label: "现金回报率", category: "debt", isActive: false, isPremium: true, format: "percent" },
-    { key: "projectedIrr", label: "5年预测IRR", category: "debt", isActive: true, isPremium: true, format: "percent" },
-    { key: "cbdPopulation", label: "3公里商圈人口", category: "population", isActive: false, isPremium: true, format: "number" },
-    { key: "demographicFitScore", label: "客群匹配度", category: "population", isActive: false, isPremium: false, format: "number" },
+/* ===== Per-type default field lists ===== */
+
+function getDefaultFields(type: "OFFICE" | "SHOPS" | "INDUSTRIAL"): FieldMeta[] {
+  const officeFields: FieldMeta[] = [
+    { key: "netEffectiveRent", label: "净有效租金", category: "core", isActive: true, isPremium: true, format: "currency", propertyType: "OFFICE" },
+    { key: "capRate", label: "资本化率", category: "valuation", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "priceToRentRatio", label: "售租比", category: "valuation", isActive: true, isPremium: true, format: "ratio", propertyType: "OFFICE" },
+    { key: "wale", label: "加权平均租期", category: "lease", isActive: true, isPremium: true, format: "number", propertyType: "OFFICE" },
+    { key: "retentionRate", label: "租户留存率", category: "lease", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "tenantConcentration", label: "租户集中度", category: "lease", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "netAbsorption", label: "净吸纳量", category: "office", isActive: true, isPremium: false, format: "number", propertyType: "OFFICE" },
+    { key: "reversionRate", label: "续租调升率", category: "office", isActive: true, isPremium: false, format: "percent", propertyType: "OFFICE" },
+    { key: "spaceUtilization", label: "空间利用率", category: "office", isActive: true, isPremium: false, format: "percent", propertyType: "OFFICE" },
+    { key: "npiMargin", label: "净物业利润率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "collectionRate", label: "租金收缴率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "compTxPrice", label: "大宗交易单价", category: "exit", isActive: false, isPremium: true, format: "currency", propertyType: "OFFICE" },
+    { key: "noiCagr3Y", label: "3年NOI增长率", category: "exit", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "projectedIrr5Y", label: "5年预测IRR", category: "exit", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "pmOperatorTier", label: "品牌名称", category: "service", isActive: false, isPremium: false, format: "text", propertyType: "OFFICE" },
+    { key: "facilitySlaRating", label: "设施SLA评级", category: "service", isActive: false, isPremium: false, format: "number", propertyType: "OFFICE" },
+    { key: "ltvRatio", label: "贷款价值比", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "debtYield", label: "债务收益率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "cashOnCashReturn", label: "现金回报率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "landFloorPrice", label: "土地楼面价", category: "valuation", isActive: false, isPremium: true, format: "currency", propertyType: "OFFICE" },
+    { key: "capexIntensity", label: "单位CapEx", category: "dev", isActive: false, isPremium: true, format: "currency", propertyType: "OFFICE" },
+    { key: "esgCertification", label: "绿色认证", category: "macro", isActive: true, isPremium: false, format: "text", propertyType: "OFFICE" },
+    { key: "submarketVacancy", label: "商圈空置率", category: "macro", isActive: true, isPremium: false, format: "percent", propertyType: "OFFICE" },
+    { key: "policyIncentiveLevel", label: "政策扶持级数", category: "macro", isActive: false, isPremium: false, format: "number", propertyType: "OFFICE" },
+    { key: "yieldSpread", label: "收益利差", category: "macro", isActive: false, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "kolBuzzIndex", label: "KOL热度指数", category: "social", isActive: true, isPremium: false, format: "number", propertyType: "OFFICE" },
+    { key: "negativeSentimentRate", label: "负面声量率", category: "social", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "netCorporateMigration", label: "企业净迁入率", category: "migration", isActive: true, isPremium: true, format: "percent", propertyType: "OFFICE" },
+    { key: "hqSupplyChainRatio", label: "总部集聚度", category: "migration", isActive: false, isPremium: false, format: "percent", propertyType: "OFFICE" },
   ];
+
+  const shopsFields: FieldMeta[] = [
+    { key: "netEffectiveRent", label: "净有效租金", category: "core", isActive: true, isPremium: true, format: "currency", propertyType: "SHOPS" },
+    { key: "capRate", label: "资本化率", category: "valuation", isActive: true, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "priceToRentRatio", label: "售租比", category: "valuation", isActive: true, isPremium: true, format: "ratio", propertyType: "SHOPS" },
+    { key: "wale", label: "加权平均租期", category: "lease", isActive: true, isPremium: true, format: "number", propertyType: "SHOPS" },
+    { key: "retentionRate", label: "租户留存率", category: "lease", isActive: true, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "salesEfficiency", label: "坪效", category: "shops", isActive: true, isPremium: false, format: "currency", propertyType: "SHOPS" },
+    { key: "rentToSalesRatio", label: "租售比", category: "shops", isActive: true, isPremium: false, format: "percent", propertyType: "SHOPS" },
+    { key: "footfallTicketSize", label: "客单价", category: "shops", isActive: false, isPremium: false, format: "text", propertyType: "SHOPS" },
+    { key: "anchorDependency", label: "主力店占比", category: "shops", isActive: false, isPremium: false, format: "percent", propertyType: "SHOPS" },
+    { key: "merchantChurnRate", label: "商户掉铺率", category: "shops", isActive: true, isPremium: false, format: "percent", propertyType: "SHOPS" },
+    { key: "firstStoreRatio", label: "首店占比", category: "brand", isActive: false, isPremium: false, format: "percent", propertyType: "SHOPS" },
+    { key: "openToCloseRatio", label: "开闭店比", category: "brand", isActive: true, isPremium: true, format: "ratio", propertyType: "SHOPS" },
+    { key: "tradeAreaPopulation", label: "商圈人口", category: "retail", isActive: false, isPremium: true, format: "number", propertyType: "SHOPS" },
+    { key: "demographicPremiumScore", label: "人口红利分", category: "retail", isActive: false, isPremium: false, format: "number", propertyType: "SHOPS" },
+    { key: "culturalRadianceLevel", label: "文化辐射级", category: "culture", isActive: false, isPremium: false, format: "number", propertyType: "SHOPS" },
+    { key: "footfallPulseRate", label: "客流脉冲系数", category: "culture", isActive: false, isPremium: true, format: "ratio", propertyType: "SHOPS" },
+    { key: "npiMargin", label: "净物业利润率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "collectionRate", label: "租金收缴率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "ltvRatio", label: "贷款价值比", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "debtYield", label: "债务收益率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "cashOnCashReturn", label: "现金回报率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "SHOPS" },
+    { key: "esgCertification", label: "绿色认证", category: "macro", isActive: true, isPremium: false, format: "text", propertyType: "SHOPS" },
+    { key: "submarketVacancy", label: "商圈空置率", category: "macro", isActive: true, isPremium: false, format: "percent", propertyType: "SHOPS" },
+    { key: "kolBuzzIndex", label: "KOL热度指数", category: "social", isActive: true, isPremium: false, format: "number", propertyType: "SHOPS" },
+    { key: "negativeSentimentRate", label: "负面声量率", category: "social", isActive: true, isPremium: true, format: "percent", propertyType: "SHOPS" },
+  ];
+
+  const industrialFields: FieldMeta[] = [
+    { key: "netEffectiveRent", label: "净有效租金", category: "core", isActive: true, isPremium: true, format: "currency", propertyType: "INDUSTRIAL" },
+    { key: "capRate", label: "资本化率", category: "valuation", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "priceToRentRatio", label: "售租比", category: "valuation", isActive: true, isPremium: true, format: "ratio", propertyType: "INDUSTRIAL" },
+    { key: "electricityOutputRatio", label: "综合电产比", category: "industrial", isActive: false, isPremium: false, format: "ratio", propertyType: "INDUSTRIAL" },
+    { key: "taxCovenantRate", label: "亩均税收", category: "industrial", isActive: false, isPremium: false, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "npiMargin", label: "净物业利润率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "collectionRate", label: "租金收缴率", category: "ops", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "compTxPrice", label: "大宗交易单价", category: "exit", isActive: false, isPremium: true, format: "currency", propertyType: "INDUSTRIAL" },
+    { key: "noiCagr3Y", label: "3年NOI增长率", category: "exit", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "projectedIrr5Y", label: "5年预测IRR", category: "exit", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "pmOperatorTier", label: "品牌名称", category: "service", isActive: false, isPremium: false, format: "text", propertyType: "INDUSTRIAL" },
+    { key: "facilitySlaRating", label: "设施SLA评级", category: "service", isActive: false, isPremium: false, format: "number", propertyType: "INDUSTRIAL" },
+    { key: "ltvRatio", label: "贷款价值比", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "debtYield", label: "债务收益率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "cashOnCashReturn", label: "现金回报率", category: "debt", isActive: false, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "esgCertification", label: "绿色认证", category: "macro", isActive: true, isPremium: false, format: "text", propertyType: "INDUSTRIAL" },
+    { key: "submarketVacancy", label: "商圈空置率", category: "macro", isActive: true, isPremium: false, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "policyIncentiveLevel", label: "政策扶持级数", category: "macro", isActive: false, isPremium: false, format: "number", propertyType: "INDUSTRIAL" },
+    { key: "netCorporateMigration", label: "企业净迁入率", category: "migration", isActive: true, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "hqSupplyChainRatio", label: "总部集聚度", category: "migration", isActive: false, isPremium: false, format: "percent", propertyType: "INDUSTRIAL" },
+    { key: "landFloorPrice", label: "土地楼面价", category: "valuation", isActive: false, isPremium: true, format: "currency", propertyType: "INDUSTRIAL" },
+    { key: "yieldSpread", label: "收益利差", category: "macro", isActive: false, isPremium: true, format: "percent", propertyType: "INDUSTRIAL" },
+  ];
+
+  if (type === "OFFICE") return officeFields;
+  if (type === "SHOPS") return shopsFields;
+  return industrialFields;
 }

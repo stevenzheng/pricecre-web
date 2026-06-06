@@ -1,9 +1,7 @@
 // app/api/admin/review-queue/[id]/action/route.ts
 // POST { action: "approve" | "reject" } — 审核操作
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -14,6 +12,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (action === "approve") {
+      // Allow edited indicators from the request body (detail page edits before approving)
+      const submittedIndicators = body.dynamicIndicators;
+      const finalIndicators = submittedIndicators || item.dynamicIndicators;
+
       // Upsert into CommercialProperty (production table)
       await prisma.commercialProperty.upsert({
         where: {
@@ -31,7 +33,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
           faceRent: item.faceRent,
           area: item.area,
           dataSource: item.dataSource,
-          dynamicIndicators: item.dynamicIndicators as any,
+          dynamicIndicators: finalIndicators as any,
           confidenceScore: item.confidenceScore,
           agentUpdatedAt: new Date(),
         },
@@ -39,11 +41,19 @@ export async function POST(request: Request, { params }: { params: { id: string 
           faceRent: item.faceRent,
           area: item.area,
           dataSource: item.dataSource,
-          dynamicIndicators: item.dynamicIndicators as any,
+          dynamicIndicators: finalIndicators as any,
           confidenceScore: item.confidenceScore,
           agentUpdatedAt: new Date(),
         },
       });
+
+      // Also update the review queue item with edited indicators
+      if (submittedIndicators) {
+        await prisma.agentReviewQueue.update({
+          where: { id: params.id },
+          data: { dynamicIndicators: submittedIndicators as any },
+        });
+      }
 
       // Update review queue status
       await prisma.agentReviewQueue.update({

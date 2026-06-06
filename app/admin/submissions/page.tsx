@@ -9,9 +9,9 @@ interface Submission {
 }
 
 const STATUS_CN: Record<string, { label: string; badge: string }> = {
-  PENDING_REVIEW: { label: "待审核", badge: "gh-badge-warning" },
-  APPROVED: { label: "已通过", badge: "gh-badge-success" },
-  REJECTED: { label: "已驳回", badge: "gh-badge-danger" },
+  PENDING_REVIEW: { label: "待审核", badge: "vl-badge-warning" },
+  APPROVED: { label: "已通过", badge: "vl-badge-success" },
+  REJECTED: { label: "已驳回", badge: "vl-badge-danger" },
 };
 
 export default function SubmissionsPage() {
@@ -35,33 +35,33 @@ export default function SubmissionsPage() {
   const filtered = filter === "all" ? submissions : submissions.filter((s) => s.status === filter);
 
   return (
-    <div className="gh-content-inner">
-      <div className="gh-page-header">
-        <h1 className="gh-page-title">租金核验队列</h1>
-        <p className="gh-page-desc">用户提交的租金成交数据 · {submissions.length} 条记录</p>
+    <div className="vl-content-inner">
+      <div className="vl-page-header">
+        <h1 className="vl-page-title">租金核验队列</h1>
+        <p className="vl-page-desc">用户提交的租金成交数据 · {submissions.length} 条记录</p>
       </div>
 
-      <div className="gh-action-bar">
-        <div className="gh-filter-tabs">
+      <div className="vl-action-bar">
+        <div className="vl-filter-tabs">
           {(["all", "PENDING_REVIEW", "APPROVED", "REJECTED"] as const).map((s) => (
-            <button key={s} className={`gh-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}>
+            <button key={s} className={`vl-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}>
               {s === "all" ? "全部" : STATUS_CN[s]?.label || s}
             </button>
           ))}
         </div>
-        <button onClick={fetchData} className="gh-btn-text">刷新</button>
+        <button onClick={fetchData} className="vl-btn-ghost">刷新</button>
       </div>
 
       {loading ? (
-        <div className="gh-empty"><p className="gh-empty-title">加载中...</p></div>
+        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
       ) : filtered.length === 0 ? (
-        <div className="gh-empty">
-          <p className="gh-empty-title">暂无提交</p>
-          <p className="gh-empty-desc">还没有用户提交租金数据</p>
+        <div className="vl-empty">
+          <p className="vl-empty-title">暂无提交</p>
+          <p className="vl-empty-desc">还没有用户提交租金数据</p>
         </div>
       ) : (
-        <div className="gh-table-wrap">
-          <table className="gh-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr>
                 <th>项目名称</th><th>城市</th>
@@ -74,20 +74,20 @@ export default function SubmissionsPage() {
               {filtered.map((s) => (
                 <tr key={s.id}>
                   <td style={{ fontWeight: 600 }}>{s.projectName}</td>
-                  <td className="gh-td-muted">{s.city || "—"}</td>
-                  <td className="gh-td-mono" style={{ textAlign: "right" }}>¥{Number(s.netRent).toFixed(1)}</td>
-                  <td><span className="gh-badge gh-badge-neutral">{s.propertyType === "OFFICE" ? "写字楼" : s.propertyType === "SHOPS" ? "商业" : s.propertyType === "INDUSTRIAL" ? "产业园" : s.propertyType || "—"}</span></td>
-                  <td className="gh-td-hint">{s.email}</td>
-                  <td className="gh-td-hint">{s.createdAt ? new Date(s.createdAt).toLocaleString("zh-CN") : "—"}</td>
-                  <td><span className={`gh-badge ${STATUS_CN[s.status]?.badge || "gh-badge-neutral"}`}>{STATUS_CN[s.status]?.label || s.status}</span></td>
+                  <td className="vl-td-muted">{s.city || "—"}</td>
+                  <td className="vl-td-mono" style={{ textAlign: "right" }}>¥{Number(s.netRent).toFixed(1)}</td>
+                  <td><span className="vl-badge vl-badge-neutral">{s.propertyType === "OFFICE" ? "写字楼" : s.propertyType === "SHOPS" ? "商业" : s.propertyType === "INDUSTRIAL" ? "产业园" : s.propertyType || "—"}</span></td>
+                  <td className="vl-td-hint">{s.email}</td>
+                  <td className="vl-td-hint">{s.createdAt ? new Date(s.createdAt).toLocaleString("zh-CN") : "—"}</td>
+                  <td><span className={`vl-badge ${STATUS_CN[s.status]?.badge || "vl-badge-neutral"}`}>{STATUS_CN[s.status]?.label || s.status}</span></td>
                   <td>
                     {s.status === "PENDING_REVIEW" ? (
                       <div style={{ display: "flex", gap: 4 }}>
-                        <button onClick={() => handleAction(s.id, "APPROVED")} className="gh-btn-primary gh-btn-sm">通过</button>
-                        <button onClick={() => handleAction(s.id, "REJECTED")} className="gh-btn-danger gh-btn-sm">驳回</button>
+                        <button onClick={() => handleAction(s.id, "APPROVED")} className="vl-btn-primary vl-btn-sm">通过</button>
+                        <button onClick={() => handleAction(s.id, "REJECTED")} className="vl-btn-danger vl-btn-sm">驳回</button>
                       </div>
                     ) : (
-                      <span style={{ fontSize: 12, color: "#A5B4BF" }}>{s.status === "APPROVED" ? "已发码" : "已驳回"}</span>
+                      <span style={{ fontSize: 12, color: "#A3A3A3" }}>{s.status === "APPROVED" ? "已发码" : "已驳回"}</span>
                     )}
                   </td>
                 </tr>

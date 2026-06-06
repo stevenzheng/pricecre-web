@@ -32,15 +32,13 @@ export default function ProfilePanel({ credits, totalCredits }: {
       const stored = localStorage.getItem("pricecre_user");
       if (stored) {
         const user = JSON.parse(stored);
-        if (user.email && user.referralCode) {
+        if (user.email) {
           setForm((prev) => ({ ...prev, email: user.email }));
           setLoggedIn(true);
           setStep("done");
-          if (user.totalCredits) setActivated(true);
           setActivated(true);
-          fetchHistory();
+          // Restore referral code if available
           if (user.referralCode) {
-            // Update page-level referral code
             try { localStorage.setItem("pricecre_referralCode", JSON.stringify(user.referralCode)); } catch {}
           }
         }
@@ -135,8 +133,20 @@ export default function ProfilePanel({ credits, totalCredits }: {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.email || !form.password) return;
+    // Save login to localStorage for persistence
+    try {
+      const code = "sz" + Math.random().toString(36).substring(2, 8);
+      localStorage.setItem("pricecre_user", JSON.stringify({
+        email: form.email,
+        referralCode: code,
+        totalCredits: 3,
+        registeredAt: Date.now(),
+      }));
+      localStorage.setItem("pricecre_referralCode", JSON.stringify(code));
+    } catch {}
     setLoggedIn(true);
     setStep("done");
+    setActivated(true);
   };
 
   // Shared cards rendered in both logged-in and logged-out states
@@ -153,7 +163,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
               style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
               onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
             >
-              立即购买查看额度 · 99元 / 50次
+              立即购买查询权益 · 99元 / 50次
             </button>
             <button
               className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[var(--bg-hover)]"
@@ -172,7 +182,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
                 <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>1 项</span>
               </div>
               <div className="flex justify-between items-center text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-                <span>{paymentProduct === "monthly" ? "不限次包月订阅" : "资产查看额度 × 50次"}</span>
+                <span>{paymentProduct === "monthly" ? "不限次包月订阅" : "资产查询权益 × 50次"}</span>
                 <span className="font-mono font-medium" style={{ color: "var(--text)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
               </div>
               <div className="border-t mt-2 pt-2 flex justify-between items-center" style={{ borderColor: "var(--line)" }}>
@@ -278,18 +288,18 @@ export default function ProfilePanel({ credits, totalCredits }: {
             </div>
 
             <p className="text-[9px] text-center" style={{ color: "var(--text-hint)" }}>
-              支付成功后额度即时到账 · 支持微信/支付宝双通道
+              支付成功后权益即时到账 · 支持微信/支付宝双通道
             </p>
           </div>
         )}
       </div>
       {/* 分享转发 */}
       <div className="card p-3">
-        <div className="section-title">分享转发获得查看额度</div>
+        <div className="section-title">分享转发获得查询权益</div>
         <div className="mb-3 text-center">
-          <div className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权额度</div>
+          <div className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>历史累计已获取确权权益</div>
           <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>0</span>
+            <span className="text-xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>0</span>
             <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
             <span className="text-xs" style={{ color: "var(--text-hint)" }}>次</span>
           </div>
@@ -488,18 +498,18 @@ export default function ProfilePanel({ credits, totalCredits }: {
           <div className="w-3 h-3 rounded-full" style={{ background: activated && quota > 0 ? "var(--positive)" : "var(--text-hint)" }} />
           <div>
             <div className="text-[13px] font-medium" style={{ color: activated && quota > 0 ? "var(--positive)" : "var(--text-muted)" }}>
-              {!activated ? "尚未激活额度" : quota > 0 ? `可用额度：${quota} 次` : "额度已用完"}
+              {!activated ? "尚未激活权益" : quota > 0 ? `可用权益：${quota} 次` : "权益已用完"}
             </div>
-            <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{!activated ? "提交数据或购买额度即可激活" : ""}</div>
+            <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{!activated ? "提交数据或购买权益即可激活" : ""}</div>
           </div>
         </div>
       </div>
       <div className="card p-5">
         <div className="section-title">账户统计</div>
         <div className="grid grid-cols-3 gap-3">
-          {[{ label: "提交", value: 0 }, { label: "购买", value: 0 }, { label: "查看", value: viewHistory.length }].map((s) => (
+          {[{ label: "累计提报", value: 0 }, { label: "累计购买", value: 0 }, { label: "已确权", value: viewHistory.length }].map((s) => (
             <div key={s.label} className="text-center py-2 rounded-lg" style={{ background: "var(--panel)" }}>
-              <div className="text-lg font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-mono)" }}>{s.value}</div>
+              <div className="text-base font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>{s.value}</div>
               <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{s.label}</div>
             </div>
           ))}
@@ -536,7 +546,7 @@ export default function ProfilePanel({ credits, totalCredits }: {
 
       <div className="space-y-2">
         {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提交真实交易</button>}
-        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买额度</button>}
+        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买权益</button>}
         <button
           className="btn-secondary w-full text-xs"
           onClick={() => {

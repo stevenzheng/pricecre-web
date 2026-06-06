@@ -1,8 +1,6 @@
 // app/api/admin/properties/route.ts — 生产表 CommercialProperty 查询
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {

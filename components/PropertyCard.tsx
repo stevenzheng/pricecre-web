@@ -483,7 +483,7 @@ export default function PropertyCard({
                         解锁中...
                       </>
                     ) : (
-                      <>{remainingCredits > 0 ? "解锁" : "额度已用完"}</>
+                      <>{remainingCredits > 0 ? "解锁" : "需先登录"}</>
                     )}
                   </button>
                 )}

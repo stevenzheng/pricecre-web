@@ -73,7 +73,10 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
           { label: "付费额度", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" as const, color: "#7C3AED", bg: "rgba(124,58,237,0.04)", action: "profile" },
         ].map((item) => (
           <button key={item.label}
-            onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: item.action })); onClose?.(); }}
+            onClick={() => {
+              document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: item.action }));
+              setTimeout(() => onClose?.(), 50);
+            }}
             style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", margin: "3px 0", borderRadius: 6, width: "100%", cursor: "pointer", background: item.bg, border: "none", borderLeft: `3px solid ${item.color}`, textAlign: "left" }}>
             <Icon type={item.icon} size={16} />
             <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</span>

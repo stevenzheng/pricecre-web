@@ -123,7 +123,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
       <div style={{ padding: "0 16px 8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
         {[
           { label: "查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
-          { label: "解锁卡片", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
+          { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
           { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
           { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
         ].map((s) => (

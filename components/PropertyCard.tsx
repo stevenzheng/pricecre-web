@@ -558,55 +558,62 @@ export default function PropertyCard({
                       }}
                     >
                       {field.label}
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const newVal = prompt(`纠错: ${field.label}`, String(field.value));
-                          if (!newVal || newVal === String(field.value)) return;
-                          let ue = "";
-                          try { const s = localStorage.getItem("pricecre_user"); if (s) ue = JSON.parse(s).email || ""; } catch {}
-                          try {
-                            await fetch("/api/data/correct", {
-                              method: "POST", headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                propertyId: property.id || property.projectName,
-                                fieldKey: field.key || field.label,
-                                fieldLabel: field.label,
-                                oldValue: String(field.value),
-                                newValue: newVal,
-                                reason: "",
-                                email: ue,
-                              }),
-                            });
-                            showModal("纠错已提交，审核通过后将更新");
-                          } catch { showModal("提交失败"); }
-                        }}
-                        style={{ marginLeft: 4, padding: "0 4px", fontSize: 10, color: "#A3A3A3", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", opacity: 0.5, flexShrink: 0 }}
-                        title="提报数据纠错"
-                      >
-                        纠错
-                      </button>
                     </span>
 
                     {/* Value or Lock */}
-                    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-start", flex: 1, paddingTop: 4 }}>
+                    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-start", flex: 1, paddingTop: 4, position: "relative" }}>
                       {isFieldLocked ? (
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-hint)", flexShrink: 0, opacity: 0.5 }}>
                           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                           <path d="M7 11V7a5 5 0 0110 0v4" />
                         </svg>
                       ) : (
-                        <span
-                          style={{
-                            fontSize: field.format === "text" ? "10px" : "13px",
-                            fontWeight: field.format === "text" ? 300 : 300,
-                            color: isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
-                            fontFamily: field.format === "text" ? "var(--font-sans)" : "var(--font-mono)",
-                            lineHeight: 1,
-                          }}
-                        >
-                          {displayValue}
-                        </span>
+                        <>
+                          <span
+                            style={{
+                              fontSize: field.format === "text" ? "10px" : "13px",
+                              fontWeight: field.format === "text" ? 300 : 300,
+                              color: isNegative ? "var(--negative)" : isPositive ? "var(--positive)" : "var(--text)",
+                              fontFamily: field.format === "text" ? "var(--font-sans)" : "var(--font-mono)",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {displayValue}
+                          </span>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const newVal = prompt(`纠错: ${field.label}`, String(field.value));
+                              if (!newVal || newVal === String(field.value)) return;
+                              let ue = "";
+                              try { const s = localStorage.getItem("pricecre_user"); if (s) ue = JSON.parse(s).email || ""; } catch {}
+                              try {
+                                await fetch("/api/data/correct", {
+                                  method: "POST", headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    propertyId: property.id || property.projectName,
+                                    fieldKey: field.key || field.label,
+                                    fieldLabel: field.label,
+                                    oldValue: String(field.value),
+                                    newValue: newVal,
+                                    reason: "",
+                                    email: ue,
+                                  }),
+                                });
+                                showModal("纠错已提交");
+                              } catch { showModal("提交失败"); }
+                            }}
+                            style={{
+                              position: "absolute", top: 0, right: 0,
+                              fontSize: 9, color: "#D4D4D4", background: "none",
+                              border: "none", cursor: "pointer", opacity: 0.3,
+                              fontFamily: "var(--font-sans)", padding: "0 2px",
+                            }}
+                            title="提报数据纠错"
+                          >
+                            纠错
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>

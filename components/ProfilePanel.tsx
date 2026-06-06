@@ -139,15 +139,38 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   }
 
   // ── Logged-in Desktop Layout ──
+  const [username, setUsername] = useState(() => {
+    try { return localStorage.getItem("pricecre_username") || "用户"; } catch { return "用户"; }
+  });
+  const [editingName, setEditingName] = useState(false);
+
+  const saveUsername = (name: string) => {
+    setUsername(name);
+    try { localStorage.setItem("pricecre_username", name); } catch {}
+    setEditingName(false);
+  };
+
   return (
-    <div style={{ padding: "16px" }}>
+    <div style={{ padding: "16px", maxWidth: 740, margin: "0 auto" }}>
       {/* User header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: "12px 16px", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
         <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#667eea,#764ba2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFF", fontSize: 15, fontWeight: 700, flexShrink: 0 }}>
-          {form.email?.charAt(0).toUpperCase() || "?"}
+          {username?.charAt(0).toUpperCase() || form.email?.charAt(0)?.toUpperCase() || "?"}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ ...title, fontSize: 14 }}>用户</div>
+          {editingName ? (
+            <input
+              autoFocus
+              defaultValue={username}
+              onBlur={e => saveUsername(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") saveUsername((e.target as HTMLInputElement).value); if (e.key === "Escape") setEditingName(false); }}
+              style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", border: "1px solid #0070F3", borderRadius: 4, padding: "2px 6px", outline: "none", width: 120 }}
+            />
+          ) : (
+            <div style={{ ...title, fontSize: 14, cursor: "pointer" }} onClick={() => setEditingName(true)} title="点击编辑昵称">
+              {username} <span style={{ fontSize: 9, color: "#A3A3A3", marginLeft: 4 }}>✎</span>
+            </div>
+          )}
           <div style={{ ...caption, fontSize: 11, overflow: "hidden", textOverflow: "ellipsis" }}>{form.email}</div>
         </div>
         <button onClick={() => { setLoggedIn(false); setStep("login"); setForm({email:"",password:"",confirm:"",code:""}); }} style={{ ...label, fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#A3A3A3" }}>
@@ -156,7 +179,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
       </div>
 
       {/* Desktop: 2-column grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {/* LEFT COL: Credit info + History */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 

@@ -31,6 +31,12 @@ export const metadata: Metadata = {
     "商业零售",
   ],
   authors: [{ name: "PriceCRE" }],
+  robots: {
+    index: true,
+    follow: false,
+    nocache: true,
+    googleBot: { index: true, follow: false },
+  },
   openGraph: {
     title: "PriceCRE · 地产价值 — 商业地产量化精算资产终端",
     description:

@@ -1,16 +1,15 @@
 /**
  * POST /api/data/redeem
  *
- * 验证激活码 → 返回额度
- * Uses deterministic HMAC-based codes so no DB storage needed
+ * 验证激活码 → 确认后增加互享额度到 UserCredit
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
+import { prisma } from "@/lib/prisma";
 
 function generateAuthCode(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";
   const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
-  // Convert hex to uppercase alphanumeric (A-Z, 2-9, no 0/1 to avoid confusion)
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 6; i++) {
@@ -29,7 +28,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (!email) {
-      // Without email, can't verify - but allow the test-submit-generated code
       return NextResponse.json({ error: "请先登录以兑换激活码" }, { status: 400 });
     }
 
@@ -37,6 +35,32 @@ export async function POST(req: NextRequest) {
     if (code.toUpperCase() !== expectedCode) {
       return NextResponse.json({ error: "激活码无效或与注册邮箱不匹配" }, { status: 400 });
     }
+
+    // 兑换码已验证成功 → 增加互享额度（referralCredits）
+    let uc = await prisma.userCredit.findUnique({ where: { email } });
+    if (!uc) {
+      // Migrate from legacy or create new
+      const user = await prisma.user.findUnique({ where: { email }, select: { referralViewCount: true } });
+      uc = await prisma.userCredit.create({
+        data: { email, referralCredits: (user?.referralViewCount ?? 10) + 8, purchasedCredits: 0, totalUsed: 0 },
+      });
+    } else {
+      await prisma.userCredit.update({
+        where: { email },
+        data: { referralCredits: { increment: 8 } },
+      });
+    }
+
+    // Audit log
+    await prisma.creditAuditLog.create({
+      data: {
+        email,
+        type: "add_credits",
+        amount: 8,
+        balance: (uc.referralCredits || 0) + (uc.purchasedCredits || 0) + 8,
+        note: "激活码兑换（互享额度）",
+      },
+    });
 
     return NextResponse.json({
       success: true,

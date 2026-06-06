@@ -51,6 +51,10 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
   const [buying, setBuying] = useState(false);
 
+  // AI payment state
+  const [showAiPayment, setShowAiPayment] = useState(false);
+  const [aiPaymentMethod, setAiPaymentMethod] = useState<"wechat" | "alipay">("wechat");
+
   const quota = credits ? credits.referral + credits.purchased : 0;
   const remainingChat = chatTokens ? Math.max(0, chatTokens.total - chatTokens.used) : 0;
 
@@ -216,7 +220,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
               邀请好友
             </div>
-            <div style={{ fontSize: 11, color: "#A3A3A3", marginBottom: 8 }}>好友注册后双方各得 10 次免费查看</div>
+            <div style={{ fontSize: 11, color: "#A3A3A3", marginBottom: 8 }}>邀请好友注册，双方各得 10 次查看额度</div>
             <div style={{ display: "flex", gap: 6 }}>
               <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
               <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); }}
@@ -320,27 +324,48 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
               AI 对话次数
             </div>
-            <button onClick={async () => {
-              setBuying(true);
-              try {
-                const res = await fetch("/api/payment/test-buy", {
-                  method: "POST", headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ email: form.email, product: "ai-chat-100", amount: 10, paymentMethod: "wechat" }),
-                });
-                const d = await res.json();
-                if (d.success) showModal("AI对话100条已到账！");
-                else showModal(d.error || "购买失败");
-              } catch { showModal("网络错误"); }
-              setBuying(false);
-            }} disabled={buying}
-              style={{
-                width: "100%", padding: "10px 0", borderRadius: 8, border: "none",
-                background: "linear-gradient(135deg, #2563EB 0%, #EC4899 100%)",
-                color: "#FFF", fontSize: 13, fontWeight: 500, cursor: buying ? "default" : "pointer",
-                opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)",
-              }}>
-              ¥10 · 100条对话
-            </button>
+            {!showAiPayment ? (
+              <button onClick={() => setShowAiPayment(true)}
+                style={{ width: "100%", padding: "10px 0", borderRadius: 8, border: "none", background: "linear-gradient(135deg, #2563EB 0%, #EC4899 100%)", color: "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                ¥10 · 100条对话
+              </button>
+            ) : (
+              <div>
+                <div style={{ padding: "10px 12px", background: "#F7F7F7", borderRadius: 8, marginBottom: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>AI 对话 × 100条</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color: "#0070F3" }}>¥10.00</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  {(["wechat","alipay"] as const).map(m => (
+                    <button key={m} onClick={() => setAiPaymentMethod(m)}
+                      style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: aiPaymentMethod === m ? "2px solid #0070F3" : "1px solid #E5E5E5", background: aiPaymentMethod === m ? "rgba(0,112,243,0.04)" : "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", color: m === "wechat" ? "#07C160" : "#1677FF" }}>
+                      {m === "wechat" ? "微信支付" : "支付宝"}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => setShowAiPayment(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>返回</button>
+                  <button onClick={async () => {
+                    setBuying(true);
+                    try {
+                      const res = await fetch("/api/payment/test-buy", {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: form.email, product: "ai-chat-100", amount: 10, paymentMethod: aiPaymentMethod }),
+                      });
+                      const d = await res.json();
+                      if (d.success) { setShowAiPayment(false); showModal("AI对话100条已到账！"); }
+                      else showModal(d.error || "购买失败");
+                    } catch { showModal("网络错误"); }
+                    setBuying(false);
+                  }} disabled={buying}
+                    style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: buying ? "default" : "pointer", opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                    {buying ? "处理中..." : `确认支付`}
+                  </button>
+                </div>
+              </div>
+            )}
             <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", textAlign: "center", marginTop: 6 }}>
               100 条 AI 助理对话额度，私密咨询资产行情与精算分析
             </div>

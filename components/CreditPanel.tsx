@@ -69,7 +69,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
         </div>
         {[
           { label: "提报真实成交", sub: "提报交易 · 确认后兑换", value: credits.shared, icon: "gift" as const, color: "#0D9488", bg: "rgba(13,148,136,0.04)", action: "share" },
-          { label: "邀请好友注册", sub: "邀请好友注册获得", value: credits.referral, icon: "share" as const, color: "#2563EB", bg: "rgba(37,99,235,0.04)", action: "share" },
+          { label: "邀请好友注册", sub: "邀请可获得10次查看额度", value: credits.referral, icon: "share" as const, color: "#2563EB", bg: "rgba(37,99,235,0.04)", action: "share" },
           { label: "购买查看次数", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" as const, color: "#7C3AED", bg: "rgba(124,58,237,0.04)", action: "profile" },
         ].map((item) => (
           <button key={item.label}
@@ -113,7 +113,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {[
-            { label: "资产卡权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
+            { label: "资产查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
             { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
             { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
             { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },

@@ -55,6 +55,8 @@ export default function Home() {
   const [aiAnalysisData, setAiAnalysisData] = useState<any>(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [orderHistory, setOrderHistory] = useState<any[]>([]);
 
   useEffect(() => {
     const h = (e: Event) => {
@@ -212,8 +214,11 @@ export default function Home() {
           setChatHistory(d.chatLogs || []);
           setShowChatHistory(true);
         }).catch(() => {});
-      } else if (action === "orders") {
-        window.open("/admin/orders", "_blank");
+      } else if (action === "orders" && userEmail) {
+        fetch(`/api/admin/user-detail?email=${encodeURIComponent(userEmail)}`).then(r => r.json()).then(d => {
+          setOrderHistory(d.orders || []);
+          setShowOrderHistory(true);
+        }).catch(() => {});
       } else if (action === "assets") {
         setMobileTab("market");
       }
@@ -638,7 +643,7 @@ export default function Home() {
         {/* Referral Welcome Toast */}
         {referralToast && (
           <div className="max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium animate-slide-up max-w-lg"
+            <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium animate-slide-up max-w-lg mx-auto"
               style={{ background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent)", borderColor: "var(--accent)", opacity: 0.9 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/></svg>
               {referralToast}
@@ -938,6 +943,41 @@ export default function Home() {
                 </div>
               ) : (
                 <div style={{ textAlign: "center", padding: 20, color: "#A3A3A3", fontSize: 12 }}>暂无对话记录</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Order History Panel */}
+      {showOrderHistory && (
+        <>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200 }} onClick={() => setShowOrderHistory(false)} />
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "#FFF", borderRadius: 12, width: 480, maxWidth: "92vw", maxHeight: "70vh", overflow: "auto", zIndex: 201, border: "1px solid #E5E5E5", boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}>
+            <div style={{ padding: "14px 16px", borderBottom: "1px solid #E5E5E5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, color: "#171717", margin: 0, fontFamily: "var(--font-sans)" }}>我的订单</h3>
+              <button onClick={() => setShowOrderHistory(false)} style={{ padding: "2px 8px", border: "none", background: "none", fontSize: 18, color: "#A3A3A3", cursor: "pointer" }}>✕</button>
+            </div>
+            <div style={{ padding: 12 }}>
+              {orderHistory.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: "55vh", overflow: "auto" }}>
+                  {orderHistory.map((o: any, i: number) => (
+                    <div key={i} style={{ padding: "10px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{o.orderNo || "—"}</span>
+                        <span style={{ fontSize: 12, fontFamily: "var(--font-geist-mono)", fontWeight: 600, color: "#0070F3" }}>¥{Number(o.amount || 0).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>
+                          {new Date(o.createdAt).toLocaleString("zh-CN")} · {o.status === 1 ? "已支付" : o.status === 0 ? "待支付" : o.status === 3 ? "已退款" : "—"}
+                        </span>
+                        <span style={{ fontSize: 10, color: "#737373", fontFamily: "var(--font-sans)" }}>{o.paymentMethod === "wechat" ? "微信" : o.paymentMethod === "alipay" ? "支付宝" : "—"}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: 20, color: "#A3A3A3", fontSize: 12 }}>暂无订单记录</div>
               )}
             </div>
           </div>

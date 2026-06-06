@@ -41,137 +41,100 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
   const remainingChat = Math.max(0, chatTokens.total - chatTokens.used);
 
   const poolNum = (v: number, active: boolean) => (
-    <span style={{ ...monoSm, fontSize: 20, color: active ? "#0070F3" : "#A3A3A3" }}>{v}</span>
+    <span style={{ ...monoSm, fontSize: 17, color: active ? "#0070F3" : "#A3A3A3" }}>{v}</span>
   );
 
   return (
     <div className="rounded-xl border" style={{ width: onClose ? 320 : "100%", maxWidth: 360, background: "#FFFFFF", borderColor: "#E5E5E5", boxShadow: onClose ? "0 4px 24px rgba(0,0,0,0.08)" : "none" }}>
       {/* ── Status Bar ── */}
-      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 8, background: isExhausted ? "rgba(238,0,0,0.03)" : isLow ? "rgba(245,166,35,0.05)" : "rgba(0,112,243,0.03)", borderRadius: "12px 12px 0 0" }}>
-        <Icon type={isExhausted ? "alert" : isLow ? "alert" : "check"} size={14} />
-        <div style={{ flex: 1 }}>
-          <span style={title}>
-            {isExhausted ? "额度已用完" : isLow ? `剩余 ${total} 次 · 即将耗尽` : `可用 ${total} 次额度`}
-          </span>
-          {isExhausted && <span style={{ ...capSm, marginLeft: 8 }}>请购买或邀请好友获取</span>}
-        </div>
+      <div style={{ padding: "8px 12px", display: "flex", alignItems: "center", gap: 6, background: isExhausted ? "rgba(238,0,0,0.03)" : isLow ? "rgba(245,166,35,0.05)" : "rgba(0,112,243,0.03)", borderRadius: "12px 12px 0 0" }}>
+        <Icon type={isExhausted ? "alert" : isLow ? "alert" : "check"} size={12} />
+        <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>
+          {isExhausted ? "额度已用完" : isLow ? `剩余 ${total} 次 · 即将耗尽` : `可用 ${total} 次额度`}
+          {isExhausted && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: "#A3A3A3" }}>请购买或邀请好友获取</span>}
+        </span>
         {onClose && (
           <button onClick={onClose} style={{ padding: 2, background: "none", border: "none", cursor: "pointer", color: "#A3A3A3" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
           </button>
         )}
       </div>
 
-      {/* ── 额度池（上） ── */}
-      <div style={{ padding: "8px 16px 4px" }}>
-        <div style={{ ...badge, color: "#737373", display: "flex", alignItems: "center", gap: 6 }}>
-          <Icon type="credit" size={12} /> 额度来源
+      {/* ── 额度来源 ── */}
+      <div style={{ padding: "4px 12px" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+          <Icon type="credit" size={10} /> 额度来源
         </div>
-      </div>
-      <div style={{ padding: "0 12px" }}>
         {[
           { label: "互享额度", sub: "提报交易 · 确认后兑换", value: credits.shared, icon: "gift" as const, color: "#0D9488", bg: "rgba(13,148,136,0.04)" },
           { label: "邀约额度", sub: "邀请好友注册获得", value: credits.referral, icon: "share" as const, color: "#2563EB", bg: "rgba(37,99,235,0.04)" },
           { label: "付费额度", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" as const, color: "#7C3AED", bg: "rgba(124,58,237,0.04)" },
         ].map((item) => (
           <div key={item.label}
-            style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", margin: "4px 0",
-              borderRadius: 8, background: item.bg, borderLeft: `3px solid ${item.color}`,
-            }}
-          >
-            <Icon type={item.icon} size={20} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</div>
-              <div style={{ ...capSm, fontSize: 11 }}>{item.sub}</div>
-            </div>
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", margin: "2px 0", borderRadius: 6, background: item.bg, borderLeft: `3px solid ${item.color}` }}>
+            <Icon type={item.icon} size={14} />
+            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</span>
+            <span style={{ fontSize: 10, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{item.sub}</span>
             {poolNum(item.value, item.value > 0)}
           </div>
         ))}
-      </div>
-
-      <div style={{ padding: "4px 16px 8px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 8, background: isExhausted ? "rgba(238,0,0,0.04)" : "#F7F7F7", border: "1px solid #E5E5E5" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 10px", borderRadius: 6, background: isExhausted ? "rgba(238,0,0,0.04)" : "#F7F7F7", border: "1px solid #E5E5E5", marginTop: 4 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>可用额度</span>
-          <span style={{ ...monoLg, fontSize: 22, color: isExhausted ? "#EE0000" : "#0070F3" }}>{total}</span>
+          <span style={{ ...monoLg, fontSize: 17, color: isExhausted ? "#EE0000" : "#0070F3" }}>{total}</span>
         </div>
       </div>
 
       {/* ── AI 对话 ── */}
-      <div style={{ padding: "8px 16px 4px", borderTop: "1px solid #F0F0F0" }}>
-        <div style={{ ...badge, color: "#737373", display: "flex", alignItems: "center", gap: 6 }}>
-          <Icon type="chat" size={12} /> AI 对话
+      <div style={{ padding: "4px 12px", borderTop: "1px solid #F0F0F0" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+          <Icon type="chat" size={10} /> AI 对话
         </div>
-      </div>
-      <div style={{ padding: "0 12px 4px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", margin: "4px 0", borderRadius: 8, background: "rgba(37,99,235,0.04)", borderLeft: "3px solid #2563EB" }}>
-          <Icon type="chat" size={20} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>对话额度</div>
-            <div style={{ ...capSm, fontSize: 11 }}>剩余 {remainingChat} / {chatTokens.total} 条</div>
-          </div>
-          <span style={{ ...monoSm, fontSize: 20, color: remainingChat > 0 ? "#2563EB" : "#EE0000" }}>{remainingChat}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", margin: "2px 0", borderRadius: 6, background: "rgba(37,99,235,0.04)", borderLeft: "3px solid #2563EB" }}>
+          <Icon type="chat" size={14} />
+          <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>对话额度</span>
+          <span style={{ fontSize: 10, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>剩余 {remainingChat}/{chatTokens.total} 条</span>
+          <span style={{ ...monoSm, fontSize: 17, color: remainingChat > 0 ? "#2563EB" : "#EE0000" }}>{remainingChat}</span>
         </div>
       </div>
 
       {/* ── 数据概览 ── */}
-      <div style={{ padding: "8px 16px 4px", borderTop: "1px solid #F0F0F0" }}>
-        <div style={{ ...badge, color: "#737373", display: "flex", alignItems: "center", gap: 6 }}>
-          <Icon type="eye" size={12} /> 数据概览
+      <div style={{ padding: "4px 12px", borderTop: "1px solid #F0F0F0" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+          <Icon type="eye" size={10} /> 数据概览
         </div>
-      </div>
-      <div style={{ padding: "0 16px 8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-        {[
-          { label: "查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
-          { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
-          { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
-          { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
-        ].map((s) => (
-          <div key={s.label} style={{ padding: "10px 10px", borderRadius: 8, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <Icon type={s.icon} size={14} />
-            <div style={{ ...monoLg, fontSize: 20, color: "#171717" }}>{s.value}</div>
-            <div style={{ ...capSm, fontSize: 11 }}>{s.label} <span style={{ color: "#A3A3A3" }}>{s.sub}</span></div>
-          </div>
-        ))}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+          {[
+            { label: "查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
+            { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
+            { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
+            { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
+          ].map((s) => (
+            <div key={s.label} style={{ padding: "4px 6px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+              <div style={{ ...monoLg, fontSize: 15, color: "#171717" }}>{s.value}</div>
+              <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── CTA ── */}
-      <div style={{ display: "flex", gap: 8, padding: "12px 16px 8px", borderTop: "1px solid #E5E5E5" }}>
+      <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderTop: "1px solid #E5E5E5" }}>
         {[
           { label: "查看订单", icon: "cart", color: "#7C3AED", action: "orders" },
           { label: "已解锁资产", icon: "unlock", color: "#0070F3", action: "assets" },
           { label: "对话记录", icon: "chat", color: "#2563EB", action: "chats" },
         ].map((btn) => (
-          <button
-            key={btn.label}
-            onClick={() => {
-              document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action }));
-              onClose?.();
-            }}
-            style={{
-              flex: 1, padding: "6px 0", borderRadius: 6, border: "1px solid #E5E5E5",
-              background: "#FFF", color: btn.color, fontSize: 12, fontWeight: 500,
-              fontFamily: "var(--font-sans)", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
-            }}
-          >
-            <Icon type={btn.icon} size={12} /> {btn.label}
+          <button key={btn.label} onClick={() => { document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action })); onClose?.(); }}
+            style={{ flex: 1, padding: "4px 0", borderRadius: 5, border: "1px solid #E5E5E5", background: "#FFF", color: btn.color, fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
+            <Icon type={btn.icon} size={10} /> {btn.label}
           </button>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 8, padding: "8px 16px 12px", borderTop: "1px solid #F0F0F0" }}>
-        <button
-          onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}
-          style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
-        >
-          提报交易
-        </button>
-        <button
-          onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); onClose?.(); }}
-          style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#171717", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
-        >
-          购买额度
-        </button>
+      <div style={{ display: "flex", gap: 6, padding: "6px 12px", borderTop: "1px solid #F0F0F0" }}>
+        <button onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}
+          style={{ flex: 1, padding: "6px 0", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>提报交易</button>
+        <button onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); onClose?.(); }}
+          style={{ flex: 1, padding: "6px 0", borderRadius: 6, border: "1px solid #D4D4D4", background: "#FFF", color: "#171717", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>购买额度</button>
       </div>
     </div>
   );

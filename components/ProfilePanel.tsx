@@ -113,7 +113,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               </button>
             </form>
           ) : (
-            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));localStorage.setItem("pricecre_username",form.email.split("@")[0]);fetch("/api/auth/ensure-user",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:form.email})});}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
+            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));localStorage.setItem("pricecre_username",form.email.split("@")[0]);fetch("/api/auth/ensure-user",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:form.email})});document.dispatchEvent(new CustomEvent("user-login",{detail:{email:form.email}}));}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
               <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} />
               <InputField label="访问密码" placeholder="········" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} />
               <button type="submit" style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", WebkitAppearance: "none" as any }}>登录</button>
@@ -136,6 +136,8 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
             } catch {}
             // Ensure user exists in DB for unlock/chat APIs
             try { fetch("/api/auth/ensure-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: testEmail }) }); } catch {}
+            // Notify page.tsx of login
+            document.dispatchEvent(new CustomEvent("user-login", { detail: { email: testEmail } }));
             setForm(p => ({ ...p, email: testEmail }));
             setLoggedIn(true); setStep("done"); setActivated(true);
           }} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>微信登录（测试模式）</button>

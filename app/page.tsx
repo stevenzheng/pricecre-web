@@ -103,6 +103,16 @@ export default function Home() {
     return () => document.removeEventListener("user-logout", handler);
   }, []);
 
+  // Listen for user login event from ProfilePanel
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { email } = (e as CustomEvent).detail;
+      if (email) setUserEmail(email);
+    };
+    document.addEventListener("user-login", handler);
+    return () => document.removeEventListener("user-login", handler);
+  }, []);
+
   // Referral detection — check for invite code on load
   const [referralToast, setReferralToast] = useState<string | null>(null);
   useEffect(() => {

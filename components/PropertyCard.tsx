@@ -558,6 +558,34 @@ export default function PropertyCard({
                       }}
                     >
                       {field.label}
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newVal = prompt(`纠错: ${field.label}`, String(field.value));
+                          if (!newVal || newVal === String(field.value)) return;
+                          let ue = "";
+                          try { const s = localStorage.getItem("pricecre_user"); if (s) ue = JSON.parse(s).email || ""; } catch {}
+                          try {
+                            await fetch("/api/data/correct", {
+                              method: "POST", headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                propertyId: property.id || property.projectName,
+                                fieldKey: field.key || field.label,
+                                fieldLabel: field.label,
+                                oldValue: String(field.value),
+                                newValue: newVal,
+                                reason: "",
+                                email: ue,
+                              }),
+                            });
+                            showModal("纠错已提交，审核通过后将更新");
+                          } catch { showModal("提交失败"); }
+                        }}
+                        style={{ marginLeft: 4, padding: "0 4px", fontSize: 10, color: "#A3A3A3", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", opacity: 0.5, flexShrink: 0 }}
+                        title="提报数据纠错"
+                      >
+                        纠错
+                      </button>
                     </span>
 
                     {/* Value or Lock */}

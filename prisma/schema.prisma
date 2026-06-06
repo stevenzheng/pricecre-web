@@ -109,6 +109,21 @@ model OrderItem {
   createdAt    DateTime @default(now())
 }
 
+model FieldCorrection {
+  id          String    @id @default(uuid())
+  propertyId  String
+  fieldKey    String
+  fieldLabel  String?
+  oldValue    String
+  newValue    String
+  reason      String?
+  status      String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  submittedBy String?
+  reviewedBy  String?
+  createdAt   DateTime  @default(now())
+  reviewedAt  DateTime?
+}
+
 model UserViewLog {
   id          String   @id @default(uuid())
   userId      String

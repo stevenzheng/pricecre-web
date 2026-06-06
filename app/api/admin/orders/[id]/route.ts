@@ -10,14 +10,20 @@ async function writeAuditLog(email: string, type: string, amount: number, balanc
   });
 }
 
-// GET — 订单详情
+// GET — 订单详情（支持 UUID 或 orderNo）
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const order = await prisma.order.findUnique({
+    let order = await prisma.order.findUnique({
       where: { id },
       include: { user: { select: { email: true } }, items: true },
     });
+    if (!order) {
+      order = await prisma.order.findFirst({
+        where: { orderNo: id },
+        include: { user: { select: { email: true } }, items: true },
+      });
+    }
     if (!order) return NextResponse.json({ error: "订单不存在" }, { status: 404 });
 
     return NextResponse.json({

@@ -708,7 +708,7 @@ export default function Home() {
                 style={{ cursor: "pointer", background: statFilter === "unlocked" ? "rgba(0,197,112,0.06)" : undefined, borderRadius: statFilter === "unlocked" ? 8 : undefined }}
                 title="点击筛选已解锁资产">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z"/><path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z"/></svg>已解锁资产</div>
-                <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{creditStats.unlockCount || stats.unlocked}</div>
+                <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{creditStats.unlockCount ?? stats.unlocked}</div>
               </div>
               <div className="stat-item" onClick={() => setMobileTab("market")}
                 style={{ cursor: "pointer" }} title="点击查看城市分布">
@@ -938,43 +938,45 @@ export default function Home() {
 
         {/* Order History Page */}
         {mobileTab === "orders" && (
-          <div className="max-w-4xl mx-auto px-4 py-6">
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 16 }}>我的订单</h2>
+          <RightDrawer title="我的订单" onClose={() => setMobileTab("market")}>
             {orderHistory.length > 0 ? (
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #E5E5E5", textAlign: "left", background: "#FAFAFA" }}>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>订单编号</th>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>商品</th>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>金额</th>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>支付方式</th>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>状态</th>
-                    <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>时间</th>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr style={{ borderBottom: "2px solid #E5E5E5", textAlign: "left", background: "#FAFAFA" }}>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>订单编号</th>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>商品</th>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>金额</th>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>支付方式</th>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>状态</th>
+                  <th style={{ padding: "10px 12px", fontWeight: 600, color: "#737373" }}>时间</th>
+                </tr></thead>
+                <tbody>{orderHistory.map((o: any, i: number) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #F0F0F0" }}>
+                    <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: 12 }}>{o.orderNo||"—"}</td>
+                    <td style={{ padding: "10px 12px" }}>{o.product==="monthly"?"不限次包月":o.product==="ai-chat-100"?"AI对话×100条":"查看权益×50次"}</td>
+                    <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "#0070F3" }}>¥{Number(o.amount||0).toFixed(2)}</td>
+                    <td style={{ padding: "10px 12px", color: "#404040" }}>{o.paymentMethod==="wechat"?"微信":"支付宝"}</td>
+                    <td style={{ padding: "10px 12px" }}><span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 12, fontWeight: 500, background: o.status===1?"rgba(16,185,129,0.1)":o.status===0?"rgba(245,166,35,0.1)":"rgba(238,0,0,0.06)", color: o.status===1?"#10B981":o.status===0?"#F5A623":"#EE0000" }}>{o.status===1?"已支付":o.status===0?"待支付":"已退款"}</span></td>
+                    <td style={{ padding: "10px 12px", fontSize: 12, color: "#A3A3A3" }}>{new Date(o.createdAt).toLocaleString("zh-CN")}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {orderHistory.map((o: any, i: number) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #F0F0F0" }}>
-                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: 12, color: "#171717" }}>{o.orderNo || "—"}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", color: "#404040" }}>{o.product === "monthly" ? "不限次包月" : o.product === "ai-chat-100" ? "AI对话×100条" : "查看权益×50次"}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontWeight: 600, color: "#0070F3" }}>¥{Number(o.amount || 0).toFixed(2)}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", color: "#404040" }}>{o.paymentMethod === "wechat" ? "微信支付" : o.paymentMethod === "alipay" ? "支付宝" : "—"}</td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <span style={{ padding: "3px 10px", borderRadius: 9999, fontSize: 12, fontWeight: 500,
-                          background: o.status === 1 ? "rgba(16,185,129,0.1)" : o.status === 0 ? "rgba(245,166,35,0.1)" : "rgba(238,0,0,0.06)",
-                          color: o.status === 1 ? "#10B981" : o.status === 0 ? "#F5A623" : "#EE0000",
-                          fontFamily: "var(--font-sans)",
-                        }}>{o.status === 1 ? "已支付" : o.status === 0 ? "待支付" : o.status === 3 ? "已退款" : "—"}</span>
-                      </td>
-                      <td style={{ padding: "10px 12px", fontFamily: "var(--font-sans)", fontSize: 12, color: "#A3A3A3" }}>{new Date(o.createdAt).toLocaleString("zh-CN")}</td>
-                    </tr>
-                  ))}
-                </tbody>
+                ))}</tbody>
               </table>
-            ) : (
-              <div style={{ textAlign: "center", padding: 40, color: "#A3A3A3", fontSize: 14 }}>暂无订单记录</div>
-            )}
-          </div>
+            ) : <div style={{ textAlign: "center", padding: 40, color: "#A3A3A3" }}>暂无订单记录</div>}
+          </RightDrawer>
+        )}
+        {showChatHistory && (
+          <RightDrawer title="AI 对话记录" onClose={() => setShowChatHistory(false)}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "auto" }}>
+              {chatHistory.map((c: any, i: number) => (
+                <div key={i} style={{ padding: "10px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#171717" }}>{new Date(c.createdAt).toLocaleString("zh-CN")}</span>
+                    <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "#EE0000" }}>-{Math.abs(c.amount)} 条</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "#737373" }}>{c.note || "AI 对话消费"}</div>
+                </div>
+              ))}
+            </div>
+          </RightDrawer>
         )}
       </main>
 
@@ -1075,5 +1077,23 @@ export default function Home() {
 
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>
+  );
+}
+
+function RightDrawer({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <>
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200 }} onClick={onClose} />
+      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 520, maxWidth: "92vw", background: "#FFF", zIndex: 201, boxShadow: "-4px 0 24px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", animation: "slideInRight 0.25s ease-out" }}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid #E5E5E5", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: "#171717", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ padding: "4px 8px", border: "none", background: "none", fontSize: 18, color: "#A3A3A3", cursor: "pointer" }}>✕</button>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", padding: 16 }}>
+          {children}
+        </div>
+      </div>
+      <style>{`@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}`}</style>
+    </>
   );
 }

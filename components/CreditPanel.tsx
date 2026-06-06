@@ -63,9 +63,9 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
       </div>
 
       {/* ── 额度来源 ── */}
-      <div style={{ padding: "6px 14px" }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 6 }}>
-          <Icon type="credit" size={10} /> 额度来源
+      <div style={{ padding: "10px 16px" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
+          <Icon type="credit" size={11} /> 额度来源
         </div>
         {[
           { label: "提报真实成交", sub: "提报交易 · 确认后兑换", value: credits.shared, icon: "gift" as const, color: "#0D9488", bg: "rgba(13,148,136,0.04)", action: "share" },
@@ -77,15 +77,15 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
               document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: item.action }));
               setTimeout(() => onClose?.(), 50);
             }}
-            style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", margin: "3px 0", borderRadius: 6, width: "100%", cursor: "pointer", background: item.bg, border: "none", borderLeft: `3px solid ${item.color}`, textAlign: "left" }}>
+            style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", margin: "4px 0", borderRadius: 6, width: "100%", cursor: "pointer", background: item.bg, border: "none", borderLeft: `3px solid ${item.color}`, textAlign: "left" }}>
             <Icon type={item.icon} size={16} />
-            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</span>
+            <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</span>
             <span style={{ fontSize: 10, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{item.sub}</span>
             {poolNum(item.value, item.value > 0)}
           </button>
         ))}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 6, background: isExhausted ? "rgba(238,0,0,0.04)" : "#F7F7F7", border: "1px solid #E5E5E5", marginTop: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 6, background: isExhausted ? "rgba(238,0,0,0.04)" : "#F7F7F7", border: "1px solid #E5E5E5", marginTop: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isExhausted ? "#EE0000" : "#0070F3"} strokeWidth="1.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             可用额度
           </span>
@@ -94,31 +94,31 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
       </div>
 
       {/* ── AI 对话 ── */}
-      <div style={{ padding: "6px 14px", borderTop: "1px solid #F0F0F0" }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 6 }}>
-          <Icon type="chat" size={10} /> AI 对话
+      <div style={{ padding: "10px 16px", borderTop: "1px solid #F0F0F0" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
+          <Icon type="chat" size={11} /> AI 对话
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", borderRadius: 6, background: "rgba(37,99,235,0.04)", borderLeft: "3px solid #2563EB" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", borderRadius: 6, background: "rgba(37,99,235,0.04)", borderLeft: "3px solid #2563EB" }}>
           <Icon type="chat" size={16} />
-          <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>对话额度</span>
+          <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>对话额度</span>
           <span style={{ fontSize: 10, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>剩余 {remainingChat}/{chatTokens.total} 条</span>
           <span style={{ ...monoSm, fontSize: 17, color: remainingChat > 0 ? "#2563EB" : "#EE0000" }}>{remainingChat}</span>
         </div>
       </div>
 
       {/* ── 数据概览 ── */}
-      <div style={{ padding: "6px 14px", borderTop: "1px solid #F0F0F0" }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 6 }}>
-          <Icon type="eye" size={10} /> 数据概览
+      <div style={{ padding: "10px 16px", borderTop: "1px solid #F0F0F0" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
+          <Icon type="eye" size={11} /> 数据概览
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {[
             { label: "资产查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
             { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
             { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
             { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
           ].map((s) => (
-            <div key={s.label} style={{ padding: "6px 8px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <div key={s.label} style={{ padding: "8px 10px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
               <Icon type={s.icon} size={12} />
               <div style={{ ...monoLg, fontSize: 15, color: "#171717" }}>{s.value}</div>
               <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>{s.label}</div>
@@ -128,14 +128,14 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
       </div>
 
       {/* ── 快捷操作 ── */}
-      <div style={{ display: "flex", gap: 6, padding: "10px 14px", borderTop: "1px solid #E5E5E5" }}>
+      <div style={{ display: "flex", gap: 8, padding: "12px 16px", borderTop: "1px solid #E5E5E5" }}>
         {[
           { label: "查看订单", icon: "cart", color: "#7C3AED", action: "orders" },
           { label: "对话记录", icon: "chat", color: "#2563EB", action: "chats" },
         ].map((btn) => (
           <button key={btn.label} onClick={() => { document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action })); onClose?.(); }}
-            style={{ flex: 1, padding: "6px 0", borderRadius: 5, border: "1px solid #E5E5E5", background: "#FFF", color: btn.color, fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-            <Icon type={btn.icon} size={11} /> {btn.label}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", color: btn.color, fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            <Icon type={btn.icon} size={12} /> {btn.label}
           </button>
         ))}
       </div>

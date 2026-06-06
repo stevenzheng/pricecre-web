@@ -250,7 +250,7 @@ export default function PropertyCard({
   };
 
   return (
-    <div id={`property-${property.id}`} className={`card overflow-hidden ${state.isExpanded ? "ring-1" : ""}`} style={{ borderColor: state.isExpanded ? "var(--accent-border)" : "var(--line)" }}>
+    <div id={`property-${property.id}`} className={`card ${state.isExpanded ? "ring-1" : "overflow-hidden"}`} style={{ borderColor: state.isExpanded ? "var(--accent-border)" : "var(--line)" }}>
       {/* ---- Collapsed Header ---- */}
       <div
         className="p-3 sm:p-4 cursor-pointer select-none"

@@ -772,7 +772,7 @@ export default function Home() {
         {/* Property Cards */}
         <div className="max-w-7xl mx-auto px-4 pb-4">
           {filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ alignItems: "start" }}>
               {filteredProperties.map((property) => {
                 const isRealUnlocked = unlockedIds.has(property.id);
                 const realIndicators = unlockedData[property.id];

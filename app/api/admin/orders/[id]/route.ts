@@ -11,9 +11,9 @@ async function writeAuditLog(email: string, type: string, amount: number, balanc
 }
 
 // GET — 订单详情（支持 UUID 或 orderNo）
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     let order = await prisma.order.findUnique({
       where: { id },
       include: { user: { select: { email: true } }, items: true },
@@ -39,9 +39,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // PUT — 修改订单状态（退款/取消/完成）
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const { action, refundReason, refundAmount, note } = body;
     // action: "cancel" | "refund" | "complete" | "update_note"

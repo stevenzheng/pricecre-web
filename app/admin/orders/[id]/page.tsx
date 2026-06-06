@@ -1,6 +1,6 @@
 "use client";
 // app/admin/orders/[id]/page.tsx — 订单详情 + 退款/取消操作
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -13,8 +13,8 @@ const statusColors: Record<number, { bg: string; text: string; label: string }> 
   5: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已完成" },
 };
 
-export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function OrderDetailPage({ params }: { params: { id: string } }) {
+  const id = params.id;
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);

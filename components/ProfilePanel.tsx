@@ -122,17 +122,30 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               </button>
             </form>
           ) : (
-            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
+            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));localStorage.setItem("pricecre_username",form.email.split("@")[0]);}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
               <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} />
               <InputField label="访问密码" placeholder="········" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} />
-              <button type="submit" style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>登录</button>
+              <button type="submit" style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", WebkitAppearance: "none" as any }}>登录</button>
             </form>
           )}
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
             <div style={{ flex: 1, height: 1, background: "#E5E5E5" }} /><span style={{ ...badge, color: "#A3A3A3" }}>OR</span><div style={{ flex: 1, height: 1, background: "#E5E5E5" }} />
           </div>
-          <button onClick={() => setLoggedIn(true)} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>微信登录</button>
+          <button onClick={() => {
+            const testEmail = "test@pricecre.com";
+            try {
+              localStorage.setItem("pricecre_user", JSON.stringify({
+                email: testEmail,
+                referralCode: "sztest1",
+                totalCredits: 10,
+                registeredAt: Date.now(),
+              }));
+              localStorage.setItem("pricecre_username", "测试用户");
+            } catch {}
+            setForm(p => ({ ...p, email: testEmail }));
+            setLoggedIn(true); setStep("done"); setActivated(true);
+          }} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>微信登录（测试模式）</button>
         </div>
       </div>
     );

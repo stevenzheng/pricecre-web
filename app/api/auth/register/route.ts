@@ -9,12 +9,25 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail, generateVerificationCode, verificationEmailTemplate } from "@/lib/email";
-import { setCode } from "@/lib/codeStore";
+import { sendEmail, verificationEmailTemplate } from "@/lib/email";
+
+function generateCode(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || "pricecre-dev-2026";
+  const window = Math.floor(Date.now() / (10 * 60 * 1000)); // 10-minute window
+  const hash = require("crypto").createHash("md5").update(`${email}:${secret}:${window}`).digest("hex");
+  const chars = "0123456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[parseInt(hash.slice(i * 2, i * 2 + 2), 16) % chars.length];
+  }
+  return code;
+}
+
+export { generateCode }; // exported for verify
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, referralCode } = await req.json();
+    const { email, password } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "邮箱和密码不能为空" }, { status: 400 });
@@ -24,15 +37,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "密码至少 6 位" }, { status: 400 });
     }
 
-    // 生成验证码
-    const code = generateVerificationCode();
-    setCode(email, code);
+    // Generate deterministic verification code (works across serverless invocations)
+    const code = generateCode(email);
 
-    // Store referral code alongside email verification
-    if (referralCode) {
-      const { setReferral } = await import("@/lib/codeStore");
-      setReferral(email, referralCode);
-    }
+    // Referral code will be handled server-side in verify
 
     // 发送邮件
     const result = await sendEmail({

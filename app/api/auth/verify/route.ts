@@ -4,11 +4,36 @@
  * 验证邮箱验证码 → 创建用户 → 处理裂变奖励
  */
 import { NextRequest, NextResponse } from "next/server";
-import { verifyCode } from "@/lib/codeStore";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+function generateCode(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || "pricecre-dev-2026";
+  const window = Math.floor(Date.now() / (10 * 60 * 1000));
+  const hash = require("crypto").createHash("md5").update(`${email}:${secret}:${window}`).digest("hex");
+  const chars = "0123456789";
+  let c = "";
+  for (let i = 0; i < 6; i++) {
+    c += chars[parseInt(hash.slice(i * 2, i * 2 + 2), 16) % chars.length];
+  }
+  return c;
+}
 
+function verifyCodeStr(email: string, input: string): boolean {
+  const secret = process.env.NEXTAUTH_SECRET || "pricecre-dev-2026";
+  // Check current and previous 10-min window (clock skew)
+  const now = Math.floor(Date.now() / (10 * 60 * 1000));
+  for (const window of [now, now - 1]) {
+    const hash = require("crypto").createHash("md5").update(`${email}:${secret}:${window}`).digest("hex");
+    const chars = "0123456789";
+    let c = "";
+    for (let i = 0; i < 6; i++) {
+      c += chars[parseInt(hash.slice(i * 2, i * 2 + 2), 16) % chars.length];
+    }
+    if (c === input) return true;
+  }
+  return false;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,14 +43,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "参数不完整" }, { status: 400 });
     }
 
-    const isValid = verifyCode(email, code);
+    const isValid = verifyCodeStr(email, code);
     if (!isValid) {
       return NextResponse.json({ error: "验证码错误或已过期" }, { status: 400 });
     }
 
-    // Check for referral code
-    const { getReferral } = await import("@/lib/codeStore");
-    const referralCode = getReferral(email);
+    // Referral code from request body
+    const referralCode = req.nextUrl?.searchParams?.get("ref") || "";
 
     // Create user in Supabase
     const userData: any = {

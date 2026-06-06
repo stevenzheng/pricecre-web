@@ -115,8 +115,8 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
           {[
             { label: "资产查看权益", value: credits.referral + credits.purchased, sub: "次", icon: "unlock" as const },
             { label: "已解锁资产", value: creditStats.unlockCount, sub: "张", icon: "check" as const },
-            { label: "AI 已用", value: chatTokens.used, sub: "条", icon: "chat" as const },
-            { label: "总对话", value: creditStats.conversations, sub: "次", icon: "chat" as const },
+            { label: "AI对话次数", value: chatTokens.used, sub: "次", icon: "chat" as const },
+            { label: "AI分析报告", value: creditStats.conversations, sub: "份", icon: "eye" as const },
           ].map((s) => (
             <div key={s.label} style={{ padding: "8px 10px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
               <Icon type={s.icon} size={12} />

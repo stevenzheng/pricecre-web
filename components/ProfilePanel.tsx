@@ -1,63 +1,18 @@
 "use client";
-/* ---- 兑换码内联组件 ---- */
-function RedeemSection() {
-  const [code, setCode] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [msg, setMsg] = useState("");
-
-  const handleActivate = async () => {
-    if (code.length !== 6) { setMsg("请输入6位激活码"); setStatus("error"); return; }
-    setStatus("loading");
-    let userEmail = "";
-    try { const stored = localStorage.getItem("pricecre_user"); if (stored) userEmail = JSON.parse(stored).email || ""; } catch {}
-    try {
-      const res = await fetch("/api/data/redeem", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, email: userEmail }),
-      });
-      const d = await res.json();
-      if (d.success) { setMsg(`激活成功！${d.credits} 次查询权益已到账`); setStatus("success"); setCode(""); }
-      else { setMsg(d.error || "激活失败"); setStatus("error"); }
-    } catch { setMsg("网络错误"); setStatus("error"); }
-  };
-
-  return (
-    <div className="card p-3">
-      <div className="section-title">激活兑换码</div>
-      <div className="flex gap-2">
-        <input
-          type="text" placeholder="输入 6 位兑换码"
-          value={code} onChange={e => { setCode(e.target.value.toUpperCase()); setStatus("idle"); }}
-          className="input-search flex-1" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} maxLength={6}
-          onKeyDown={e => { if (e.key === "Enter") handleActivate(); }}
-        />
-        <button
-          className="btn-primary text-sm px-5 flex-shrink-0"
-          onClick={handleActivate}
-          disabled={status === "loading"}
-        >
-          {status === "loading" ? "验证中..." : "激活"}
-        </button>
-      </div>
-      {status !== "idle" && (
-        <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)",
-          background: status === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)",
-          color: status === "success" ? "#0070F3" : "#EE0000" }}>
-          {msg}
-        </div>
-      )}
-    </div>
-  );
-}
-
-import { showModal } from "@/components/Toast";
-import CreditPanel from "@/components/CreditPanel";
 
 import { useState, useEffect } from "react";
 
 type Step = "login" | "register" | "verify" | "done";
 
-export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats }: { 
+// ── Vercel Design System tokens ──
+const title = { fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" } as const;
+const label = { fontSize: 12, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" } as const;
+const caption = { fontSize: 12, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" } as const;
+const body = { fontSize: 14, fontWeight: 400, color: "#404040", fontFamily: "var(--font-sans)" } as const;
+const badge = { fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)" } as const;
+const mono = { fontFamily: "var(--font-mono)", fontWeight: 300, letterSpacing: "-0.03em" } as const;
+
+export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats }: {
   credits?: { referral: number; purchased: number };
   totalCredits?: number;
   chatTokens?: { total: number; used: number };
@@ -67,538 +22,308 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
   const [loggedIn, setLoggedIn] = useState(false);
   const [activated, setActivated] = useState(false);
-  // quota is derived from page-level credits for consistency with CreditPanel
-  const quota = credits && (credits.referral + credits.purchased) > 0 ? credits.referral + credits.purchased : 0;
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
+
+  // Payment state
   const [showPayment, setShowPayment] = useState(false);
   const [paymentProduct, setPaymentProduct] = useState<"single" | "monthly">("single");
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
   const [buying, setBuying] = useState(false);
-  const [viewHistory, setViewHistory] = useState<any[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
 
-  // Restore login state from localStorage on mount
+  // Redeem state
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemStatus, setRedeemStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [redeemMsg, setRedeemMsg] = useState("");
+
+  const quota = credits ? credits.referral + credits.purchased : 0;
+  const remainingChat = chatTokens ? Math.max(0, chatTokens.total - chatTokens.used) : 0;
+
+  // Restore login
   useEffect(() => {
     try {
       const stored = localStorage.getItem("pricecre_user");
       if (stored) {
         const user = JSON.parse(stored);
         if (user.email) {
-          setForm((prev) => ({ ...prev, email: user.email }));
-          setLoggedIn(true);
-          setStep("done");
-          setActivated(true);
-          // Restore referral code if available
-          if (user.referralCode) {
-            try { localStorage.setItem("pricecre_referralCode", JSON.stringify(user.referralCode)); } catch {}
-          }
+          setForm(p => ({ ...p, email: user.email }));
+          setLoggedIn(true); setStep("done"); setActivated(true);
         }
       }
     } catch {}
   }, []);
 
-  // Sync credits from parent page state
-  useEffect(() => {
-    if (credits) {
-      const total = credits.referral + credits.purchased;
-      if (total > 0 && !activated) setActivated(true);
-      // quota is now derived from credits prop — no need to set manually
-    }
-  }, [credits]);
-
-  const fetchHistory = async () => {
-    if (!form.email) return;
+  const handleRedeem = async () => {
+    if (redeemCode.length !== 6) { setRedeemMsg("请输入6位激活码"); setRedeemStatus("error"); return; }
+    setRedeemStatus("loading");
+    let ue = "";
+    try { const s = localStorage.getItem("pricecre_user"); if (s) ue = JSON.parse(s).email || ""; } catch {}
     try {
-      const res = await fetch(`/api/user/history?email=${encodeURIComponent(form.email)}`);
-      const data = await res.json();
-      setViewHistory(data.history || []);
-    } catch {}
+      const res = await fetch("/api/data/redeem", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: redeemCode, email: ue }) });
+      const d = await res.json();
+      if (d.success) { setRedeemMsg(`激活成功！${d.credits} 次查询权益已到账`); setRedeemStatus("success"); setRedeemCode(""); }
+      else { setRedeemMsg(d.error || "激活失败"); setRedeemStatus("error"); }
+    } catch { setRedeemMsg("网络错误"); setRedeemStatus("error"); }
   };
 
-  /* ---- 注册：发送验证码 ---- */
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!form.email || !form.password) return;
-    if (form.password.length < 6) { setError("密码至少6位"); return; }
-    if (form.password !== form.confirm) { setError("两次密码不一致"); return; }
-
-    setLoading(true);
+  const handlePay = async () => {
+    setBuying(true);
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
+      const amount = paymentProduct === "monthly" ? 299 : 99;
+      const res = await fetch("/api/payment/test-buy", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, product: paymentProduct, amount, paymentMethod }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setDevCode(data.devCode || "");
-        setStep("verify");
-      } else {
-        setError(data.error || "发送失败");
-      }
-    } catch {
-      setError("网络错误，请重试");
-    }
-    setLoading(false);
+      const d = await res.json();
+      if (d.success) { setShowPayment(false); }
+    } catch {} finally { setBuying(false); }
   };
 
-  /* ---- 验证码校验 ---- */
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, code: form.code }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setToken(data.token);
-        setLoggedIn(true);
-        setStep("done");
-        // Save referral code to localStorage for dynamic sharing
-        if (data.referralCode) {
-          try {
-            localStorage.setItem("pricecre_user", JSON.stringify({
-              email: form.email,
-              referralCode: data.referralCode,
-              totalCredits: data.totalCredits || 3,
-              registeredAt: Date.now(),
-            }));
-          } catch {}
-        }
-        fetchHistory();
-      } else {
-        setError(data.error || "验证失败");
-      }
-    } catch {
-      setError("网络错误");
-    }
-    setLoading(false);
-  };
-
-  /* ---- 登录 ---- */
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.email || !form.password) return;
-    // Save login to localStorage for persistence
-    try {
-      const code = "sz" + Math.random().toString(36).substring(2, 8);
-      localStorage.setItem("pricecre_user", JSON.stringify({
-        email: form.email,
-        referralCode: code,
-        totalCredits: 3,
-        registeredAt: Date.now(),
-      }));
-      localStorage.setItem("pricecre_referralCode", JSON.stringify(code));
-    } catch {}
-    setLoggedIn(true);
-    setStep("done");
-    setActivated(true);
-  };
-
-  // Shared cards rendered in both logged-in and logged-out states
-  const publicCards = (
-    <div className="space-y-3">
-      {/* 商业付费直通车 */}
-      <div className="card p-4">
-        <div className="section-title">商业付费直通车</div>
-        
-        {!showPayment ? (
-          <div className="space-y-2">
-            <button
-              className="w-full py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
-              style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
-              onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
-            >
-              立即购买查询权益 · 99元 / 50次
-            </button>
-            <button
-              className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[var(--bg-hover)]"
-              style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
-              onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }}
-            >
-              不限次包月 · 299元/月
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3 animate-slide-up">
-            {/* Order Summary */}
-            <div className="p-3 rounded-lg" style={{ background: "var(--panel)" }}>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>订单明细</span>
-                <span style={{ fontSize: 11, color: "var(--text-hint)", fontWeight: 500 }}>1 项</span>
-              </div>
-              <div className="flex justify-between items-center mb-1" style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400 }}>
-                <span>{paymentProduct === "monthly" ? "不限次包月订阅" : "资产查询权益 × 50次"}</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: "var(--text)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-              </div>
-              <div className="border-t mt-2 pt-2 flex justify-between items-center" style={{ borderColor: "var(--line)" }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-strong)" }}>合计</span>
-                <span style={{ fontSize: 14, fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--accent)" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-              </div>
-            </div>
-
-            {/* Payment Method Selection */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>选择支付方式</span>
-              
-              {/* WeChat */}
-              <button
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${paymentMethod === "wechat" ? "ring-1" : ""}`}
-                style={{
-                  borderColor: paymentMethod === "wechat" ? "var(--accent)" : "var(--line)",
-                  background: paymentMethod === "wechat" ? "var(--accent-soft)" : "var(--panel)",
-                }}
-                onClick={() => setPaymentMethod("wechat")}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#07C160" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M8.69 3.46c-4.15 0-7.52 2.73-7.52 6.1 0 1.86.98 3.53 2.5 4.66l-.63 2.1 2.43-1.23c.96.29 2.02.45 3.14.45.37 0 .74-.02 1.1-.06a5.72 5.72 0 01-.18-1.46c0-3.07 3.02-5.57 6.75-5.57.3 0 .6.02.88.05C17.16 6.23 13.37 3.46 8.69 3.46z"/><path d="M17.35 9.72c-3.4 0-6.16 1.86-6.16 4.16 0 2.3 2.76 4.16 6.16 4.16.25 0 .5-.02.74-.04v.01c.94.3 2.63 1.01 2.63 1.01l-.54-1.89c1.2-.88 1.9-2.04 1.9-3.29 0-2.26-2.76-4.12-6.73-4.12z"/></svg>
-                </div>
-                <div className="flex-1 text-left">
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-strong)" }}>微信支付</div>
-                  <div style={{ fontSize: 11, fontWeight: 400, color: "var(--text-hint)" }}>WeChat Pay · 扫码即付</div>
-                </div>
-                {paymentMethod === "wechat" && (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
-                )}
-              </button>
-
-              {/* Alipay */}
-              <button
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${paymentMethod === "alipay" ? "ring-1" : ""}`}
-                style={{
-                  borderColor: paymentMethod === "alipay" ? "var(--accent)" : "var(--line)",
-                  background: paymentMethod === "alipay" ? "var(--accent-soft)" : "var(--panel)",
-                }}
-                onClick={() => setPaymentMethod("alipay")}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#1677FF" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-inverse)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9V7h2v6zm4 4h-2v-2h2v2zm0-6h-2V7h2v4z"/></svg>
-                </div>
-                <div className="flex-1 text-left">
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-strong)" }}>支付宝</div>
-                  <div style={{ fontSize: 11, fontWeight: 400, color: "var(--text-hint)" }}>Alipay · 安全支付</div>
-                </div>
-                {paymentMethod === "alipay" && (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--text-inverse)"/></svg>
-                )}
-              </button>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <button
-                className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
-                style={{ background: "var(--panel)", color: "var(--text-muted)", border: "1px solid var(--line)" }}
-                onClick={() => { setShowPayment(false); setPaymentMethod("wechat"); }}
-              >
-                返回
-              </button>
-              <button
-                className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ background: buying ? "var(--text-hint)" : "var(--accent)", color: "var(--text-inverse)", cursor: buying ? "not-allowed" : "pointer" }}
-                disabled={buying}
-                onClick={async () => {
-                  setBuying(true);
-                  try {
-                    const amount = paymentProduct === "monthly" ? 299 : 99;
-                    const product = paymentProduct;
-                    const res = await fetch("/api/payment/test-buy", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: form.email, product, amount, paymentMethod: paymentMethod }),
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                      const msg = paymentProduct === "monthly" 
-                        ? "包月订阅已激活 · 30天不限次查看" 
-                        : `${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`;
-                      showModal(msg);
-                      setShowPayment(false);
-                      setPaymentMethod("wechat");
-                    } else {
-                      showModal("支付失败，请重试");
-                    }
-                  } catch {
-                    const msg = paymentProduct === "monthly" 
-                      ? "包月订阅已激活 · 30天不限次查看"
-                      : `${paymentMethod === "wechat" ? "微信" : "支付宝"}支付确认中... 50次额度即将到账`;
-                    showModal(msg);
-                    setShowPayment(false);
-                    setPaymentMethod("wechat");
-                  }
-                  setBuying(false);
-                }}
-              >
-                {buying ? "处理中..." : `确认支付 ¥${paymentProduct === "monthly" ? "299.00" : "99.00"}`}
-              </button>
-            </div>
-
-            <p className="text-[9px] text-center" style={{ color: "var(--text-hint)" }}>
-              支付成功后权益即时到账 · 支持微信/支付宝双通道
-            </p>
-          </div>
-        )}
-      </div>
-      {/* 分享转发 */}
-      <div className="card p-3">
-        <div className="section-title">分享转发获得查询权益</div>
-        <div className="mb-3 text-center">
-          <div style={{ fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", color: "var(--text-muted)", marginBottom: 8 }}>历史累计已获取确权权益</div>
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-xl font-medium" style={{ color: "var(--text-strong)", fontFamily: "var(--font-geist-mono), 'Geist Mono', monospace" }}>0</span>
-            <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>/ 100</span>
-            <span className="text-xs" style={{ color: "var(--text-hint)" }}>次</span>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>你的全局专属裂变链接</div>
-          <div className="flex gap-2">
-            <input type="text" readOnly value="pricecre.com/r/sz2026" className="input-search flex-1 text-xs" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }} />
-            <button className="btn-secondary text-xs px-4 flex-shrink-0" onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); showModal("已复制邀约链接"); }}>一键邀约</button>
-          </div>
-        </div>
-      </div>
-
-      {/* 激活兑换码 */}
-      <RedeemSection />
-    </div>
-  );
-
-  /* ---- 登录 / 注册主界面 ---- */
+  // ── Login / Register ──
   if (!loggedIn) {
     return (
-      <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
-        <div className="card p-6 space-y-5">
-          {/* 标签 */}
-          <div className="flex items-center gap-2 justify-center">
-            <span className="badge badge-accent text-[9px] tracking-wider font-medium" style={{ fontFamily: "var(--font-mono)" }}>
-              SECURE_GATEWAY
-            </span>
-            <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-              // 账户登录
-            </span>
-          </div>
-
-          <h2 className="text-center text-lg font-medium" style={{ color: "var(--text-strong)" }}>
+      <div style={{ maxWidth: 420, margin: "0 auto", padding: "16px" }}>
+        <div style={{ background: "#FFF", borderRadius: 12, border: "1px solid #E5E5E5", padding: 24 }}>
+          <h2 style={{ ...title, fontSize: 18, textAlign: "center", marginBottom: 16 }}>
             {step === "verify" ? "验证邮箱" : "登录 PriceCRE"}
           </h2>
 
-          {/* Tab */}
           {step !== "verify" && (
-            <div className="flex rounded-lg p-0.5" style={{ background: "var(--panel)" }}>
-              <button onClick={() => setStep("login")}
-                className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${step === "login" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
-                邮箱登录
-              </button>
-              <button onClick={() => setStep("register")}
-                className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${step === "register" ? "bg-[var(--bg-surface)] text-[var(--text-strong)] shadow-sm" : "text-[var(--text-muted)]"}`}>
-                注册新账户
-              </button>
-            </div>
-          )}
-
-          {/* 错误提示 */}
-          {error && (
-            <div className="text-[11px] font-medium px-3 py-2 rounded-lg" style={{ background: "var(--negative-soft)", color: "var(--negative)" }}>
-              {error}
-            </div>
-          )}
-
-          {/* 验证码步骤 */}
-          {step === "verify" ? (
-            <form onSubmit={handleVerify} className="space-y-3">
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                验证码已发送至 <strong>{form.email}</strong>{devCode ? `（开发模式：${devCode}）` : ""}
-              </p>
-              <input type="text" placeholder="输入 6 位验证码" value={form.code}
-                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                className="input-search text-center text-lg tracking-[0.3em]" style={{ paddingLeft: "12px", fontFamily: "var(--font-mono)" }}
-                maxLength={6} />
-              <button type="submit" disabled={loading} className="btn-primary w-full text-sm" style={{ paddingTop: 12, paddingBottom: 12 }}>
-                {loading ? "验证中..." : "验证并登录"}
-              </button>
-              <button type="button" onClick={() => setStep("register")} className="w-full text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                ← 返回修改邮箱
-              </button>
-            </form>
-          ) : step === "register" ? (
-            /* 注册表单 */
-            <form onSubmit={handleRegister} className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>账户邮箱</span>
-                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
-                </div>
-                <input type="email" placeholder="your@email.com" value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="input-search" style={{ paddingLeft: "12px" }} />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>设置密码</span>
-                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
-                </div>
-                <input type="password" placeholder="至少 6 位" value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="input-search" style={{ paddingLeft: "12px" }} />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>确认密码</span>
-                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>CONFIRM</span>
-                </div>
-                <input type="password" placeholder="再次输入" value={form.confirm}
-                  onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                  className="input-search" style={{ paddingLeft: "12px" }} />
-              </div>
-              <button type="submit" disabled={loading} className="btn-primary w-full text-sm" style={{ paddingTop: 12, paddingBottom: 12 }}>
-                {loading ? "发送中..." : "发送验证码"}
-                <span className="text-[9px] font-normal ml-1 opacity-60" style={{ fontFamily: "var(--font-mono)" }}>SEND CODE</span>
-              </button>
-            </form>
-          ) : (
-            /* 登录表单 */
-            <form onSubmit={handleLogin} className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>账户邮箱</span>
-                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>EMAIL</span>
-                </div>
-                <input type="email" placeholder="your@email.com" value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="input-search" style={{ paddingLeft: "12px" }} />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>访问密码</span>
-                  <span className="text-[9px] font-medium tracking-wider opacity-40" style={{ fontFamily: "var(--font-mono)" }}>PASSWORD</span>
-                </div>
-                <input type="password" placeholder="········" value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="input-search" style={{ paddingLeft: "12px" }} />
-              </div>
-              <button type="submit" className="btn-primary w-full text-sm" style={{ paddingTop: 12, paddingBottom: 12 }}>
-                登录 <span className="text-[9px] font-normal ml-1 opacity-60" style={{ fontFamily: "var(--font-mono)" }}>SIGN IN</span>
-              </button>
-            </form>
-          )}
-
-          {/* OR + 微信 */}
-          {step !== "verify" && (
-            <>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px" style={{ background: "var(--line)" }} />
-                <span className="text-[10px] font-medium" style={{ color: "var(--text-hint)" }}>OR</span>
-                <div className="flex-1 h-px" style={{ background: "var(--line)" }} />
-              </div>
-              <button className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-                style={{ background: "var(--positive-soft)", color: "var(--positive)", border: "1px solid var(--positive-border)" }}
-                onClick={() => setLoggedIn(true)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/><path d="M14.332 11.09a9.225 9.225 0 00-1.525.197c-1.961.36-3.717 1.525-4.775 3.053-.556.803-.858 1.69-.858 2.59 0 2.637 1.99 4.964 4.83 5.807a5.19 5.19 0 001.445.213c.506 0 1.007-.073 1.493-.213l1.086.636a.18.18 0 00.095.031.17.17 0 00.168-.168c0-.041-.017-.082-.027-.122l-.222-.846a.338.338 0 01.121-.38c1.822-1.209 2.922-3.083 2.922-5.314 0-3.26-2.95-5.684-6.278-5.684z"/></svg>
-                微信登录 <span className="text-[9px] font-normal opacity-60" style={{ fontFamily: "var(--font-mono)" }}>WeChat Login</span>
-              </button>
-            </>
-          )}
-
-          {/* 微信公众号 */}
-          <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t" style={{ borderColor: "var(--line)" }}>
-            <div className="flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#07C160">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-                <path d="M8.5 9a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" fill="#fff"/>
-              </svg>
-              <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>关注微信公众号</span>
-            </div>
-            <span className="text-sm font-medium" style={{ color: "var(--positive)" }}>PriceCRE</span>
-            <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>获取最新资产数据推送与行业洞察</span>
-          </div>
-
-        </div>
-      {publicCards}
-    </div>
-    );
-  }
-
-  /* ---- 已登录 ---- */
-  return (
-    <div className="max-w-sm mx-auto px-4 py-4 space-y-4">
-      {/* 1. 用户信息卡片 */}
-      <div className="card p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--panel)" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <div>
-            <div className="text-sm font-medium" style={{ color: "var(--text-strong)" }}>用户</div>
-            <div style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-sans)", color: "var(--text-muted)" }}>{form.email}</div>
-          </div>
-          <button onClick={() => { setLoggedIn(false); setStep("login"); }} style={{ fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}>退出登录</button>
-        </div>
-      </div>
-
-      {/* CreditPanel — 统一额度面板 */}
-      <CreditPanel
-        credits={{
-          shared: 0,
-          referral: credits?.referral || 0,
-          purchased: credits?.purchased || 0,
-        }}
-        chatTokens={chatTokens || { total: 0, used: 0 }}
-        creditStats={creditStats || { viewCount: 0, unlockCount: 0, conversations: 0 }}
-      />
-
-      {/* 查看记录 */}
-      {viewHistory.length > 0 && (
-        <div className="card p-5">
-          <div className="section-title" onClick={() => setShowHistory(!showHistory)} style={{ cursor: "pointer" }}>
-            查看记录 ({viewHistory.length})
-            <span className="ml-2 text-[10px]" style={{ color: "var(--text-hint)" }}>{showHistory ? "收起 ▲" : "展开 ▼"}</span>
-          </div>
-          {showHistory && (
-            <div className="space-y-1.5 mt-3">
-              {viewHistory.map((p, i) => (
-                <div key={p.id || i} className="flex items-center justify-between py-2 px-2 rounded-lg" style={{ background: "var(--panel)" }}>
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-medium truncate" style={{ color: "var(--text-strong)" }}>{p.projectName}</div>
-                    <div className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.city} · {p.district}</div>
-                  </div>
-                  <div className="text-xs font-mono font-medium ml-2 flex-shrink-0" style={{ color: "var(--accent)" }}>
-                    ¥{Number(p.faceRent).toFixed(1)}
-                  </div>
-                </div>
+            <div style={{ display: "flex", borderRadius: 8, background: "#F7F7F7", padding: 2, marginBottom: 16 }}>
+              {["login","register"].map(s => (
+                <button key={s} onClick={() => setStep(s as Step)}
+                  style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: step === s ? "#FFF" : "transparent", color: step === s ? "#171717" : "#A3A3A3", fontSize: 13, fontWeight: 500, cursor: "pointer", boxShadow: step === s ? "0 1px 3px rgba(0,0,0,0.08)" : "none", fontFamily: "var(--font-sans)" }}>
+                  {s === "login" ? "邮箱登录" : "注册新账户"}
+                </button>
               ))}
             </div>
           )}
+
+          {error && <div style={{ padding: "8px 12px", borderRadius: 6, background: "rgba(238,0,0,0.06)", color: "#EE0000", fontSize: 12, fontWeight: 500, marginBottom: 12, fontFamily: "var(--font-sans)" }}>{error}</div>}
+
+          {step === "verify" ? (
+            <form onSubmit={async e => { e.preventDefault(); setLoading(true); try { const r = await fetch("/api/auth/verify", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({email:form.email,code:form.code}) }); const d = await r.json(); if (d.success) { setToken(d.token); setLoggedIn(true); setStep("done"); if (d.referralCode) try { localStorage.setItem("pricecre_user", JSON.stringify({email:form.email,referralCode:d.referralCode,totalCredits:10,registeredAt:Date.now()})); } catch {} } else setError(d.error||"验证失败"); } catch { setError("网络错误"); } setLoading(false); }}>
+              <p style={caption}>{devCode ? `验证码已发送至 ${form.email} (${devCode})` : `验证码已发送至 ${form.email}`}</p>
+              <input type="text" placeholder="输入6位验证码" value={form.code} onChange={e => setForm({...form, code: e.target.value})}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #D4D4D4", borderRadius: 8, fontSize: 18, textAlign: "center", letterSpacing: "0.3em", outline: "none", fontFamily: "var(--font-mono)", marginTop: 12 }} maxLength={6} />
+              <button type="submit" disabled={loading} style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: loading ? "default" : "pointer", opacity: loading ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                {loading ? "验证中..." : "验证并登录"}
+              </button>
+            </form>
+          ) : step === "register" ? (
+            <form onSubmit={async e => { e.preventDefault(); setError(""); if (!form.email||!form.password) return; if (form.password.length<6){setError("密码至少6位");return;} if (form.password!==form.confirm){setError("两次密码不一致");return;} setLoading(true); try { const r = await fetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:form.email,password:form.password})}); const d=await r.json(); if(d.success){setDevCode(d.devCode||"");setStep("verify")} else setError(d.error||"发送失败"); } catch { setError("网络错误"); } setLoading(false); }}>
+              <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} />
+              <InputField label="设置密码" placeholder="至少6位" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} />
+              <InputField label="确认密码" placeholder="再次输入" type="password" value={form.confirm} onChange={e=>setForm({...form,confirm:e.target.value})} />
+              <button type="submit" disabled={loading} style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: loading ? "default" : "pointer", opacity: loading ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                {loading ? "发送中..." : "发送验证码"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
+              <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} />
+              <InputField label="访问密码" placeholder="········" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} />
+              <button type="submit" style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>登录</button>
+            </form>
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "#E5E5E5" }} /><span style={{ ...badge, color: "#A3A3A3" }}>OR</span><div style={{ flex: 1, height: 1, background: "#E5E5E5" }} />
+          </div>
+          <button onClick={() => setLoggedIn(true)} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>微信登录</button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* 3. 付费 + 分享 + 公众号 */}
-      {publicCards}
-
-      <div className="space-y-2">
-        {!activated && <button className="btn-primary w-full" onClick={() => { setActivated(true); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>提报交易</button>}
-        {quota <= 0 && <button className="btn-secondary w-full" onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}>购买权益</button>}
-        <button
-          className="btn-secondary w-full text-xs"
-          onClick={() => {
-            localStorage.removeItem("pricecre_user");
-            setLoggedIn(false);
-            setStep("login");
-            setForm({ email: "", password: "", confirm: "", code: "" });
-            showModal("已退出登录");
-          }}
-        >
+  // ── Logged-in Desktop Layout ──
+  return (
+    <div style={{ padding: "16px" }}>
+      {/* User header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: "12px 16px", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
+        <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#667eea,#764ba2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFF", fontSize: 15, fontWeight: 700, flexShrink: 0 }}>
+          {form.email?.charAt(0).toUpperCase() || "?"}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ ...title, fontSize: 14 }}>用户</div>
+          <div style={{ ...caption, fontSize: 11, overflow: "hidden", textOverflow: "ellipsis" }}>{form.email}</div>
+        </div>
+        <button onClick={() => { setLoggedIn(false); setStep("login"); setForm({email:"",password:"",confirm:"",code:""}); }} style={{ ...label, fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#A3A3A3" }}>
           退出登录
         </button>
       </div>
+
+      {/* Desktop: 2-column grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, maxWidth: 720, margin: "0 auto" }}>
+        {/* LEFT COL: Credit info + History */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Credit Pools */}
+          <SectionCard icon="credit" title="额度来源">
+            {[
+              { label: "邀约额度", sub: "邀请好友获得", v: credits?.referral || 0, color: "#2563EB" },
+              { label: "付费额度", sub: "直接购买", v: credits?.purchased || 0, color: "#7C3AED" },
+            ].map(p => (
+              <PoolRow key={p.label} label={p.label} sub={p.sub} value={p.v} color={p.color} />
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 10px", background: "#F7F7F7", borderRadius: 6, marginTop: 4 }}>
+              <span style={label}>可用额度</span>
+              <span style={{ ...mono, fontSize: 18, color: quota > 0 ? "#0070F3" : "#EE0000" }}>{quota}</span>
+            </div>
+          </SectionCard>
+
+          {/* AI Chat */}
+          <SectionCard icon="chat" title="AI 对话">
+            <PoolRow label="对话额度" sub={`剩余 ${remainingChat} / ${chatTokens?.total || 0} 条`} value={remainingChat} color="#2563EB" />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 8 }}>
+              <MiniStat label="已用" value={chatTokens?.used || 0} sub="条" />
+              <MiniStat label="总对话" value={creditStats?.conversations || 0} sub="次" />
+            </div>
+          </SectionCard>
+
+          {/* Quick Actions */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            {[
+              { label: "查看订单", action: "orders", icon: "cart" },
+              { label: "已解锁资产", action: "assets", icon: "unlock" },
+              { label: "对话记录", action: "chats", icon: "chat" },
+              { label: "纠错提报", action: "correct", icon: "edit" },
+            ].map(btn => (
+              <button key={btn.label} onClick={() => document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action }))}
+                style={{ padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COL: Payment + Referral + Redeem */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Payment */}
+          <SectionCard icon="cart" title="商业付费直通车">
+            {!showPayment ? (
+              <>
+                <PayBtn label="查看权益 × 50 次" price="¥99.00" onClick={() => { setPaymentProduct("single"); setShowPayment(true); }} />
+                <PayBtn label="不限次包月" price="¥299.00/月" secondary onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }} />
+              </>
+            ) : (
+              <div>
+                <div style={{ padding: "10px 12px", background: "#F7F7F7", borderRadius: 8, marginBottom: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={label}>{paymentProduct === "monthly" ? "不限次包月" : "查看权益 × 50 次"}</span>
+                    <span style={{ ...mono, fontSize: 14, color: "#171717" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
+                    <span style={{ ...label, fontWeight: 600 }}>合计</span>
+                    <span style={{ ...mono, fontSize: 16, fontWeight: 600, color: "#0070F3" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  {(["wechat","alipay"] as const).map(m => (
+                    <button key={m} onClick={() => setPaymentMethod(m)}
+                      style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: paymentMethod === m ? "2px solid #0070F3" : "1px solid #E5E5E5", background: paymentMethod === m ? "rgba(0,112,243,0.04)" : "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", color: m === "wechat" ? "#07C160" : "#1677FF" }}>
+                      {m === "wechat" ? "微信支付" : "支付宝"}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => setShowPayment(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>返回</button>
+                  <button onClick={handlePay} disabled={buying}
+                    style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: buying ? "default" : "pointer", opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                    {buying ? "处理中..." : `确认支付`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </SectionCard>
+
+          {/* Referral */}
+          <SectionCard icon="share" title="邀请好友">
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ ...caption, fontSize: 11, marginBottom: 4 }}>好友注册后双方各得 10 次免费查看</div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
+                <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); }}
+                  style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Redeem */}
+          <SectionCard icon="gift" title="激活兑换码">
+            <div style={{ display: "flex", gap: 6 }}>
+              <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
+                placeholder="6位激活码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
+                style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
+              <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
+                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                {redeemStatus === "loading" ? "验证中" : "激活"}
+              </button>
+            </div>
+            {redeemStatus !== "idle" && (
+              <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
+                {redeemMsg}
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      </div>
     </div>
+  );
+}
+
+// ── Helper Components ──
+
+function InputField({ label: lbl, placeholder, type, value, onChange }: { label: string; placeholder: string; type: string; value: string; onChange: (e: any) => void }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>{lbl}</div>
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange}
+        style={{ width: "100%", padding: "9px 12px", border: "1px solid #D4D4D4", borderRadius: 8, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
+    </div>
+  );
+}
+
+function SectionCard({ icon, title: t, children }: { icon: string; title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+      <div style={{ padding: "10px 14px", background: "#FAFAFA", borderBottom: "1px solid #F0F0F0", display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{t}</div>
+      </div>
+      <div style={{ padding: "10px 14px" }}>{children}</div>
+    </div>
+  );
+}
+
+function PoolRow({ label: lbl, sub, value, color }: { label: string; sub: string; value: number; color: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0" }}>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{lbl}</div>
+        <div style={{ fontSize: 11, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{sub}</div>
+      </div>
+      <span style={{ ...mono, fontSize: 18, color: value > 0 ? color : "#D4D4D4" }}>{value}</span>
+    </div>
+  );
+}
+
+function MiniStat({ label: lbl, value, sub }: { label: string; value: number; sub: string }) {
+  return (
+    <div style={{ textAlign: "center", padding: "8px 4px", background: "#FAFAFA", borderRadius: 6 }}>
+      <div style={{ ...mono, fontSize: 16, color: "#171717" }}>{value}</div>
+      <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>{lbl} {sub}</div>
+    </div>
+  );
+}
+
+function PayBtn({ label: lbl, price, onClick, secondary }: { label: string; price: string; onClick: () => void; secondary?: boolean }) {
+  return (
+    <button onClick={onClick}
+      style={{ width: "100%", marginBottom: 6, padding: "10px 0", borderRadius: 8, border: secondary ? "1px solid #E5E5E5" : "none", background: secondary ? "#FFF" : "#0070F3", color: secondary ? "#171717" : "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+      {lbl} · {price}
+    </button>
   );
 }

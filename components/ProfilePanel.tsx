@@ -30,19 +30,12 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
     try { return localStorage.getItem("pricecre_username") || "用户"; } catch { return "用户"; }
   });
   const [editingName, setEditingName] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const saveUsername = (name: string) => {
     setUsername(name);
     try { localStorage.setItem("pricecre_username", name); } catch {}
     setEditingName(false);
   };
-
-  // Payment state
-  const [showPayment, setShowPayment] = useState(false);
-  const [paymentProduct, setPaymentProduct] = useState<"single" | "monthly">("single");
-  const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
-  const [buying, setBuying] = useState(false);
 
   // Redeem state
   const [redeemCode, setRedeemCode] = useState("");
@@ -77,19 +70,6 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
       if (d.success) { setRedeemMsg(`激活成功！${d.credits} 次查询权益已到账`); setRedeemStatus("success"); setRedeemCode(""); }
       else { setRedeemMsg(d.error || "激活失败"); setRedeemStatus("error"); }
     } catch { setRedeemMsg("网络错误"); setRedeemStatus("error"); }
-  };
-
-  const handlePay = async () => {
-    setBuying(true);
-    try {
-      const amount = paymentProduct === "monthly" ? 299 : 99;
-      const res = await fetch("/api/payment/test-buy", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, product: paymentProduct, amount, paymentMethod }),
-      });
-      const d = await res.json();
-      if (d.success) { setShowPayment(false); }
-    } catch {} finally { setBuying(false); }
   };
 
   // ── Login / Register ──
@@ -241,81 +221,22 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
           </div>
         </div>
 
-        {/* RIGHT COL: Payment + Referral + Redeem */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-
-          {/* Payment */}
-          <SectionCard icon="cart" title="商业付费直通车">
-            {!showPayment ? (
-              <>
-                <PayBtn label="查看权益 × 50 次" price="¥99.00" onClick={() => { setPaymentProduct("single"); setShowPayment(true); }} />
-                <PayBtn label="不限次包月" price="¥299.00/月" secondary onClick={() => { setPaymentProduct("monthly"); setShowPayment(true); }} />
-              </>
-            ) : (
-              <div>
-                <div style={{ padding: "10px 12px", background: "#F7F7F7", borderRadius: 8, marginBottom: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={label}>{paymentProduct === "monthly" ? "不限次包月" : "查看权益 × 50 次"}</span>
-                    <span style={{ ...mono, fontSize: 14, color: "#171717" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
-                    <span style={{ ...label, fontWeight: 600 }}>合计</span>
-                    <span style={{ ...mono, fontSize: 16, fontWeight: 600, color: "#0070F3" }}>¥{paymentProduct === "monthly" ? "299.00" : "99.00"}</span>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                  {(["wechat","alipay"] as const).map(m => (
-                    <button key={m} onClick={() => setPaymentMethod(m)}
-                      style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: paymentMethod === m ? "2px solid #0070F3" : "1px solid #E5E5E5", background: paymentMethod === m ? "rgba(0,112,243,0.04)" : "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", color: m === "wechat" ? "#07C160" : "#1677FF" }}>
-                      {m === "wechat" ? "微信支付" : "支付宝"}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => setShowPayment(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>返回</button>
-                  <button onClick={handlePay} disabled={buying}
-                    style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: buying ? "default" : "pointer", opacity: buying ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
-                    {buying ? "处理中..." : `确认支付`}
-                  </button>
-                </div>
-              </div>
-            )}
-          </SectionCard>
-
-          {/* Referral */}
-          <SectionCard icon="share" title="邀请好友">
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ ...caption, fontSize: 11, marginBottom: 4 }}>好友注册后双方各得 10 次免费查看</div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
-                <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-                  style={{
-                    padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3",
-                    background: copied ? "#0070F3" : "#FFF", color: copied ? "#FFF" : "#0070F3",
-                    fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)",
-                    transition: "all 0.2s ease",
-                  }}>{copied ? "已复制" : "复制"}</button>
-              </div>
+        {/* Redeem — compact */}
+        <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "10px 14px", marginTop: 12 }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
+              placeholder="激活兑换码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
+              style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
+            <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
+              style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+              {redeemStatus === "loading" ? "验证中" : "激活"}
+            </button>
+          </div>
+          {redeemStatus !== "idle" && (
+            <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
+              {redeemMsg}
             </div>
-          </SectionCard>
-
-          {/* Redeem */}
-          <SectionCard icon="gift" title="激活兑换码">
-            <div style={{ display: "flex", gap: 6 }}>
-              <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
-                placeholder="6位激活码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
-                style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
-              <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
-                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
-                {redeemStatus === "loading" ? "验证中" : "激活"}
-              </button>
-            </div>
-            {redeemStatus !== "idle" && (
-              <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
-                {redeemMsg}
-              </div>
-            )}
-          </SectionCard>
+          )}
         </div>
       </div>
     </div>
@@ -363,14 +284,5 @@ function MiniStat({ label: lbl, value, sub }: { label: string; value: number; su
       <div style={{ ...mono, fontSize: 16, color: "#171717" }}>{value}</div>
       <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>{lbl} {sub}</div>
     </div>
-  );
-}
-
-function PayBtn({ label: lbl, price, onClick, secondary }: { label: string; price: string; onClick: () => void; secondary?: boolean }) {
-  return (
-    <button onClick={onClick}
-      style={{ width: "100%", marginBottom: 6, padding: "10px 0", borderRadius: 8, border: secondary ? "1px solid #E5E5E5" : "none", background: secondary ? "#FFF" : "#0070F3", color: secondary ? "#171717" : "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
-      {lbl} · {price}
-    </button>
   );
 }

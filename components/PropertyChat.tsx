@@ -127,17 +127,31 @@ export default function PropertyChat({ property, email, onClose }: { property: P
   const messageList = (
     <>
       {messages.map((m, i) => (
-        <div key={i} style={{
-          alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-          maxWidth: "88%", padding: "10px 14px", borderRadius: 12,
-          background: m.role === "user" ? "#171717" : "#F7F7F7",
-          color: m.role === "user" ? "#FFFFFF" : "#171717",
-          fontSize: 13.5, lineHeight: 1.65, fontFamily: "var(--font-sans)",
-          letterSpacing: "-0.01em", whiteSpace: "pre-wrap",
-          borderBottomRightRadius: m.role === "user" ? 4 : 12,
-          borderBottomLeftRadius: m.role === "assistant" ? 4 : 12,
-        }}>
-          {m.role === "assistant" ? renderContent(m.content) : m.content}
+        <div key={i} style={{ alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "88%", display: "flex", flexDirection: "column" }}>
+          <div style={{
+            padding: "10px 14px", borderRadius: 12,
+            background: m.role === "user" ? "#171717" : "#F7F7F7",
+            color: m.role === "user" ? "#FFFFFF" : "#171717",
+            fontSize: 13.5, lineHeight: 1.65, fontFamily: "var(--font-sans)",
+            letterSpacing: "-0.01em", whiteSpace: "pre-wrap",
+            borderBottomRightRadius: m.role === "user" ? 4 : 12,
+            borderBottomLeftRadius: m.role === "assistant" ? 4 : 12,
+          }}>
+            {m.role === "assistant" ? renderContent(m.content) : m.content}
+          </div>
+          <div style={{ display: "flex", gap: 4, marginTop: 3, paddingLeft: m.role === "assistant" ? 4 : 0, paddingRight: m.role === "user" ? 4 : 0, justifyContent: m.role === "assistant" ? "flex-start" : "flex-end" }}>
+            <button onClick={() => { navigator.clipboard.writeText(m.content.replace(/<[^>]*>/g, ""));
+              const el = document.getElementById(`cp-msg-${i}`); if (el) { el.textContent = "已复制"; setTimeout(() => { if (el) el.textContent = "复制"; }, 1500); } }}
+              id={`cp-msg-${i}`} style={{ fontSize: 10, color: "#A3A3A3", background: "none", border: "none", cursor: "pointer", padding: "0 4px", fontFamily: "var(--font-sans)" }}>复制</button>
+            <button onClick={() => {
+              const text = m.content.replace(/<[^>]*>/g, "");
+              const blob = new Blob([text], { type: "text/plain" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = `ai-chat-${Date.now()}.txt`;
+              document.body.appendChild(a); a.click(); document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }} style={{ fontSize: 10, color: "#A3A3A3", background: "none", border: "none", cursor: "pointer", padding: "0 4px", fontFamily: "var(--font-sans)" }}>下载</button>
+          </div>
         </div>
       ))}
       {loading && (

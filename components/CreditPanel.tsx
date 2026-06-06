@@ -68,17 +68,18 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
           <Icon type="credit" size={10} /> 额度来源
         </div>
         {[
-          { label: "互享额度", sub: "提报交易 · 确认后兑换", value: credits.shared, icon: "gift" as const, color: "#0D9488", bg: "rgba(13,148,136,0.04)" },
-          { label: "邀约额度", sub: "邀请好友注册获得", value: credits.referral, icon: "share" as const, color: "#2563EB", bg: "rgba(37,99,235,0.04)" },
-          { label: "付费额度", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" as const, color: "#7C3AED", bg: "rgba(124,58,237,0.04)" },
+          { label: "互享额度", sub: "提报交易 · 确认后兑换", value: credits.shared, icon: "gift" as const, color: "#0D9488", bg: "rgba(13,148,136,0.04)", action: "share" },
+          { label: "邀约额度", sub: "邀请好友注册获得", value: credits.referral, icon: "share" as const, color: "#2563EB", bg: "rgba(37,99,235,0.04)", action: "share" },
+          { label: "付费额度", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" as const, color: "#7C3AED", bg: "rgba(124,58,237,0.04)", action: "profile" },
         ].map((item) => (
-          <div key={item.label}
-            style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", margin: "3px 0", borderRadius: 6, background: item.bg, borderLeft: `3px solid ${item.color}` }}>
+          <button key={item.label}
+            onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: item.action })); onClose?.(); }}
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", margin: "3px 0", borderRadius: 6, width: "100%", cursor: "pointer", background: item.bg, border: "none", borderLeft: `3px solid ${item.color}`, textAlign: "left" }}>
             <Icon type={item.icon} size={16} />
             <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.label}</span>
             <span style={{ fontSize: 10, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{item.sub}</span>
             {poolNum(item.value, item.value > 0)}
-          </div>
+          </button>
         ))}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 6, background: isExhausted ? "rgba(238,0,0,0.04)" : "#F7F7F7", border: "1px solid #E5E5E5", marginTop: 6 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 4 }}>
@@ -123,8 +124,8 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
         </div>
       </div>
 
-      {/* ── CTA ── */}
-      <div style={{ display: "flex", gap: 6, padding: "10px 14px 6px", borderTop: "1px solid #E5E5E5" }}>
+      {/* ── 快捷操作 ── */}
+      <div style={{ display: "flex", gap: 6, padding: "10px 14px", borderTop: "1px solid #E5E5E5" }}>
         {[
           { label: "查看订单", icon: "cart", color: "#7C3AED", action: "orders" },
           { label: "对话记录", icon: "chat", color: "#2563EB", action: "chats" },
@@ -134,12 +135,6 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
             <Icon type={btn.icon} size={11} /> {btn.label}
           </button>
         ))}
-      </div>
-      <div style={{ display: "flex", gap: 6, padding: "6px 14px 10px", borderTop: "1px solid #F0F0F0" }}>
-        <button onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); onClose?.(); }}
-          style={{ flex: 1, padding: "7px 0", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>提报交易</button>
-        <button onClick={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); onClose?.(); }}
-          style={{ flex: 1, padding: "7px 0", borderRadius: 6, border: "1px solid #D4D4D4", background: "#FFF", color: "#171717", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>购买额度</button>
       </div>
     </div>
   );

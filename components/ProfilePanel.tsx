@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import CreditPanel from "@/components/CreditPanel";
 
 type Step = "login" | "register" | "verify" | "done";
 
@@ -12,11 +13,12 @@ const body = { fontSize: 14, fontWeight: 400, color: "#404040", fontFamily: "var
 const badge = { fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)" } as const;
 const mono = { fontFamily: "var(--font-mono)", fontWeight: 300, letterSpacing: "-0.03em" } as const;
 
-export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats }: {
+export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats, userEmail }: {
   credits?: { referral: number; purchased: number };
   totalCredits?: number;
   chatTokens?: { total: number; used: number };
   creditStats?: { viewCount: number; unlockCount: number; conversations: number };
+  userEmail?: string | null;
 }) {
   const [step, setStep] = useState<Step>("login");
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
@@ -191,65 +193,51 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
 
       {/* Desktop: 2-column grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {/* LEFT COL: Credit info + History */}
+        {/* LEFT COL: CreditPanel */}
+        <CreditPanel
+          credits={credits ? { shared: 0, ...credits } : { shared: 0, referral: 0, purchased: 0 }}
+          chatTokens={chatTokens || { total: 0, used: 0 }}
+          creditStats={creditStats || { viewCount: 0, unlockCount: 0, conversations: 0 }}
+          userEmail={userEmail}
+        />
+
+        {/* RIGHT COL: Referral + Redeem */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-
-          {/* Credit Pools */}
-          <SectionCard icon="credit" title="额度来源">
-            {[
-              { label: "提报真实成交", sub: "提报交易 · 确认后兑换", v: 0, color: "#0D9488" },
-              { label: "邀请好友注册", sub: "邀请好友注册获得", v: credits?.referral || 0, color: "#2563EB" },
-              { label: "购买查看次数", sub: "直接购买 · ¥99/50次", v: credits?.purchased || 0, color: "#7C3AED" },
-            ].map(p => (
-              <PoolRow key={p.label} label={p.label} sub={p.sub} value={p.v} color={p.color} />
-            ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 10px", background: "#F7F7F7", borderRadius: 6, marginTop: 4 }}>
-              <span style={label}>可用额度</span>
-              <span style={{ ...mono, fontSize: 18, color: quota > 0 ? "#0070F3" : "#EE0000" }}>{quota}</span>
+          {/* Referral */}
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+              邀请好友
             </div>
-          </SectionCard>
-
-          {/* AI Chat */}
-          <SectionCard icon="chat" title="AI 对话">
-            <PoolRow label="对话额度" sub={`剩余 ${remainingChat} / ${chatTokens?.total || 0} 条`} value={remainingChat} color="#2563EB" />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 8 }}>
-              <MiniStat label="已用" value={chatTokens?.used || 0} sub="条" />
-              <MiniStat label="总对话" value={creditStats?.conversations || 0} sub="次" />
+            <div style={{ fontSize: 11, color: "#A3A3A3", marginBottom: 8 }}>好友注册后双方各得 10 次免费查看</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
+              <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); }}
+                style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
             </div>
-          </SectionCard>
+          </div>
 
-          {/* Quick Actions */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {[
-              { label: "查看订单", action: "orders", icon: "cart" },
-              { label: "已解锁资产", action: "assets", icon: "unlock" },
-              { label: "对话记录", action: "chats", icon: "chat" },
-              { label: "纠错提报", action: "correct", icon: "edit" },
-            ].map(btn => (
-              <button key={btn.label} onClick={() => document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: btn.action }))}
-                style={{ padding: "8px 0", borderRadius: 8, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                {btn.label}
+          {/* Redeem */}
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.5"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+              激活兑换码
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
+                placeholder="6位激活码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
+                style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
+              <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
+                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                {redeemStatus === "loading" ? "验证中" : "激活"}
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Redeem — compact */}
-        <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "10px 14px", marginTop: 12 }}>
-          <div style={{ display: "flex", gap: 6 }}>
-            <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
-              placeholder="激活兑换码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
-              style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
-            <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
-              style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
-              {redeemStatus === "loading" ? "验证中" : "激活"}
-            </button>
-          </div>
-          {redeemStatus !== "idle" && (
-            <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
-              {redeemMsg}
             </div>
-          )}
+            {redeemStatus !== "idle" && (
+              <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
+                {redeemMsg}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

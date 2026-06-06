@@ -87,6 +87,19 @@ export default function Home() {
     return () => document.removeEventListener("nav-to-tab", handler);
   }, []);
 
+  // Listen for user logout event
+  useEffect(() => {
+    const handler = () => {
+      setUserEmail(null);
+      setCredits({ shared: 0, referral: 0, purchased: 0 });
+      setChatTokens({ total: 0, used: 0 });
+      setCreditStats({ viewCount: 0, unlockCount: 0, conversations: 0 });
+      try { localStorage.removeItem("pricecre_user"); } catch {}
+    };
+    document.addEventListener("user-logout", handler);
+    return () => document.removeEventListener("user-logout", handler);
+  }, []);
+
   // Referral detection — check for invite code on load
   const [referralToast, setReferralToast] = useState<string | null>(null);
   useEffect(() => {

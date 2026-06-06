@@ -185,7 +185,13 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
           )}
           <div style={{ ...caption, fontSize: 11, overflow: "hidden", textOverflow: "ellipsis" }}>{form.email}</div>
         </div>
-        <button onClick={() => { setLoggedIn(false); setStep("login"); setForm({email:"",password:"",confirm:"",code:""}); }} style={{ ...label, fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#A3A3A3" }}>
+        <button onClick={() => {
+          localStorage.removeItem("pricecre_user");
+          localStorage.removeItem("pricecre_username");
+          localStorage.removeItem("pricecre_referralCode");
+          document.dispatchEvent(new CustomEvent("user-logout"));
+          setLoggedIn(false); setStep("login"); setForm({email:"",password:"",confirm:"",code:""});
+        }} style={{ ...label, fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#A3A3A3" }}>
           退出登录
         </button>
       </div>

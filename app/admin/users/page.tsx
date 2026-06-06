@@ -29,7 +29,12 @@ export default function UsersPage() {
 
   const fetchUsers = () => {
     setLoading(true);
-    fetch("/api/admin/users").then(r => r.json()).then(d => setUsers(d.users || [])).finally(() => setLoading(false));
+    fetch("/api/admin/users").then(r => r.json()).then(d => {
+      const us = d.users || [];
+      setUsers(us);
+      // Pre-fetch credits/tokens for all users
+      us.forEach((u: any) => { if (u.email) fetchUserQuota(u.email); });
+    }).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchUsers(); }, []);
@@ -149,9 +154,9 @@ export default function UsersPage() {
             const isExpanded = expandedUser === u.id;
             const cr = u.email ? userCredits[u.email] : null;
             const tr = u.email ? userTokens[u.email] : null;
-            const totalCredits = cr 
+            const totalCredits = cr
               ? ((cr.referralCredits || 0) + (cr.purchasedCredits || 0))
-              : (u.referralViewCount || 0) + (u.purchasedViewCount || 0);
+              : "-";
 
             return (
               <div key={u.id} style={{ background: "#FFF", borderRadius: 8, border: `1px solid ${isExpanded ? "#0070F3" : "#E5E5E5"}`, overflow: "hidden", transition: "border-color 0.15s" }}>
@@ -167,7 +172,7 @@ export default function UsersPage() {
                       <span>·</span>
                       <span>{new Date(u.createdAt).toLocaleDateString("zh-CN")}</span>
                       <span>·</span>
-                      <span style={{ color: "#0D9488", fontWeight: 600 }}>查询权益 {totalCredits} 次</span>
+                      <span style={{ color: "#0D9488", fontWeight: 600 }}>查询权益 {typeof totalCredits === "number" ? `${totalCredits} 次` : totalCredits}</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
@@ -179,9 +184,9 @@ export default function UsersPage() {
                 {/* Expanded management panel */}
                 {isExpanded && (() => {
                   const ud = u.email ? userDetail[u.email] : null;
-                  const totalCreditsVal = cr 
+                  const totalCreditsVal = cr
                     ? (cr.referralCredits || 0) + (cr.purchasedCredits || 0)
-                    : (u.referralViewCount || 0) + (u.purchasedViewCount || 0);
+                    : 0;
                   const tokensVal = tr?.tokens || 0;
                   const tokensUsed = tr?.totalUsed || 0;
                   const remaining = Math.max(0, tokensVal - tokensUsed);
@@ -200,8 +205,8 @@ export default function UsersPage() {
                           {totalCreditsVal}
                         </div>
                         <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#737373", marginBottom: 12, fontFamily: "var(--font-sans)" }}>
-                          <span>邀约获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.referralCredits ?? u.referralViewCount ?? 0}</b></span>
-                          <span>付费获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.purchasedCredits ?? u.purchasedViewCount ?? 0}</b></span>
+                          <span>邀约获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.referralCredits ?? 0}</b></span>
+                          <span>付费获得 <b style={{ color: "#0D9488", fontWeight: 600 }}>{cr?.purchasedCredits ?? 0}</b></span>
                           {(cr?.totalUsed || 0) > 0 && <span>已用 <b style={{ color: "#EE0000", fontWeight: 600 }}>{cr.totalUsed}</b></span>}
                         </div>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
@@ -267,9 +272,9 @@ export default function UsersPage() {
                           onMouseEnter={e => (e.currentTarget.style.borderColor = item.color)}
                           onMouseLeave={e => (e.currentTarget.style.borderColor = "#E5E5E5")}
                         >
-                          <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>{item.label}</div>
+                          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>{item.label}</div>
                           <div style={{ fontSize: 20, fontWeight: 300, color: item.color, fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.03em" }}>{item.value}</div>
-                          <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{item.sub}</div>
+                          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>{item.sub}</div>
                         </div>
                       ))}
                     </div>
@@ -365,7 +370,7 @@ export default function UsersPage() {
                       <td style={{ padding: "6px 10px", fontFamily: "var(--font-geist-mono)", fontSize: 11, color: "#0070F3" }}>{o.orderNo}</td>
                       <td style={{ padding: "6px 10px", textAlign: "right", fontFamily: "var(--font-geist-mono)", fontWeight: 600 }}>¥{o.amount.toFixed(2)}</td>
                       <td style={{ padding: "6px 10px" }}>
-                        <span style={{ padding: "1px 6px", borderRadius: 3, fontSize: 10, background: st.bg, color: st.text, fontWeight: 500 }}>{st.label}</span>
+                        <span style={{ padding: "1px 6px", borderRadius: 3, fontSize: 11, background: st.bg, color: st.text, fontWeight: 500 }}>{st.label}</span>
                       </td>
                       <td style={{ padding: "6px 10px", color: "#737373", fontSize: 11, whiteSpace: "nowrap" }}>{new Date(o.createdAt).toLocaleDateString("zh-CN")}</td>
                     </tr>

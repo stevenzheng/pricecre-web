@@ -32,6 +32,9 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [msg, setMsg] = useState("");
+  const [showNewOrder, setShowNewOrder] = useState(false);
+  const [newOrder, setNewOrder] = useState({ email: "", credits: 50, productType: "view_quota", note: "" });
+  const [creating, setCreating] = useState(false);
 
   const fetchOrders = async (p = page, s = statusFilter, q = search) => {
     setLoading(true);
@@ -64,6 +67,36 @@ export default function OrdersPage() {
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 
+  const handleCreateOrder = async () => {
+    if (!newOrder.email) { setMsg("请输入用户邮箱"); return; }
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newOrder.email,
+          productType: newOrder.productType === "chat_quota" ? 2 : 1,
+          amount: 0,
+          paymentMethod: "admin_manual",
+          note: newOrder.note || "管理员手动创建",
+          items: [{
+            productType: newOrder.productType,
+            productName: newOrder.productType === "chat_quota" ? "AI 对话额度" : "查看额度",
+            quantity: 1,
+            unitPrice: 0,
+            totalPrice: 0,
+            creditsAdded: newOrder.credits,
+          }],
+        }),
+      });
+      const d = await res.json();
+      if (res.ok) { setMsg(d.msg); setShowNewOrder(false); setNewOrder({ email: "", credits: 50, productType: "view_quota", note: "" }); fetchOrders(); }
+      else { setMsg(d.error || "创建失败"); }
+    } catch { setMsg("网络错误"); }
+    setCreating(false);
+    setTimeout(() => setMsg(""), 3000);
+  };
+
   return (
     <div className="vl-content-inner">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -71,9 +104,10 @@ export default function OrdersPage() {
           <h1 className="vl-page-title" style={{ margin: 0 }}>订单管理</h1>
           <p className="vl-page-desc">{total} 条订单记录</p>
         </div>
-        <Link href="/admin/orders/new" className="vl-btn-primary" style={{ fontSize: 13, padding: "6px 16px", textDecoration: "none" }}>
-          + 新建订单
-        </Link>
+        <button
+          onClick={() => setShowNewOrder(true)}
+          className="vl-btn-primary" style={{ fontSize: 13, padding: "6px 16px" }}
+        >+ 新建订单</button>
       </div>
 
       {msg && (
@@ -184,6 +218,48 @@ export default function OrdersPage() {
               </button>
             </div>
           )}
+        </>
+      )}
+
+      {/* 新建订单弹窗 */}
+      {showNewOrder && (
+        <>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 100 }} onClick={() => setShowNewOrder(false)} />
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "#FFF", borderRadius: 12, padding: 24, width: 400, maxWidth: "92vw", zIndex: 101, border: "1px solid #E5E5E5" }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 16px" }}>新建订单</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>用户邮箱</label>
+                <input value={newOrder.email} onChange={e => setNewOrder({ ...newOrder, email: e.target.value })} placeholder="user@example.com"
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>商品类型</label>
+                <select value={newOrder.productType} onChange={e => setNewOrder({ ...newOrder, productType: e.target.value })}
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }}>
+                  <option value="view_quota">查看额度</option>
+                  <option value="chat_quota">AI 对话额度</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>赠送额度</label>
+                <input type="number" min={1} value={newOrder.credits} onChange={e => setNewOrder({ ...newOrder, credits: Number(e.target.value) })}
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 14, outline: "none", fontFamily: "var(--font-geist-mono)" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>备注</label>
+                <input value={newOrder.note} onChange={e => setNewOrder({ ...newOrder, note: e.target.value })} placeholder="管理员赠送"
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
+              <button onClick={() => setShowNewOrder(false)} className="vl-btn-ghost" style={{ fontSize: 12 }}>取消</button>
+              <button onClick={handleCreateOrder} disabled={creating}
+                style={{ padding: "6px 20px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, cursor: creating ? "default" : "pointer", opacity: creating ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                {creating ? "创建中..." : "确认创建"}
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>

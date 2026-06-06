@@ -67,7 +67,7 @@ export default function CreditPanel({ credits, chatTokens, creditStats, onClose 
       </div>
       <div className="px-5 pb-2" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {[
-          { label: "互享额度", sub: "注册 / 活动赠送", value: credits.shared, icon: "gift" },
+          { label: "互享额度", sub: "提交交易数据 · 确认后兑换", value: credits.shared, icon: "gift" },
           { label: "邀约额度", sub: "邀请好友获取", value: credits.referral, icon: "share" },
           { label: "付费额度", sub: "直接购买 · ¥99/50次", value: credits.purchased, icon: "cart" },
         ].map((item) => (

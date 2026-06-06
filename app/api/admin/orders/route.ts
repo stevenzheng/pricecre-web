@@ -121,7 +121,38 @@ export async function POST(request: NextRequest) {
       include: { items: true, user: { select: { email: true } } },
     });
 
-    return NextResponse.json({ order: { ...order, amount: Number(order.amount) }, msg: "订单已创建" });
+    // 将额度实际添加到用户账户
+    if (items) {
+      for (const item of items) {
+        const credits = item.creditsAdded || 0;
+        if (credits <= 0) continue;
+
+        if (item.productType === "chat_quota") {
+          // 添加到 AI 对话额度
+          let token = await prisma.userChatToken.findUnique({ where: { email } });
+          if (!token) {
+            token = await prisma.userChatToken.create({ data: { email, tokens: 100, totalUsed: 0 } });
+          }
+          await prisma.userChatToken.update({ where: { email }, data: { tokens: { increment: credits } } });
+          await prisma.creditAuditLog.create({
+            data: { email, type: "add_tokens", amount: credits, balance: token.tokens + credits, adminEmail: "admin", note: `订单 ${orderNo} 赠送` },
+          });
+        } else {
+          // 添加到查看额度 (purchasedCredits)
+          let uc = await prisma.userCredit.findUnique({ where: { email } });
+          if (!uc) {
+            const user = await prisma.user.findUnique({ where: { email }, select: { referralViewCount: true } });
+            uc = await prisma.userCredit.create({ data: { email, referralCredits: user?.referralViewCount ?? 10, purchasedCredits: 0 } });
+          }
+          await prisma.userCredit.update({ where: { email }, data: { purchasedCredits: { increment: credits } } });
+          await prisma.creditAuditLog.create({
+            data: { email, type: "add_credits", amount: credits, balance: uc.referralCredits + uc.purchasedCredits + credits, adminEmail: "admin", note: `订单 ${orderNo} 赠送` },
+          });
+        }
+      }
+    }
+
+    return NextResponse.json({ order: { ...order, amount: Number(order.amount) }, msg: "订单已创建，额度已到账" });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

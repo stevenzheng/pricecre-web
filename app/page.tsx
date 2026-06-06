@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import PropertyCard from "@/components/PropertyCard";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -57,13 +57,19 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    const h = (e: Event) => setWechatCardData((e as CustomEvent).detail);
+    const h = (e: Event) => {
+      if (!userEmailRef.current) { showModal("请先登录"); return; }
+      setWechatCardData((e as CustomEvent).detail);
+    };
     document.addEventListener("open-wechat-card", h);
     return () => document.removeEventListener("open-wechat-card", h);
   }, []);
 
   useEffect(() => {
-    const h = (e: Event) => setAiAnalysisData((e as CustomEvent).detail);
+    const h = (e: Event) => {
+      if (!userEmailRef.current) { showModal("请先登录以使用 AI 分析"); return; }
+      setAiAnalysisData((e as CustomEvent).detail);
+    };
     document.addEventListener("open-ai-analysis", h);
     return () => document.removeEventListener("open-ai-analysis", h);
   }, []);
@@ -131,6 +137,8 @@ export default function Home() {
   const [userEmail, setUserEmail] = useState(() =>
     loadPersisted<string | null>("userEmail", null)
   );
+  const userEmailRef = useRef<string | null>(null);
+  useEffect(() => { userEmailRef.current = userEmail; }, [userEmail]);
 
   // Persist on change
   useEffect(() => { savePersisted("credits", credits); }, [credits]);
@@ -407,12 +415,7 @@ export default function Home() {
         showModal(data.error);
       }
     } catch {
-      // Fallback to local mock for demo
-      setCredits((prev) => {
-        if (prev.referral > 0) return { ...prev, referral: prev.referral - 1 };
-        if (prev.purchased > 0) return { ...prev, purchased: prev.purchased - 1 };
-        return prev;
-      });
+      showModal("网络异常，请稍后重试");
     }
   }, []);
 
@@ -635,7 +638,7 @@ export default function Home() {
         {/* Referral Welcome Toast */}
         {referralToast && (
           <div className="max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium animate-slide-up"
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium animate-slide-up max-w-lg"
               style={{ background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent)", borderColor: "var(--accent)", opacity: 0.9 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/></svg>
               {referralToast}

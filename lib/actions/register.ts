@@ -23,8 +23,8 @@ export async function registerUser(data: { email: string; password?: string; ref
           await tx.user.update({
             where: { id: referrer.id },
             data: {
-              referralViewCount: { increment: 5 },
-              lifetimeReferralEarned: { increment: 5 },
+              referralViewCount: { increment: 10 },
+              lifetimeReferralEarned: { increment: 10 },
             },
           });
           // 同步更新 UserCredit 邀约额度
@@ -32,15 +32,15 @@ export async function registerUser(data: { email: string; password?: string; ref
           if (referrerCredit) {
             await tx.userCredit.update({
               where: { email: referrer.email! },
-              data: { referralCredits: { increment: 5 } },
+              data: { referralCredits: { increment: 10 } },
             });
           } else {
             await tx.userCredit.create({
-              data: { email: referrer.email!, referralCredits: 5, purchasedCredits: 0, totalUsed: 0 },
+              data: { email: referrer.email!, referralCredits: 10, purchasedCredits: 0, totalUsed: 0 },
             });
           }
           await tx.creditAuditLog.create({
-            data: { email: referrer.email!, type: "add_credits", amount: 5, balance: (referrerCredit?.referralCredits || 0) + (referrerCredit?.purchasedCredits || 0) + 5, note: "邀请用户注册奖励" },
+            data: { email: referrer.email!, type: "add_credits", amount: 10, balance: (referrerCredit?.referralCredits || 0) + (referrerCredit?.purchasedCredits || 0) + 10, note: "邀请用户注册奖励" },
           });
         }
       }

@@ -20,6 +20,21 @@ export async function GET() {
       orderBy: { createdAt: "desc" as const },
     });
 
+    // Fetch UserCredit data separately (no relation via FK — keyed by email)
+    const emails = users.map(u => u.email).filter(Boolean) as string[];
+    const credits = await prisma.userCredit.findMany({
+      where: { email: { in: emails } },
+      select: { email: true, referralCredits: true, purchasedCredits: true },
+    });
+    const creditMap = new Map(credits.map(c => [c.email, c]));
+
+    // Count referrals per user
+    const referralCounts = await prisma.referral.groupBy({
+      by: ["referrerId"],
+      _count: { id: true },
+    });
+    const countMap = new Map(referralCounts.map(r => [r.referrerId, r._count.id]));
+
     const referrals = await prisma.referral.findMany({
       select: {
         id: true,
@@ -33,10 +48,19 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      users: users.map(u => ({
-        ...u,
-        referralsCount: 0, // Count via separate query below
-      })),
+      users: users.map(u => {
+        const uc = u.email ? creditMap.get(u.email) : null;
+        return {
+          id: u.id,
+          email: u.email,
+          myReferralCode: u.myReferralCode,
+          referralViewCount: uc?.referralCredits ?? u.referralViewCount,
+          purchasedViewCount: uc?.purchasedCredits ?? u.purchasedViewCount,
+          lifetimeReferralEarned: u.lifetimeReferralEarned,
+          createdAt: u.createdAt,
+          referralsCount: countMap.get(u.id) || 0,
+        };
+      }),
       referrals: referrals.map(r => ({
         id: r.id,
         referrerEmail: r.referrer.email,

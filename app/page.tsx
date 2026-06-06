@@ -83,13 +83,13 @@ export default function Home() {
     const urlParams = new URLSearchParams(window.location.search);
     const refFromUrl = urlParams.get("ref");
     if (refFromUrl) {
-      setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 3 次查询权益`);
+      setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 10 次查询权益`);
     } else {
       // Check localStorage for previously stored referral
       try {
         const stored = JSON.parse(localStorage.getItem("pricecre_referral") || "null");
         if (stored?.code) {
-          setReferralToast(`你已通过邀请链接进入，注册后双方各得 3 次查询权益`);
+          setReferralToast(`你已通过邀请链接进入，注册后双方各得 10 次查询权益`);
         }
       } catch {}
     }
@@ -818,7 +818,7 @@ export default function Home() {
               邀请好友 · 双方各得查询权益
             </h3>
             <p className="text-xs mb-4 opacity-80" style={{ color: "var(--text-inverse)" }}>
-              好友通过你的专属链接注册，双方各获得 3 次免费查询权益
+              好友通过你的专属链接注册，双方各获得 10 次免费查询权益
             </p>
 
             <div className="flex items-center gap-2 max-w-xs mx-auto">

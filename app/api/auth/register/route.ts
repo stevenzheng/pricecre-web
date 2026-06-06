@@ -23,7 +23,7 @@ function generateCode(email: string): string {
   return code;
 }
 
-export { generateCode }; // exported for verify
+// generateCode is inlined — do not export from route file
 
 export async function POST(req: NextRequest) {
   try {

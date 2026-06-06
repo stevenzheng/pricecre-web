@@ -187,8 +187,9 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
           {/* Credit Pools */}
           <SectionCard icon="credit" title="额度来源">
             {[
-              { label: "邀约额度", sub: "邀请好友获得", v: credits?.referral || 0, color: "#2563EB" },
-              { label: "付费额度", sub: "直接购买", v: credits?.purchased || 0, color: "#7C3AED" },
+              { label: "提报真实成交", sub: "提报交易 · 确认后兑换", v: 0, color: "#0D9488" },
+              { label: "邀请好友注册", sub: "邀请好友注册获得", v: credits?.referral || 0, color: "#2563EB" },
+              { label: "购买查看次数", sub: "直接购买 · ¥99/50次", v: credits?.purchased || 0, color: "#7C3AED" },
             ].map(p => (
               <PoolRow key={p.label} label={p.label} sub={p.sub} value={p.v} color={p.color} />
             ))}

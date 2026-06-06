@@ -147,6 +147,14 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   }
 
   // ── Logged-in Desktop Layout ──
+  const referralCode = (() => {
+    try {
+      const stored = localStorage.getItem("pricecre_user");
+      if (stored) return JSON.parse(stored).referralCode || "sz2026";
+    } catch {}
+    return "sz2026";
+  })();
+
   return (
     <div style={{ padding: "16px", maxWidth: 740, margin: "0 auto" }}>
       {/* User header */}
@@ -242,6 +250,42 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               {redeemMsg}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Referral + Purchase Row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+        {/* 裂变邀约 */}
+        <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 6 }}>裂变邀约</div>
+          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginBottom: 8, fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
+            pricecre.com/r/{referralCode}
+          </div>
+          <button onClick={() => {
+            const url = `https://pricecre.com/r/${referralCode}`;
+            navigator.clipboard.writeText(url);
+            alert("邀请链接已复制到剪贴板");
+          }} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+            复制邀请链接
+          </button>
+          <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 6 }}>
+            邀请好友注册，双方各得 3 次查看额度
+          </div>
+        </div>
+
+        {/* 购买额度 */}
+        <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 6 }}>购买额度</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <button onClick={() => { document.dispatchEvent(new CustomEvent("open-payment", { detail: { product: "single" } })); }}
+              style={{ padding: "8px 0", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+              ¥99 / 50次
+            </button>
+            <button onClick={() => { document.dispatchEvent(new CustomEvent("open-payment", { detail: { product: "monthly" } })); }}
+              style={{ padding: "8px 0", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+              ¥299 / 包月
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -656,9 +656,10 @@ export default function Home() {
             <div className="fixed inset-0 z-40" onClick={() => setShowCreditPanel(false)} />
             <div className="absolute right-4 top-[calc(var(--nav-height)+4px)] z-50 animate-slide-up">
               <CreditPanel
-              credits={credits}
+              credits={{ shared: 0, referral: credits.referral, purchased: credits.purchased }}
               chatTokens={chatTokens}
               creditStats={creditStats}
+              userEmail={userEmail}
               onClose={() => setShowCreditPanel(false)}
               />
             </div>

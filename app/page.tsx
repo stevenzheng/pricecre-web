@@ -48,7 +48,10 @@ export default function Home() {
 
   // UI State
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"market" | "map" | "share" | "profile">("market");
+  const [mobileTab, setMobileTab] = useState(() => {
+    try { return (sessionStorage.getItem("pricecre_tab") as any) || "market"; }
+    catch { return "market"; }
+  });
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [focusedPropertyId, setFocusedPropertyId] = useState<string | null>(null);
   const [wechatCardData, setWechatCardData] = useState<any>(null);
@@ -453,6 +456,7 @@ export default function Home() {
   const handleTabChange = useCallback(
     (tab: "market" | "map" | "share" | "profile") => {
       setMobileTab(tab);
+      try { sessionStorage.setItem("pricecre_tab", tab); } catch {}
       if (tab === "market") setFocusedPropertyId(null);
     },
     []
@@ -792,7 +796,7 @@ export default function Home() {
         </div>
 
         {/* Property Cards */}
-        <div className="max-w-7xl mx-auto px-4 pb-4">
+        <div className="max-w-7xl mx-auto px-4 pt-2 pb-4">
           {filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ alignItems: "start" }}>
               {filteredProperties.map((property) => {

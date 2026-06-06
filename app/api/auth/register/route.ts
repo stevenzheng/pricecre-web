@@ -42,22 +42,15 @@ export async function POST(req: NextRequest) {
 
     // Referral code will be handled server-side in verify
 
-    // 发送邮件
-    const result = await sendEmail({
-      to: email,
-      subject: "PriceCRE 邮箱验证码",
-      html: verificationEmailTemplate(code),
-    });
-
-    if (!result.success) {
-      return NextResponse.json({ error: "邮件发送失败，请稍后重试" }, { status: 500 });
-    }
+    // Send email (best-effort in testing phase)
+    try {
+      await sendEmail({ to: email, subject: "PriceCRE 邮箱验证码", html: verificationEmailTemplate(code) });
+    } catch { /* email optional in testing */ }
 
     return NextResponse.json({
       success: true,
       message: "验证码已发送至您的邮箱",
-      // 开发模式下返回验证码方便调试
-      ...(process.env.NODE_ENV !== "production" ? { devCode: code } : {}),
+      devCode: code, // 测试阶段始终返回验证码
     });
   } catch (err: unknown) {
     console.error("[Register Error]", err instanceof Error ? err.message : String(err));

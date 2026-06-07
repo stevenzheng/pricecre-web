@@ -1,0 +1,15 @@
+# Code Owners - 自动分配PR审查者
+
+# 默认审查者：所有文件都需要 @stevenzheng 审查
+*       @stevenzheng
+
+# 特定模块的审查者（可选，根据团队情况调整）
+# /app/api/           @stevenzheng
+# /app/components/    @stevenzheng
+# /prisma/            @stevenzheng
+# /docs/              @stevenzheng
+
+# 配置文件
+# /.github/           @stevenzheng
+# /package.json       @stevenzheng
+# /tsconfig.json      @stevenzheng

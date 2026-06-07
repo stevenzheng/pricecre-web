@@ -408,6 +408,14 @@ export default function Home() {
     });
   }, [activeCity, activeType, searchQuery]);
 
+  // Card list with inline referral card at random position
+  const cardList = useMemo(() => {
+    const list = [...filteredProperties];
+    const idx = list.length > 0 ? Math.floor(Math.random() * Math.min(list.length + 1, 6)) : 0;
+    list.splice(idx, 0, { __isReferral: true } as any);
+    return list;
+  }, [filteredProperties]);
+
   // Stats (reactive to unlocks)
   const [serverStats, setServerStats] = useState({ total: mockProperties.length, cities: 0, volume: 0 });
 
@@ -826,7 +834,22 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 pt-2 pb-4">
           {filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ alignItems: "start" }}>
-              {filteredProperties.map((property) => {
+              {cardList.map((item: any) => {
+                if (item.__isReferral) {
+                  return (
+                    <div key="referral-inline" style={{ background: "linear-gradient(135deg, #EEE9FF 0%, #F5F0FF 100%)", borderRadius: 12, border: "1.5px dashed #7C3AED", padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minHeight: 240, fontFamily: "var(--font-sans)" }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#7C3AED", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", textAlign: "center" }}>邀请好友 · 双方各得查询权益</div>
+                      <div style={{ fontSize: 11, color: "#737373", textAlign: "center", lineHeight: 1.6 }}>好友通过你的专属链接注册<br/>双方各获得 10 次免费查询权益</div>
+                      <code style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#7C3AED", background: "rgba(124,58,237,0.08)", padding: "6px 12px", borderRadius: 6, wordBreak: "break-all", textAlign: "center" }}>pricecre.com/r/{myReferralCode}</code>
+                      <button onClick={() => { navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}
+                        style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: "#7C3AED", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>一键邀约</button>
+                    </div>
+                  );
+                }
+                const property = item;
                 const isRealUnlocked = unlockedIds.has(property.id);
                 const realIndicators = unlockedData[property.id];
                 return (

@@ -230,9 +230,13 @@ export default function Home() {
         }
         if (ud && !ud.error) {
           setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.viewCount || 0, conversations: ud.totalConversations || 0 });
-          // Restore previously unlocked property IDs from server history
+          // Merge server viewLogs with existing unlockedIds (don't replace!)
           if (ud.viewLogs?.length) {
-            setUnlockedIds(new Set(ud.viewLogs.map((v: any) => v.propertyId).filter(Boolean)));
+            setUnlockedIds((prev) => {
+              const next = new Set(prev);
+              (ud.viewLogs || []).forEach((v: any) => v.propertyId && next.add(v.propertyId));
+              return next;
+            });
           }
         }
       } catch {}
@@ -455,7 +459,11 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.unlocked) {
-        setUnlockedIds((prev) => new Set(prev).add(propertyId));
+        setUnlockedIds((prev) => {
+          const next = new Set(prev).add(propertyId);
+          savePersisted("unlockedIds", [...next]); // Save immediately, don't wait for useEffect
+          return next;
+        });
         // Store real indicators from server
         if (data.property?.dynamicIndicators) {
           setUnlockedData((prev) => ({ ...prev, [propertyId]: data.property.dynamicIndicators }));
@@ -837,15 +845,15 @@ export default function Home() {
               {cardList.map((item: any) => {
                 if (item.__isReferral) {
                   return (
-                    <div key="referral-inline" style={{ background: "linear-gradient(135deg, #EEE9FF 0%, #F5F0FF 100%)", borderRadius: 12, border: "1.5px dashed #7C3AED", padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minHeight: 240, fontFamily: "var(--font-sans)" }}>
-                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#7C3AED", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div key="referral-inline" style={{ background: "linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%)", borderRadius: 12, border: "1.5px dashed #2563EB", padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minHeight: 280, fontFamily: "var(--font-sans)", height: "100%" }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
                       </div>
                       <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", textAlign: "center" }}>邀请好友 · 双方各得查询权益</div>
-                      <div style={{ fontSize: 11, color: "#737373", textAlign: "center", lineHeight: 1.6 }}>好友通过你的专属链接注册<br/>双方各获得 10 次免费查询权益</div>
-                      <code style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#7C3AED", background: "rgba(124,58,237,0.08)", padding: "6px 12px", borderRadius: 6, wordBreak: "break-all", textAlign: "center" }}>pricecre.com/r/{myReferralCode}</code>
-                      <button onClick={() => { navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`); document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "share" })); }}
-                        style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: "#7C3AED", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>一键邀约</button>
+                      <div style={{ fontSize: 11, color: "#64748B", textAlign: "center", lineHeight: 1.6 }}>好友通过你的专属链接注册<br/>双方各获得 10 次免费查询权益+100次AI资产对话</div>
+                      <code style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(37,99,235,0.08)", padding: "6px 12px", borderRadius: 6, wordBreak: "break-all", textAlign: "center" }}>pricecre.com/r/{myReferralCode}</code>
+                      <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`); const btn = e.currentTarget; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; }, 2000); }}
+                        style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: "#2563EB", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>一键邀约</button>
                     </div>
                   );
                 }

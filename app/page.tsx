@@ -845,15 +845,23 @@ export default function Home() {
               {cardList.map((item: any) => {
                 if (item.__isReferral) {
                   return (
-                    <div key="referral-inline" style={{ background: "linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%)", borderRadius: 12, border: "1.5px dashed #2563EB", padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minHeight: 280, fontFamily: "var(--font-sans)", height: "100%" }}>
-                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                    <div key="referral-inline" className="card overflow-hidden" style={{ cursor: "default" }}>
+                      <div className="p-3 sm:p-4" style={{ background: "linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%)", border: "1.5px dashed #2563EB", borderRadius: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <span style={{ width: 32, height: 32, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                          </span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>邀请好友 · 双方各得</div>
+                            <div style={{ fontSize: 11, color: "#64748B", fontFamily: "var(--font-sans)", lineHeight: 1.5 }}>10次查询权益 + 100次AI对话</div>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                          <code style={{ flex: 1, fontSize: 10, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.7)", padding: "6px 10px", borderRadius: 6, wordBreak: "break-all" }}>pricecre.com/r/{myReferralCode}</code>
+                          <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText(\`https://pricecre.com/r/${myReferralCode}\`); const btn = e.currentTarget; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000); }}
+                            style={{ padding: "6px 16px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>一键邀约</button>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", textAlign: "center" }}>邀请好友 · 双方各得查询权益</div>
-                      <div style={{ fontSize: 11, color: "#64748B", textAlign: "center", lineHeight: 1.6 }}>好友通过你的专属链接注册<br/>双方各获得 10 次免费查询权益+100次AI资产对话</div>
-                      <code style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(37,99,235,0.08)", padding: "6px 12px", borderRadius: 6, wordBreak: "break-all", textAlign: "center" }}>pricecre.com/r/{myReferralCode}</code>
-                      <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`); const btn = e.currentTarget; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; }, 2000); }}
-                        style={{ padding: "10px 24px", borderRadius: 8, border: "none", background: "#2563EB", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>一键邀约</button>
                     </div>
                   );
                 }

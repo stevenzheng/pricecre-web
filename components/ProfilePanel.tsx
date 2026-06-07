@@ -227,7 +227,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
             <div style={{ fontSize: 13, color: "#737373", marginBottom: 10 }}>邀请好友注册，双方各得 10 次查看额度</div>
             <div style={{ display: "flex", gap: 8 }}>
               <input readOnly value={`pricecre.com/r/${referralCode}`} style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
-              <button onClick={() => { navigator.clipboard.writeText(`pricecre.com/r/${referralCode}`); }}
+              <button onClick={(e) => { const btn = e.currentTarget; const url = `pricecre.com/r/${referralCode}`; navigator.clipboard.writeText(url).then(() => { btn.textContent = "已复制"; btn.style.color = "#10B981"; setTimeout(() => { btn.textContent = "复制"; btn.style.color = "#0070F3"; }, 2000); }).catch(() => {}); }}
                 style={{ padding: "10px 18px", borderRadius: 8, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
             </div>
           </div>

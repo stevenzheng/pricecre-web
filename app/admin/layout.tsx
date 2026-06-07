@@ -17,7 +17,6 @@ const navItems = [
   { label: "兑换码", href: "/admin/exchange-codes", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9h4M10 13h4M10 17h2"/></svg> },
   { label: "AI报告", href: "/admin/ai-reports", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
   { label: "邀请码", href: "/admin/referrals", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h7"/><polyline points="16 2 22 8 11 19 7 19 7 15"/></svg> },
-  { label: "邀请码", href: "/admin/referrals", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h7"/><polyline points="16 2 22 8 11 19 7 19 7 15"/></svg> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

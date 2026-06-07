@@ -8,28 +8,21 @@ export async function GET(req: NextRequest) {
 
   try {
     const records = await prisma.aiAnalysisCache.findMany({
+      where: { cacheKey: { startsWith: email } },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
 
-    // Filter by email stored in analysisData JSON
-    const reports = records
-      .filter((r: any) => {
-        const data = r.analysisData as any;
-        return data?.email === email;
-      })
-      .map((r: any) => ({
+    return NextResponse.json({
+      reports: records.map((r: any) => ({
         id: r.id,
-        propertyId: (r.analysisData as any)?.propertyId || "",
         projectName: r.projectName,
         city: r.city,
         summary: (r.analysisData as any)?.summary || "",
         createdAt: r.createdAt,
-      }));
-
-    return NextResponse.json({ reports });
+      })),
+    });
   } catch (err: any) {
-    console.error("user-reports error:", err.message);
     return NextResponse.json({ reports: [] });
   }
 }

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.aiAnalysisCache.create({
       data: {
-        cacheKey: `${propertyId}:${Date.now()}`,
+        cacheKey: `${email}:${propertyId}:${Date.now()}`,
         projectName: projectName || "",
         city: city || "",
         district: district || "",

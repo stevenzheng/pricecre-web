@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
       take: 50,
     });
 
-    const totalConversations = await prisma.aiAnalysisCache.count({}).catch(() => 0);
+    const totalConversations = await prisma.aiAnalysisCache.count({
+      where: { cacheKey: { startsWith: email } },
+    }).catch(() => 0);
 
     return NextResponse.json({
       viewLogs: viewLogs.map(v => ({ id: v.id, propertyId: v.propertyId, viewedAt: v.viewedAt })),

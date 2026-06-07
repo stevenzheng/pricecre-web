@@ -846,20 +846,20 @@ export default function Home() {
                 if (item.__isReferral) {
                   return (
                     <div key="referral-inline" className="card overflow-hidden" style={{ cursor: "default" }}>
-                      <div className="p-3 sm:p-4" style={{ background: "linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%)", border: "1.5px dashed #2563EB", borderRadius: 12 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                          <span style={{ width: 32, height: 32, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                      <div className="p-3 sm:p-4" style={{ background: "linear-gradient(135deg, #E8F0FE 0%, #DBEAFE 100%)", border: "2px dashed #2563EB", borderRadius: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ width: 36, height: 36, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
                           </span>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>邀请好友 · 双方各得</div>
-                            <div style={{ fontSize: 11, color: "#64748B", fontFamily: "var(--font-sans)", lineHeight: 1.5 }}>10次查询权益 + 100次AI对话</div>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: "#171717", fontFamily: "var(--font-sans)", lineHeight: 1.3, marginBottom: 2 }}>邀请好友 · 双方各得</div>
+                            <div style={{ fontSize: 13, color: "#4B5563", fontFamily: "var(--font-sans)" }}>10次查询权益 + 100次AI对话</div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                          <code style={{ flex: 1, fontSize: 10, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.7)", padding: "6px 10px", borderRadius: 6, wordBreak: "break-all" }}>pricecre.com/r/{myReferralCode}</code>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <code style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.8)", padding: "8px 12px", borderRadius: 6, wordBreak: "break-all", fontWeight: 500 }}>pricecre.com/r/{myReferralCode}</code>
                           <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText("https://pricecre.com/r/" + myReferralCode); const btn = e.currentTarget as HTMLButtonElement; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000); }}
-                            style={{ padding: "6px 16px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>一键邀约</button>
+                            style={{ padding: "8px 18px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>一键邀约</button>
                         </div>
                       </div>
                     </div>

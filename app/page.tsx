@@ -57,8 +57,12 @@ export default function Home() {
   const [wechatCardData, setWechatCardData] = useState<any>(null);
   const [aiAnalysisData, setAiAnalysisData] = useState<any>(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
-  const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [showUnlockedAssets, setShowUnlockedAssets] = useState(false);
+  const [showAiReports, setShowAiReports] = useState(false);
+  const [aiReports, setAiReports] = useState<any[]>([]);
+  const [showReportDetail, setShowReportDetail] = useState<any>(null);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
 
   useEffect(() => {
@@ -254,6 +258,12 @@ export default function Home() {
         }
       } else if (action === "assets") {
         setMobileTab("market");
+      } else if (action === "ai-reports" && userEmail) {
+        fetch(`/api/ai/user-reports?email=${encodeURIComponent(userEmail)}`).then(r => r.json()).then(d => {
+          setAiReports(d.reports || []);
+          setShowReportDetail(null);
+          setShowAiReports(true);
+        }).catch(() => {});
       }
     };
     document.addEventListener("credit-panel-action", h);
@@ -704,9 +714,9 @@ export default function Home() {
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>覆盖资产</div>
                 <div className="stat-value">{stats.total}</div>
               </div>
-              <div className="stat-item" onClick={() => setStatFilter(statFilter === "unlocked" ? null : "unlocked")}
+              <div className="stat-item" onClick={() => { setStatFilter(statFilter === "unlocked" ? null : "unlocked"); setShowUnlockedAssets(true); }}
                 style={{ cursor: "pointer", background: statFilter === "unlocked" ? "rgba(0,197,112,0.06)" : undefined, borderRadius: statFilter === "unlocked" ? 8 : undefined }}
-                title="点击筛选已解锁资产">
+                title="点击查看已解锁资产清单">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z"/><path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z"/></svg>已解锁资产</div>
                 <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{creditStats.unlockCount ?? stats.unlocked}</div>
               </div>
@@ -978,6 +988,51 @@ export default function Home() {
             </div>
           </RightDrawer>
         )}
+        {showUnlockedAssets && (
+          <RightDrawer title="已解锁资产" onClose={() => setShowUnlockedAssets(false)}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {mockProperties.filter(p => unlockedIds.has(p.id)).map(p => (
+                <div key={p.id} onClick={() => { setShowUnlockedAssets(false); setFocusedPropertyId(p.id); }}
+                  style={{ padding: "10px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0", cursor: "pointer" }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>{p.projectName}</div>
+                  <div style={{ fontSize: 11, color: "#A3A3A3", marginTop: 2 }}>{p.city} · {p.district || "—"} · {p.propertyType === "OFFICE" ? "写字楼" : p.propertyType === "SHOPS" ? "商业零售" : "产业园"}</div>
+                </div>
+              ))}
+              {mockProperties.filter(p => unlockedIds.has(p.id)).length === 0 && (
+                <div style={{ textAlign: "center", padding: 24, color: "#A3A3A3" }}>暂无已解锁资产</div>
+              )}
+            </div>
+          </RightDrawer>
+        )}
+        {showAiReports && (
+          <RightDrawer title="AI分析报告" onClose={() => setShowAiReports(false)}>
+            {showReportDetail ? (
+              <div>
+                <button onClick={() => setShowReportDetail(null)}
+                  style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 12, cursor: "pointer", marginBottom: 12, color: "#2563EB" }}>← 返回列表</button>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{showReportDetail.projectName}</div>
+                <div style={{ fontSize: 12, color: "#737373", marginBottom: 12 }}>{showReportDetail.city} · {new Date(showReportDetail.createdAt).toLocaleString("zh-CN")}</div>
+                <div style={{ padding: "12px", background: "#F7F7F7", borderRadius: 8, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7 }}>{showReportDetail.content}</div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {aiReports.map((r: any) => (
+                  <div key={r.id} onClick={async () => {
+                    try {
+                      const res = await fetch(`/api/ai/get-report?id=${r.id}`);
+                      const d = await res.json();
+                      setShowReportDetail(d);
+                    } catch {}
+                  }} style={{ padding: "10px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0", cursor: "pointer" }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>{r.projectName || r.summary}</div>
+                    <div style={{ fontSize: 11, color: "#A3A3A3", marginTop: 2 }}>{r.city || ""} · {new Date(r.createdAt).toLocaleString("zh-CN")}</div>
+                  </div>
+                ))}
+                {aiReports.length === 0 && <div style={{ textAlign: "center", padding: 24, color: "#A3A3A3" }}>暂无分析报告</div>}
+              </div>
+            )}
+          </RightDrawer>
+        )}
       </main>
 
       {/* ====== Footer ====== */}
@@ -991,6 +1046,11 @@ export default function Home() {
 
       {/* ====== Mobile Bottom Nav ====== */}
       <Modal />
+
+      <Modal />
+      {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
+      {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
+      {chatProp && <PropertyChat property={chatProp} email={userEmail || undefined} onClose={() => setChatProp(null)} />}
 
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />
     </div>

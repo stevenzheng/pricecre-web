@@ -6,12 +6,12 @@ interface AIAnalysisProps {
   projectName: string; city: string; district: string; propertyType: string;
   faceRent: number; netEffectiveRent: number | null;
   indicators: { label: string; value: string; key: string }[];
-  email?: string;
+  email?: string; propertyId?: string;
   onClose: () => void;
 }
 
 export default function AIAnalysis({
-  projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, email, onClose,
+  projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, email, propertyId, onClose,
 }: AIAnalysisProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,8 @@ export default function AIAnalysis({
       if (data.error) { setError(data.error); setLoading(false); return; }
       setAnalysis({ score: data.score, positives: data.positives || [], negatives: data.negatives || [], conclusion: data.conclusion });
       setLoading(false);
+      // Auto-save report
+      try { fetch("/api/ai/save-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email || "anonymous", propertyId: propertyId || "", projectName, city, content: data.conclusion, summary: `${projectName} · 精算评分 ${data.score}分` }) }); } catch {}
     }).catch(() => {
       if (!cancelled) { setError("分析失败"); setLoading(false); }
     });

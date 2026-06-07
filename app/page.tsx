@@ -463,9 +463,11 @@ export default function Home() {
       if (data.unlocked) {
         setUnlockedIds((prev) => {
           const next = new Set(prev).add(propertyId);
-          savePersisted("unlockedIds", [...next]); // Save immediately, don't wait for useEffect
+          savePersisted("unlockedIds", [...next]);
           return next;
         });
+        // Notify card component to stop spinner
+        document.dispatchEvent(new CustomEvent("unlock-success", { detail: propertyId }));
         // Store real indicators from server
         if (data.property?.dynamicIndicators) {
           setUnlockedData((prev) => ({ ...prev, [propertyId]: data.property.dynamicIndicators }));
@@ -479,9 +481,11 @@ export default function Home() {
         });
       } else if (data.error) {
         showModal(data.error);
+        document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
       }
     } catch {
       showModal("网络异常，请稍后重试");
+      document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
     }
   }, [userEmail]); // Must depend on userEmail for closure to update after login
 
@@ -736,7 +740,7 @@ export default function Home() {
                 style={{ cursor: "pointer", background: statFilter === "unlocked" ? "rgba(0,197,112,0.06)" : undefined, borderRadius: statFilter === "unlocked" ? 8 : undefined }}
                 title="点击查看已解锁资产清单">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z"/><path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z"/></svg>已解锁资产</div>
-                <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{creditStats.unlockCount ?? stats.unlocked}</div>
+                <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{stats.unlocked}</div>
               </div>
               <div className="stat-item" onClick={() => setMobileTab("market")}
                 style={{ cursor: "pointer" }} title="点击查看城市分布">
@@ -881,6 +885,8 @@ export default function Home() {
                   remainingCredits={totalCredits}
                   onUnlock={handleUnlock}
                   autoExpand={property.id === focusedPropertyId}
+                  isLoggedIn={!!userEmail}
+                  onNotLoggedIn={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); }}
                 />
               )})}
             </div>

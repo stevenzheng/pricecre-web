@@ -195,17 +195,37 @@ export default function PropertyCard({
   remainingCredits,
   onUnlock,
   autoExpand = false,
+  isLoggedIn = false,
+  onNotLoggedIn,
 }: {
   property: CommercialProperty;
   remainingCredits: number;
   onUnlock?: (propertyId: string) => void;
   autoExpand?: boolean;
+  isLoggedIn?: boolean;
+  onNotLoggedIn?: () => void;
 }) {
   const [state, dispatch] = useReducer(cardReducer, {
     isExpanded: autoExpand,
     isUnlocking: false,
     hasUnlocked: false,
   });
+
+  // Listen for unlock success/fail events from parent
+  useEffect(() => {
+    const onSuccess = (e: Event) => {
+      if ((e as CustomEvent).detail === property.id) dispatch({ type: "UNLOCK_SUCCESS" });
+    };
+    const onFail = (e: Event) => {
+      if ((e as CustomEvent).detail === property.id) dispatch({ type: "UNLOCK_FAIL" });
+    };
+    document.addEventListener("unlock-success", onSuccess);
+    document.addEventListener("unlock-fail", onFail);
+    return () => {
+      document.removeEventListener("unlock-success", onSuccess);
+      document.removeEventListener("unlock-fail", onFail);
+    };
+  }, [property.id]);
 
   const isUnlocked = property.isUnlocked || state.hasUnlocked;
 
@@ -227,12 +247,15 @@ export default function PropertyCard({
   );
 
   const handleUnlock = useCallback(() => {
-    if (isUnlocked || state.isUnlocking || remainingCredits <= 0) return;
+    if (isUnlocked || state.isUnlocking) return;
+    if (!isLoggedIn) { onNotLoggedIn?.(); return; }
+    if (remainingCredits <= 0) {
+      document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }));
+      return;
+    }
     dispatch({ type: "START_UNLOCK" });
     if (onUnlock) onUnlock(property.id);
-    // Shorter delay — the real API handles data, UI shows spinner briefly
-    setTimeout(() => dispatch({ type: "UNLOCK_SUCCESS" }), 400);
-  }, [isUnlocked, state.isUnlocking, remainingCredits, onUnlock, property.id]);
+  }, [isUnlocked, state.isUnlocking, remainingCredits, isLoggedIn, onNotLoggedIn, onUnlock, property.id]);
 
   const netEffectiveRent = isUnlocked ? property.dynamicIndicators.netEffectiveRent : null;
   const typeLabel = propertyTypeLabels[property.propertyType];
@@ -472,7 +495,8 @@ export default function PropertyCard({
                   <button
                     className="btn-primary text-sm"
                     onClick={(e) => { e.stopPropagation(); handleUnlock(); }}
-                    disabled={state.isUnlocking || remainingCredits <= 0}
+                    disabled={state.isUnlocking}
+                    style={{ opacity: state.isUnlocking ? 0.6 : 1 }}
                   >
                     {state.isUnlocking ? (
                       <>
@@ -483,7 +507,7 @@ export default function PropertyCard({
                         解锁中...
                       </>
                     ) : (
-                      <>{remainingCredits > 0 ? "解锁" : "需先登录"}</>
+                      <>{!isLoggedIn ? "需登录" : remainingCredits > 0 ? "解锁" : "额度不足"}</>
                     )}
                   </button>
                 )}

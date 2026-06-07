@@ -101,7 +101,9 @@ export default function Home() {
       setCredits({ shared: 0, referral: 0, purchased: 0 });
       setChatTokens({ total: 0, used: 0 });
       setCreditStats({ viewCount: 0, unlockCount: 0, conversations: 0 });
-      try { localStorage.removeItem("pricecre_user"); } catch {}
+      setUnlockedIds(new Set());
+      setUnlockedData({});
+      try { localStorage.removeItem("pricecre_user"); localStorage.removeItem("pricecre_unlockedIds"); } catch {}
     };
     document.addEventListener("user-logout", handler);
     return () => document.removeEventListener("user-logout", handler);
@@ -117,20 +119,26 @@ export default function Home() {
     return () => document.removeEventListener("user-login", handler);
   }, []);
 
-  // Referral detection — check for invite code on load
+  // Referral detection — only show once, not when logged in
   const [referralToast, setReferralToast] = useState<string | null>(null);
   useEffect(() => {
-    // Check URL param first (fresh redirect from /r/[code])
+    const isLoggedIn = !!JSON.parse(localStorage.getItem("pricecre_user") || "{}")?.email;
+    if (isLoggedIn) return; // Don't show referral toast for logged-in users
+
+    const dismissed = sessionStorage.getItem("pricecre_ref_toast_dismissed");
+    if (dismissed) return; // Already dismissed this session
+
     const urlParams = new URLSearchParams(window.location.search);
     const refFromUrl = urlParams.get("ref");
     if (refFromUrl) {
       setReferralToast(`好友邀请你加入 PriceCRE，注册后双方各得 10 次查询权益`);
+      sessionStorage.setItem("pricecre_ref_toast_dismissed", "1");
     } else {
-      // Check localStorage for previously stored referral
       try {
         const stored = JSON.parse(localStorage.getItem("pricecre_referral") || "null");
         if (stored?.code) {
           setReferralToast(`你已通过邀请链接进入，注册后双方各得 10 次查询权益`);
+          sessionStorage.setItem("pricecre_ref_toast_dismissed", "1");
         }
       } catch {}
     }
@@ -160,6 +168,9 @@ export default function Home() {
     loadPersisted("creditStats", { viewCount: 0, unlockCount: 0, conversations: 0 })
   );
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => {
+    // Only restore unlocked data if user is logged in
+    const isLoggedIn = !!JSON.parse(localStorage.getItem("pricecre_user") || "{}")?.email;
+    if (!isLoggedIn) return new Set<string>();
     const arr = loadPersisted<string[]>("unlockedIds", []);
     return new Set(arr);
   });

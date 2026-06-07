@@ -202,21 +202,8 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
         </button>
       </div>
 
-      {/* Responsive grid: 1-col mobile, 2-col desktop — all cards equal width */}
-      <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-        <style>{`@media(min-width:768px){.profile-grid{grid-template-columns:1fr 1fr!important}}`}</style>
-        {/* LEFT COL: CreditPanel — force full width */}
-        <div style={{ width: "100%" }}>
-        <CreditPanel
-          credits={credits ? { shared: 0, ...credits } : { shared: 0, referral: 0, purchased: 0 }}
-          chatTokens={chatTokens || { total: 0, used: 0 }}
-          creditStats={creditStats || { viewCount: 0, unlockCount: 0, conversations: 0 }}
-          userEmail={userEmail}
-        />
-        </div>
-
-        {/* RIGHT COL: Referral + Redeem */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* Single-column layout — all cards stacked */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 480, margin: "0 auto", width: "100%" }}>
           {/* Referral */}
           <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
@@ -385,7 +372,6 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               color: #EF4444 !important;
             }
           `}</style>
-        </div>
       </div>
     </div>
   );

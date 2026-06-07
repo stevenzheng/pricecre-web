@@ -219,18 +219,6 @@ export default function PropertyChat({ property, email, onClose }: { property: P
                 AI 助理基于大模型生成，内容仅供参考，不构成投资建议
               </div>
 
-              {/* Quota + Recharge */}
-              <div style={{ padding: "6px 16px", borderTop: "1px solid #F7F7F7", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexShrink: 0 }}>
-                <span style={{ fontSize: 11, color: freeUsed < 10 ? "#0D9488" : "#E91E63", fontFamily: "var(--font-sans)" }}>
-                  剩余 {10 - freeUsed}/10 条免费对话
-                </span>
-                <button
-                  onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
-                  style={{ padding: "3px 10px", borderRadius: 999, border: "1px solid #E5E5E5", background: "#FFFFFF", color: "#525252", fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
-                  对话额度
-                </button>
-              </div>
-
               {/* Input */}
               <div style={{ padding: "8px 12px 16px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, flexShrink: 0 }}>
                 <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="输入你的问题..." disabled={loading} style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 10, outline: "none", fontSize: 13.5, fontFamily: "var(--font-sans)", background: loading ? "#F7F7F7" : "#FAFAFA" }} />

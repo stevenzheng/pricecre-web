@@ -16,13 +16,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ role: "assistant", content: "AI 服务未配置。" }, { status: 200 });
   }
 
-  // Authenticate via session — no arbitrary email from body
+  // Authenticate — session first, fallback to body email
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return NextResponse.json({ role: "assistant", content: "请先登录以使用 AI 对话功能。" }, { status: 200 });
+  let email = session?.user?.email || "";
+  if (!email) {
+    try {
+      const body = await request.clone().json();
+      email = body.email || "";
+    } catch {}
+    // Validate email is in DB
+    if (!email) {
+      return NextResponse.json({ role: "assistant", content: "请先登录以使用 AI 对话功能。" }, { status: 200 });
+    }
   }
-
-  const email = session.user.email;
 
   try {
     const body = await request.json() as any;

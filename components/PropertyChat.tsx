@@ -227,8 +227,25 @@ export default function PropertyChat({ property, email, onClose }: { property: P
                 AI 分析师基于大模型生成，内容仅供参考，不构成投资建议
               </div>
 
+              {/* Quota Bar + Purchase */}
+              <div style={{ padding: "8px 16px", borderTop: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "#FAFAFA" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>AI对话额度</span>
+                    <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.total > 0 ? `${chatQuota.used}/${chatQuota.total}` : "加载中..."}</span>
+                  </div>
+                  <div style={{ height: 4, background: "#E5E5E5", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ width: `${chatQuota.total > 0 ? Math.min(100, (chatQuota.used / chatQuota.total) * 100) : 0}%`, height: "100%", background: chatQuota.used >= chatQuota.total && chatQuota.total > 0 ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
+                  </div>
+                </div>
+                <button onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
+                  style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #2563EB", background: "#FFF", color: "#2563EB", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
+                  购买AI对话额度
+                </button>
+              </div>
+
               {/* Input */}
-              <div style={{ padding: "8px 12px 16px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, flexShrink: 0 }}>
+              <div> style={{ padding: "8px 12px 16px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, flexShrink: 0 }}>
                 <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="输入你的问题..." disabled={loading} style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 10, outline: "none", fontSize: 13.5, fontFamily: "var(--font-sans)", background: loading ? "#F7F7F7" : "#FAFAFA" }} />
                 <button onClick={send} disabled={loading || !input.trim()} style={{ width: 42, height: 42, borderRadius: 10, border: "none", background: input.trim() && !loading ? "#171717" : "#E5E5E5", cursor: input.trim() && !loading ? "pointer" : "default", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -282,16 +299,6 @@ export default function PropertyChat({ property, email, onClose }: { property: P
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <button onClick={handleClose} title="关闭" style={{ width: 32, height: 32, border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", color: "#171717" }}>✕</button>
-      </div>
-
-      {/* Quota Bar — always visible */}
-      <div style={{ padding: "6px 14px", background: "rgba(37,99,235,0.04)", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
-        <span style={{ color: "#737373" }}>AI对话额度</span>
-        <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.total > 0 ? `${chatQuota.used}/${chatQuota.total}` : "加载中..."}</span>
-        <div style={{ flex: 1, height: 4, background: "#F0F0F0", borderRadius: 2, overflow: "hidden" }}>
-          <div style={{ width: `${chatQuota.total > 0 ? Math.min(100, (chatQuota.used / chatQuota.total) * 100) : 0}%`, height: "100%", background: chatQuota.used >= chatQuota.total && chatQuota.total > 0 ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
-          </div>
-          <span style={{ fontSize: 10, color: "#A3A3A3" }}>剩余 {chatQuota.total - chatQuota.used}</span>
       </div>
 
       {/* Messages */}

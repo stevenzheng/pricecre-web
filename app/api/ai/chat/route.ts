@@ -9,8 +9,8 @@ export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const apiKey = (process.env.ANTHROPIC_API_KEY || "").replace(/^"|"$/g, "");
-  const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
-  const model = process.env.ANTHROPIC_MODEL || "gpt-4o-mini";
+  const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn").replace(/\/$/, "");
+  const model = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
 
   if (!apiKey || apiKey.length < 10) {
     return NextResponse.json({ role: "assistant", content: "AI 服务未配置。" }, { status: 200 });
@@ -55,9 +55,9 @@ export async function POST(request: Request) {
 
     const allMessages = [{ role: "system", content: systemPrompt }, ...(messages || [])];
 
-    const isAnthropic = baseUrl.includes("anthropic");
+    const useAnthropic = !baseUrl.includes("openai"); // Anthropic format for mydamoxing.cn etc.
 
-    if (isAnthropic) {
+    if (useAnthropic) {
       const anthroRes = await fetch(`${baseUrl}/v1/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },

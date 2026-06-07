@@ -1,23 +1,35 @@
-// GET /api/ai/user-reports?email=xxx — List user's AI reports (file-based + Prisma)
+// GET /api/ai/user-reports?email=xxx — List user's AI reports from AiAnalysisCache
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const DB_FILE = path.join(process.cwd(), "data", "ai-reports.json");
-
-function readDB(): any[] {
-  try { return JSON.parse(fs.readFileSync(DB_FILE, "utf-8")); } catch { return []; }
-}
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get("email");
   if (!email) return NextResponse.json({ reports: [] });
 
   try {
-    const all = readDB();
-    const reports = all.filter((r: any) => r.email === email).slice(0, 50);
+    const records = await prisma.aiAnalysisCache.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    // Filter by email stored in analysisData JSON
+    const reports = records
+      .filter((r: any) => {
+        const data = r.analysisData as any;
+        return data?.email === email;
+      })
+      .map((r: any) => ({
+        id: r.id,
+        propertyId: (r.analysisData as any)?.propertyId || "",
+        projectName: r.projectName,
+        city: r.city,
+        summary: (r.analysisData as any)?.summary || "",
+        createdAt: r.createdAt,
+      }));
+
     return NextResponse.json({ reports });
-  } catch {
+  } catch (err: any) {
+    console.error("user-reports error:", err.message);
     return NextResponse.json({ reports: [] });
   }
 }

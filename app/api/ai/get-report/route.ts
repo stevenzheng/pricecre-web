@@ -1,19 +1,22 @@
-// GET /api/ai/get-report?id=xxx — Get full report content (file-based)
+// GET /api/ai/get-report?id=xxx — Get full report content
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const DB_FILE = path.join(process.cwd(), "data", "ai-reports.json");
-
-function readDB(): any[] {
-  try { return JSON.parse(fs.readFileSync(DB_FILE, "utf-8")); } catch { return []; }
-}
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "缺少ID" }, { status: 400 });
-  const all = readDB();
-  const report = all.find((r: any) => r.id === id);
-  if (!report) return NextResponse.json({ error: "报告不存在" }, { status: 404 });
-  return NextResponse.json(report);
+  try {
+    const r = await prisma.aiAnalysisCache.findUnique({ where: { id } });
+    if (!r) return NextResponse.json({ error: "报告不存在" }, { status: 404 });
+    return NextResponse.json({
+      id: r.id,
+      projectName: r.projectName,
+      city: r.city,
+      createdAt: r.createdAt,
+      content: (r.analysisData as any)?.content || "",
+      summary: (r.analysisData as any)?.summary || "",
+    });
+  } catch {
+    return NextResponse.json({ error: "查询失败" }, { status: 500 });
+  }
 }

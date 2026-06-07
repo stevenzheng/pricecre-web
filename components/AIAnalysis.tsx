@@ -30,7 +30,7 @@ export default function AIAnalysis({
       setAnalysis({ score: data.score, positives: data.positives || [], negatives: data.negatives || [], conclusion: data.conclusion });
       setLoading(false);
       // Auto-save report
-      try { fetch("/api/ai/save-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email || "anonymous", propertyId: propertyId || "", projectName, city, content: data.conclusion, summary: `${projectName} · 精算评分 ${data.score}分` }) }); } catch {}
+      try { fetch("/api/ai/save-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email || "anonymous", propertyId: propertyId || "", projectName, city, district, propertyType, content: data.conclusion, summary: data.score + "分 · " + (data.positives || []).slice(0, 2).join("; ") }) }); } catch {}
     }).catch(() => {
       if (!cancelled) { setError("分析失败"); setLoading(false); }
     });

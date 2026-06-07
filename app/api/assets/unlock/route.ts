@@ -1,63 +1,107 @@
 /**
  * POST /api/assets/unlock
- *
- * Unlock asset data — deduct credits from user pool.
- * Auth: NextAuth session OR body.email
+ * 修复：未登录严格拒绝，不再伪造成功响应
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, projectName, city, email: bodyEmail } = await request.json();
+    const { propertyId, projectName, city } = await request.json();
 
     if (!propertyId) {
       return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
     }
 
-    // Auth: session first, body.email fallback
+    // ✅ 严格鉴权：只认 session，不接受 body.email
     const session = await getServerSession(authOptions);
-    const email = session?.user?.email || bodyEmail || "";
+    const email = session?.user?.email;
 
+    // ❌ 未登录：直接拒绝，不伪造成功
     if (!email) {
-      // Unauthenticated — return success but no deduction
+      return NextResponse.json(
+        { error: "请先登录", requireLogin: true },
+        { status: 401 }
+      );
+    }
+
+    // 查询或初始化用户额度
+    let userCredit = await prisma.userCredit.findUnique({ where: { email } });
+    if (!userCredit) {
+      userCredit = await prisma.userCredit.create({
+        data: { email, referralCredits: 10, purchasedCredits: 0 },
+      });
+    }
+
+    const total = userCredit.referralCredits + userCredit.purchasedCredits;
+
+    // ❌ 额度不足：跳转购买
+    if (total <= 0) {
+      return NextResponse.json(
+        { error: "额度不足，请购买或邀请好友获取", requirePurchase: true },
+        { status: 402 }
+      );
+    }
+
+    // ✅ 检查是否已解锁（防重复扣费）
+    const existing = await prisma.userViewLog.findUnique({
+      where: {
+        userId_propertyId: {
+          userId: session.user.id,
+          propertyId,
+        },
+      },
+    });
+
+    if (existing) {
+      // 已解锁过，不重复扣费
+      const updated = await prisma.userCredit.findUnique({ where: { email } });
       return NextResponse.json({
         unlocked: true,
-        remainingCredits: 99,
+        alreadyUnlocked: true,
+        remainingCredits:
+          (updated?.referralCredits || 0) + (updated?.purchasedCredits || 0),
         property: { id: propertyId, projectName: projectName || "", city: city || "" },
       });
     }
 
-    // Deduct credits
-    let userCredit = await prisma.userCredit.findUnique({ where: { email } });
-    if (!userCredit) {
-      userCredit = await prisma.userCredit.create({ data: { email, referralCredits: 10, purchasedCredits: 0 } });
-    }
-
-    const total = userCredit.referralCredits + userCredit.purchasedCredits;
-    if (total <= 0) {
-      return NextResponse.json({ error: "额度不足，请购买或邀请好友获取" }, { status: 402 });
-    }
-
-    // Deduct from referral first
+    // ✅ 扣费：优先扣推荐额度
     if (userCredit.referralCredits > 0) {
-      await prisma.userCredit.update({ where: { email }, data: { referralCredits: { decrement: 1 } } });
+      await prisma.userCredit.update({
+        where: { email },
+        data: { referralCredits: { decrement: 1 }, totalUsed: { increment: 1 } },
+      });
     } else {
-      await prisma.userCredit.update({ where: { email }, data: { purchasedCredits: { decrement: 1 } } });
+      await prisma.userCredit.update({
+        where: { email },
+        data: { purchasedCredits: { decrement: 1 }, totalUsed: { increment: 1 } },
+      });
     }
+
+    // ✅ 记录解锁日志
+    await prisma.userViewLog.create({
+      data: { userId: session.user.id, propertyId },
+    }).catch(() => {}); // 忽略重复写入
 
     const updated = await prisma.userCredit.findUnique({ where: { email } });
+
     return NextResponse.json({
       unlocked: true,
-      remainingCredits: (updated?.referralCredits || 0) + (updated?.purchasedCredits || 0),
-      property: { id: propertyId, projectName: projectName || "", city: city || "" },
+      remainingCredits:
+        (updated?.referralCredits || 0) + (updated?.purchasedCredits || 0),
+      property: {
+        id: propertyId,
+        projectName: projectName || "",
+        city: city || "",
+      },
     });
   } catch (err: any) {
     console.error("[Unlock Error]", err.message);
-    return NextResponse.json({ error: "服务器错误: " + (err.message || "").slice(0, 80) }, { status: 500 });
+    return NextResponse.json(
+      { error: "服务器错误: " + (err.message || "").slice(0, 80) },
+      { status: 500 }
+    );
   }
 }

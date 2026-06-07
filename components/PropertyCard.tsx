@@ -250,6 +250,7 @@ export default function PropertyCard({
     if (isUnlocked || state.isUnlocking) return;
     if (!isLoggedIn) { onNotLoggedIn?.(); return; }
     if (remainingCredits <= 0) {
+      showModal("额度不足，请购买或邀请好友获取更多额度");
       document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }));
       return;
     }
@@ -262,6 +263,7 @@ export default function PropertyCard({
   const typeIcon = propertyTypeIconMap[property.propertyType];
 
   const openChat = () => {
+    if (!isLoggedIn) { onNotLoggedIn?.(); return; }
     const evt = new CustomEvent("open-property-chat", {
       detail: {
         projectName: property.projectName, city: property.city, district: property.district,
@@ -507,7 +509,7 @@ export default function PropertyCard({
                         解锁中...
                       </>
                     ) : (
-                      <>{!isLoggedIn ? "需登录" : remainingCredits > 0 ? "解锁" : "额度不足"}</>
+                      <>{!isLoggedIn ? "👤 需登录" : remainingCredits > 0 ? "🔓 解锁" : "⚠ 额度不足"}</>
                     )}
                   </button>
                 )}

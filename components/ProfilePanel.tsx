@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import CreditPanel from "@/components/CreditPanel";
 import { showModal } from "@/components/Toast";
 
@@ -126,7 +127,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
               </button>
             </form>
           ) : (
-            <form onSubmit={e => { e.preventDefault(); if(!form.email||!form.password)return; try{const code="sz"+Math.random().toString(36).substring(2,8);localStorage.setItem("pricecre_user",JSON.stringify({email:form.email,referralCode:code,totalCredits:10,registeredAt:Date.now()}));localStorage.setItem("pricecre_username",form.email.split("@")[0]);fetch("/api/auth/ensure-user",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:form.email})});document.dispatchEvent(new CustomEvent("user-login",{detail:{email:form.email}}));}catch{}setLoggedIn(true);setStep("done");setActivated(true); }}>
+            <form onSubmit={async e => { e.preventDefault(); if(!form.email||!form.password)return; setLoading(true); try { const result = await signIn("credentials", { email: form.email, password: form.password, redirect: false }); if (result?.ok) { const code = "sz"+Math.random().toString(36).substring(2,8); localStorage.setItem("pricecre_user", JSON.stringify({ email: form.email, referralCode: code, totalCredits: 10, registeredAt: Date.now() })); localStorage.setItem("pricecre_username", form.email.split("@")[0]); document.dispatchEvent(new CustomEvent("user-login", { detail: { email: form.email } })); setLoggedIn(true); setStep("done"); setActivated(true); } else { setError(result?.error || "账号或密码错误"); } } catch { setError("网络错误"); } setLoading(false); }}>
               <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} />
               <InputField label="访问密码" placeholder="········" type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} />
               <button type="submit" style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", WebkitAppearance: "none" as any }}>登录</button>
@@ -136,24 +137,36 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
             <div style={{ flex: 1, height: 1, background: "#E5E5E5" }} /><span style={{ ...badge, color: "#A3A3A3" }}>OR</span><div style={{ flex: 1, height: 1, background: "#E5E5E5" }} />
           </div>
-          <button onClick={() => {
+          <button onClick={async () => {
             const testEmail = "test@pricecre.com";
-            try {
+            setLoading(true);
+            // Try real NextAuth signIn first
+            const result = await signIn("credentials", {
+              email: testEmail,
+              password: "test123456",
+              redirect: false,
+            });
+            if (result?.ok) {
               localStorage.setItem("pricecre_user", JSON.stringify({
-                email: testEmail,
-                referralCode: "sztest1",
-                totalCredits: 10,
-                registeredAt: Date.now(),
+                email: testEmail, referralCode: "sztest1", totalCredits: 10, registeredAt: Date.now(),
               }));
               localStorage.setItem("pricecre_username", "测试用户");
-            } catch {}
-            // Ensure user exists in DB for unlock/chat APIs
-            try { fetch("/api/auth/ensure-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: testEmail }) }); } catch {}
-            // Notify page.tsx of login
+              document.dispatchEvent(new CustomEvent("user-login", { detail: { email: testEmail } }));
+              setLoggedIn(true); setStep("done"); setActivated(true);
+              setLoading(false);
+              return;
+            }
+            // Fallback: ensure user exists and login via localStorage
+            try { await fetch("/api/auth/ensure-user", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: testEmail }) }); } catch {}
+            localStorage.setItem("pricecre_user", JSON.stringify({
+              email: testEmail, referralCode: "sztest1", totalCredits: 10, registeredAt: Date.now(),
+            }));
+            localStorage.setItem("pricecre_username", "测试用户");
             document.dispatchEvent(new CustomEvent("user-login", { detail: { email: testEmail } }));
             setForm(p => ({ ...p, email: testEmail }));
             setLoggedIn(true); setStep("done"); setActivated(true);
-          }} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>微信登录（测试模式）</button>
+            setLoading(false);
+          }} disabled={loading} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: "1px solid #D4D4D4", background: "#FFF", color: "#07C160", fontSize: 14, fontWeight: 500, cursor: loading ? "default" : "pointer", fontFamily: "var(--font-sans)", opacity: loading ? 0.6 : 1 }}>{loading ? "登录中..." : "微信登录（测试模式）"}</button>
         </div>
       </div>
     );
@@ -191,7 +204,8 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
           )}
           <div style={{ ...caption, fontSize: 11, overflow: "hidden", textOverflow: "ellipsis" }}>{form.email}</div>
         </div>
-        <button onClick={() => {
+        <button         onClick={async () => {
+          await signOut({ redirect: false });
           localStorage.removeItem("pricecre_user");
           localStorage.removeItem("pricecre_username");
           localStorage.removeItem("pricecre_referralCode");

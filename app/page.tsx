@@ -467,10 +467,27 @@ export default function Home() {
         body: JSON.stringify({ 
           propertyId,
           ...(prop ? { projectName: prop.projectName, city: prop.city } : {}),
-          ...(userEmail ? { email: userEmail } : {}),
+          // email now handled by session cookie, not body
         }),
       });
       const data = await res.json();
+
+      // Handle 401 — not logged in
+      if (res.status === 401 || data.requireLogin) {
+        showModal("请先登录以解锁资产");
+        document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }));
+        document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
+        return;
+      }
+
+      // Handle 402 — no credits
+      if (res.status === 402 || data.requirePurchase) {
+        showModal("额度不足，请购买或邀请好友获取更多额度");
+        document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }));
+        document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
+        return;
+      }
+
       if (data.unlocked) {
         setUnlockedIds((prev) => {
           const next = new Set(prev).add(propertyId);
@@ -483,13 +500,16 @@ export default function Home() {
         if (data.property?.dynamicIndicators) {
           setUnlockedData((prev) => ({ ...prev, [propertyId]: data.property.dynamicIndicators }));
         }
-        // Sync credits from server response
-        setCredits((prev) => {
-          const total = data.remainingCredits ?? (prev.referral + prev.purchased - 1);
-          // Prefer referral pool deduction logic
-          if (prev.referral > 0) return { shared: prev.shared, referral: prev.referral - 1, purchased: prev.purchased };
-          return { shared: prev.shared, referral: 0, purchased: Math.max(0, total) };
-        });
+        // Sync credits from server (authoritative)
+        if (typeof data.remainingCredits === "number" && userEmail) {
+          fetch(`/api/admin/user-credits?email=${encodeURIComponent(userEmail)}`)
+            .then(r => r.json())
+            .then(cr => {
+              if (!cr.error) {
+                setCredits({ shared: 0, referral: cr.referralCredits || 0, purchased: cr.purchasedCredits || 0 });
+              }
+            }).catch(() => {});
+        }
       } else if (data.error) {
         showModal(data.error);
         document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));

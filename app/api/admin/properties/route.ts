@@ -1,9 +1,11 @@
 // app/api/admin/properties/route.ts — 生产表 CommercialProperty 查询
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
+    await adminAuth();
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -30,6 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ items: properties, total, page, limit });
   } catch (error) {
+    if ((error as any)?.status) return error as any;
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
   }
 }

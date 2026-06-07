@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendEmail, verificationEmailTemplate } from "@/lib/email";
 
 function generateCode(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || "pricecre-dev-2026";
+  const secret = process.env.NEXTAUTH_SECRET;
   const window = Math.floor(Date.now() / (10 * 60 * 1000)); // 10-minute window
   const hash = require("crypto").createHash("md5").update(`${email}:${secret}:${window}`).digest("hex");
   const chars = "0123456789";

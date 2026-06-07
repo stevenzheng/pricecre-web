@@ -606,8 +606,8 @@ export default function PropertyCard({
                             style={{
                               position: "absolute", bottom: 0, right: 0,
                               width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center",
-                              fontSize: 9, color: "#D4D4D4", background: "none",
-                              border: "none", cursor: "pointer", opacity: 0.3, padding: 0,
+                              fontSize: 9, color: "#F59E0B", background: "none",
+                              border: "none", cursor: "pointer", opacity: 0.7, padding: 0,
                             }}
                             title="提报数据纠错"
                           >

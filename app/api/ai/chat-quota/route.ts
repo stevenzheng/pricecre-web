@@ -1,61 +1,65 @@
-// app/api/ai/chat-quota/route.ts — Chat token management (DB-backed)
-import { NextResponse } from "next/server";
+// app/api/ai/chat-quota/route.ts — Chat token management (session-authorized)
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { adminAuth } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// GET — check remaining quota
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const email = searchParams.get("email") || "anonymous";
+// GET — returns current user's quota (self only)
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ tokens: 0, totalUsed: 0 });
+  }
 
-  let token = await prisma.userChatToken.findUnique({ where: { email } });
+  const token = await prisma.userChatToken.findUnique({ where: { email: session.user.email } });
   return NextResponse.json({ tokens: token?.tokens || 0, totalUsed: token?.totalUsed || 0 });
 }
 
-// POST — consume quota (client side already uses localStorage, this is server validation)
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { email, assetId } = body;
-    if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
-
-    // For now, just validate tokens exist — actual consumption tracked client-side
-    let token = await prisma.userChatToken.findUnique({ where: { email } });
-    const tokens = token?.tokens || 0;
-
-    return NextResponse.json({ ok: true, source: tokens > 0 ? "token" : "free", tokens });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+// POST — verify current user has quota (no cross-user access)
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "未登录" }, { status: 401 });
   }
+
+  const token = await prisma.userChatToken.findUnique({ where: { email: session.user.email } });
+  return NextResponse.json({
+    ok: true,
+    source: (token?.tokens || 0) > 0 ? "token" : "free",
+    tokens: token?.tokens || 0,
+  });
 }
 
-// PUT — admin adds tokens
-export async function PUT(request: Request) {
+// PUT — admin operation: add/set tokens for a specific user
+export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, addTokens, setTokens, note, adminEmail } = body;
+    await adminAuth();
+
+    const { email, addTokens, setTokens, note } = await request.json();
     if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
 
     let token = await prisma.userChatToken.findUnique({ where: { email } });
-    if (!token) token = await prisma.userChatToken.create({ data: { email, tokens: 100, totalUsed: 0 } });
 
-    let newTokens = token.tokens;
-    if (setTokens != null) {
-      newTokens = setTokens;
-      await prisma.userChatToken.update({ where: { email }, data: { tokens: newTokens } });
-    } else if (addTokens) {
-      newTokens = token.tokens + addTokens;
-      await prisma.userChatToken.update({ where: { email }, data: { tokens: { increment: addTokens } } });
+    if (setTokens !== undefined) {
+      token = await prisma.userChatToken.upsert({
+        where: { email },
+        create: { email, tokens: setTokens, totalUsed: 0 },
+        update: { tokens: setTokens },
+      });
+    } else if (addTokens !== undefined) {
+      token = await prisma.userChatToken.upsert({
+        where: { email },
+        create: { email, tokens: addTokens, totalUsed: 0 },
+        update: { tokens: { increment: addTokens } },
+      });
     }
 
-    // Write audit log
-    await prisma.creditAuditLog.create({
-      data: { email, type: setTokens != null ? "set_tokens" : "add_tokens", amount: newTokens - token.tokens, balance: newTokens, adminEmail: adminEmail || null, note: note || null },
-    });
-
-    return NextResponse.json({ email, tokens: newTokens });
+    return NextResponse.json({ success: true, tokens: token?.tokens || 0 });
   } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

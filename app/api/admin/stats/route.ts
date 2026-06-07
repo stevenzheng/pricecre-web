@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
+    await adminAuth();
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
     const dayAgo = new Date(now.getTime() - 86400000);
@@ -103,6 +105,7 @@ export async function GET(request: NextRequest) {
       dailyViews,
     });
   } catch (error) {
+    if ((error as any)?.status) return error as any;
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
 }

@@ -3,9 +3,11 @@
 // POST — 创建新审核条目
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
   try {
+    await adminAuth();
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -39,6 +41,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ items: list, total, page, limit });
   } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

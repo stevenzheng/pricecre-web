@@ -4,11 +4,12 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 import { sendEmail, activationEmailTemplate } from "@/lib/email";
 import { createHash } from "crypto";
 
 function generateAuthCode(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";
+  const secret = process.env.NEXTAUTH_SECRET;
   const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
@@ -20,6 +21,7 @@ function generateAuthCode(email: string): string {
 
 export async function GET(request: NextRequest) {
   try {
+    await adminAuth();
     // Try the submissions table, fall back to an empty list
     let submissions: any[] = [];
     try {
@@ -44,13 +46,15 @@ export async function GET(request: NextRequest) {
         createdAt: s.createdAt,
       })),
     });
-  } catch {
+  } catch (err: unknown) {
+    if ((err as any)?.status) return err as any;
     return NextResponse.json({ submissions: [] });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    await adminAuth();
     const { submissionId, action } = await request.json();
 
     if (!submissionId || !["APPROVED", "REJECTED"].includes(action)) {
@@ -86,6 +90,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, action });
   } catch (err: unknown) {
+    if ((err as any)?.status) return err as any;
     return NextResponse.json({ error: "操作失败" }, { status: 500 });
   }
 }

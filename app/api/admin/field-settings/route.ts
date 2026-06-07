@@ -1,23 +1,27 @@
 // app/api/admin/field-settings/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") || "OFFICE";
   try {
+    await adminAuth();
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type") || "OFFICE";
     const fields = await prisma.fieldMetadata.findMany({
       where: { moduleType: type as any },
       orderBy: { sortOrder: "asc" },
     });
     return NextResponse.json({ fields });
   } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    await adminAuth();
     const body = await request.json();
     const fields: any[] = body.fields || [];
     const moduleType = (body.moduleType || "OFFICE") as any;
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, count: fields.length });
   } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

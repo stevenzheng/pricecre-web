@@ -4,9 +4,11 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET() {
   try {
+    await adminAuth();
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -70,13 +72,15 @@ export async function GET() {
         createdAt: r.createdAt,
       })),
     });
-  } catch {
+  } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ users: [], referrals: [] });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    await adminAuth();
     const { userId, action } = await req.json();
     if (!userId) return NextResponse.json({ error: "缺少userId" }, { status: 400 });
 
@@ -98,7 +102,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "未知操作" }, { status: 400 });
-  } catch {
+  } catch (err: any) {
+    if (err?.status) return err;
     return NextResponse.json({ error: "操作失败" }, { status: 500 });
   }
 }

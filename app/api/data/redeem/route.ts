@@ -8,7 +8,7 @@ import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 
 function generateAuthCode(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || "pricecre-activation-secret";
+  const secret = process.env.NEXTAUTH_SECRET;
   const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";

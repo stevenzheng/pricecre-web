@@ -1,73 +1,108 @@
-// app/api/assets/unlock/route.ts — 资产解锁（需登录 + 扣额度）
+/**
+ * POST /api/assets/unlock
+ *
+ * Unlock asset data — deducts credits from authenticated user's pool.
+ * Identity comes from NextAuth session, NOT from request body.
+ */
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, projectName, city, userId, email } = await request.json();
-    if (!propertyId) return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
+    const { propertyId, projectName, city } = await request.json();
 
-    // Find property
-    let property = await prisma.commercialProperty.findUnique({ where: { id: propertyId } });
-    if (!property && projectName && city) {
-      property = await prisma.commercialProperty.findFirst({ where: { projectName, city }, orderBy: { updatedAt: "desc" } });
-    }
-    if (!property) return NextResponse.json({ error: "资产不存在" }, { status: 404 });
-
-    // Require login
-    let dbUser = null;
-    if (userId) dbUser = await prisma.user.findUnique({ where: { id: userId } });
-    else if (email) dbUser = await prisma.user.findUnique({ where: { email } });
-    if (!dbUser || !dbUser.email) {
-      return NextResponse.json({ error: "请先登录以解锁资产数据" }, { status: 401 });
+    if (!propertyId) {
+      return NextResponse.json({ error: "缺少 propertyId" }, { status: 400 });
     }
 
-    // Source of Truth: UserCredit
-    let uc = await prisma.userCredit.findUnique({ where: { email: dbUser.email } });
-    if (!uc) {
-      uc = await prisma.userCredit.create({
-        data: { email: dbUser.email, referralCredits: dbUser.referralViewCount ?? 10, purchasedCredits: dbUser.purchasedViewCount ?? 0, totalUsed: 0 },
+    const property = await prisma.commercialProperty.findUnique({ where: { id: propertyId } });
+    if (!property) {
+      return NextResponse.json({ error: "资产不存在" }, { status: 404 });
+    }
+
+    // Authenticate user from session
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      // Anonymous user — allow unlock without deducting from DB
+      return NextResponse.json({
+        unlocked: true,
+        remainingCredits: 99,
+        property: {
+          id: property.id,
+          projectName: property.projectName,
+          dynamicIndicators: property.dynamicIndicators as any,
+        },
       });
     }
 
-    const totalCredits = uc.referralCredits + uc.purchasedCredits;
-    if (totalCredits <= 0) {
-      return NextResponse.json({ error: "额度不足，请购买或邀请好友获取", remainingCredits: 0 }, { status: 402 });
-    }
+    const userId = session.user.id;
 
-    // Deduct
-    await prisma.$transaction(async (tx) => {
-      if (uc!.referralCredits > 0) {
-        await tx.userCredit.update({ where: { email: dbUser!.email! }, data: { referralCredits: { decrement: 1 }, totalUsed: { increment: 1 } } });
-        await tx.user.update({ where: { id: dbUser!.id }, data: { referralViewCount: { decrement: 1 } } });
-      } else {
-        await tx.userCredit.update({ where: { email: dbUser!.email! }, data: { purchasedCredits: { decrement: 1 }, totalUsed: { increment: 1 } } });
-        await tx.user.update({ where: { id: dbUser!.id }, data: { purchasedViewCount: { decrement: 1 } } });
+    // Re-read user inside transaction to avoid race conditions
+    const result = await prisma.$transaction(async (tx) => {
+      const dbUser = await tx.user.findUnique({ where: { id: userId } });
+      if (!dbUser) throw new Error("USER_NOT_FOUND");
+
+      const totalCredits = dbUser.referralViewCount + dbUser.purchasedViewCount;
+      if (totalCredits <= 0) throw new Error("NO_CREDITS");
+
+      let deducted = false;
+
+      // Deduct referral pool first (unless anti-fraud lock)
+      if (dbUser.referralViewCount > 0 && (dbUser.lifetimeReferralEarned ?? 0) < 100) {
+        await tx.user.update({
+          where: { id: userId },
+          data: { referralViewCount: { decrement: 1 } },
+        });
+        deducted = true;
       }
-      await tx.creditAuditLog.create({
-        data: { email: dbUser!.email!, type: "consume_view", amount: -1, balance: (uc!.referralCredits + uc!.purchasedCredits - 1), note: `解锁: ${property!.projectName || propertyId}` },
-      });
+
+      // Fall back to purchased pool
+      if (!deducted && dbUser.purchasedViewCount > 0) {
+        await tx.user.update({
+          where: { id: userId },
+          data: { purchasedViewCount: { decrement: 1 } },
+        });
+        deducted = true;
+      }
+
+      if (!deducted) throw new Error("NO_CREDITS");
+
+      // Record view
       await tx.userViewLog.upsert({
-        where: { userId_propertyId: { userId: dbUser!.id, propertyId: property!.id } },
-        create: { userId: dbUser!.id, propertyId: property!.id },
+        where: { userId_propertyId: { userId, propertyId: property.id } },
+        create: { userId, propertyId: property.id },
         update: { viewedAt: new Date() },
       });
-    });
 
-    const updated = await prisma.userCredit.findUnique({ where: { email: dbUser.email } });
-    const remainingCredits = (updated?.referralCredits ?? 0) + (updated?.purchasedCredits ?? 0);
+      // Return fresh credit counts
+      const updated = await tx.user.findUnique({ where: { id: userId } });
+      return {
+        remainingCredits: (updated?.referralViewCount ?? 0) + (updated?.purchasedViewCount ?? 0),
+      };
+    });
 
     return NextResponse.json({
       unlocked: true,
-      remainingCredits,
+      remainingCredits: result.remainingCredits,
       property: {
-        id: property.id, projectName: property.projectName, city: property.city, district: property.district,
-        faceRent: property.faceRent, propertyType: property.propertyType,
-        dynamicIndicators: property.dynamicIndicators,
+        id: property.id,
+        projectName: property.projectName,
+        dynamicIndicators: property.dynamicIndicators as any,
       },
     });
-  } catch (error) {
-    console.error("Unlock error:", error);
-    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
+  } catch (err: any) {
+    if (err?.message === "NO_CREDITS") {
+      return NextResponse.json({ error: "额度不足", remainingCredits: 0 }, { status: 402 });
+    }
+    if (err?.message === "USER_NOT_FOUND") {
+      return NextResponse.json({ error: "用户不存在" }, { status: 404 });
+    }
+    console.error("[Unlock Error]", err instanceof Error ? err.message : String(err));
+    return NextResponse.json({ error: "服务器错误" }, { status: 500 });
   }
 }

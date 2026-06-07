@@ -56,6 +56,23 @@ export async function POST(request: Request) {
 
     const allMessages = [{ role: "system", content: systemPrompt }, ...(messages || [])];
 
+    const isAnthropic = baseUrl.includes("anthropic");
+
+    if (isAnthropic) {
+      const anthroRes = await fetch(`${baseUrl}/v1/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({ model, max_tokens: 2000, system: systemPrompt, messages: (messages || []) }),
+      });
+      if (!anthroRes.ok) {
+        await prisma.userChatToken.update({ where: { email }, data: { tokens: { increment: 1 }, totalUsed: { decrement: 1 } } }).catch(() => {});
+        throw Error(`Anthropic API ${anthroRes.status}`);
+      }
+      const data = await anthroRes.json();
+      const content = data?.content?.[0]?.text || "抱歉，AI 暂时无法生成回复。";
+      return NextResponse.json({ role: "assistant", content });
+    }
+
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {

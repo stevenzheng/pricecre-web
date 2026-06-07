@@ -241,7 +241,7 @@ export default function Home() {
           setChatTokens({ total: tk.tokens || 0, used: tk.totalUsed || 0 });
         }
         if (ud && !ud.error) {
-          setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.viewCount || 0, conversations: ud.totalConversations || 0 });
+          setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.unlockCount || 0, conversations: ud.totalConversations || 0 });
           // Merge server viewLogs with existing unlockedIds (don't replace!)
           if (ud.viewLogs?.length) {
             setUnlockedIds((prev) => {

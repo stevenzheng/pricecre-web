@@ -858,7 +858,7 @@ export default function Home() {
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                           <code style={{ flex: 1, fontSize: 10, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.7)", padding: "6px 10px", borderRadius: 6, wordBreak: "break-all" }}>pricecre.com/r/{myReferralCode}</code>
-                          <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText(\`https://pricecre.com/r/${myReferralCode}\`); const btn = e.currentTarget; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000); }}
+                          <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText("https://pricecre.com/r/" + myReferralCode); const btn = e.currentTarget as HTMLButtonElement; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000); }}
                             style={{ padding: "6px 16px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>一键邀约</button>
                         </div>
                       </div>

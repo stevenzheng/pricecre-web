@@ -241,7 +241,11 @@ export default function Home() {
           setChatTokens({ total: tk.tokens || 0, used: tk.totalUsed || 0 });
         }
         if (ud && !ud.error) {
-          setCreditStats({ viewCount: ud.viewCount || 0, unlockCount: ud.unlockCount || 0, conversations: ud.totalConversations || 0 });
+          // ✅ 正确计算 unlockCount：从 viewLogs 中统计唯一 propertyId 数量
+          const unlockCount = ud.viewLogs?.length 
+            ? new Set((ud.viewLogs || []).map((v: any) => v.propertyId)).size 
+            : 0;
+          setCreditStats({ viewCount: ud.viewCount || 0, unlockCount, conversations: ud.totalConversations || 0 });
           // Merge server viewLogs with existing unlockedIds (don't replace!)
           if (ud.viewLogs?.length) {
             setUnlockedIds((prev) => {

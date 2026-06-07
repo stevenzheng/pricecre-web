@@ -68,7 +68,12 @@ export async function POST(request: Request) {
         throw Error(`Anthropic API ${anthroRes.status}`);
       }
       const data = await anthroRes.json();
-      const content = data?.content?.[0]?.text || "抱歉，AI 暂时无法生成回复。";
+      // Handle MiniMax content format: find text block, skip thinking blocks
+      const contentList = data.content || data.message?.content || [];
+      const textBlock = Array.isArray(contentList)
+        ? contentList.find((c: any) => c.type === "text")
+        : null;
+      const content = textBlock?.text || "抱歉，AI 暂时无法生成回复。";
       return NextResponse.json({ role: "assistant", content });
     }
 

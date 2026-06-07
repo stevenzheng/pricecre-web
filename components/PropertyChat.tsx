@@ -25,7 +25,7 @@ export default function PropertyChat({ property, email, onClose }: { property: P
   const [chatQuota, setChatQuota] = useState<{ total: number; used: number }>({ total: 0, used: 0 });
   const [messages, setMessages] = useState<Msg[]>([{
     role: "assistant",
-    content: `嗨！我是 **${property.projectName}** 的 AI 助理 👋
+    content: `嗨！我是 **${property.projectName}** 的 AI 分析师 👋
 
 这个项目位于 ${property.city}·${property.district}，是 ${property.propertyType} 业态，挂牌面价 **¥${property.faceRent}/㎡/天**。
 
@@ -202,9 +202,16 @@ export default function PropertyChat({ property, email, onClose }: { property: P
             <div style={{ position: "relative", width: 440, maxWidth: "90vw", height: "100%", background: "#FFFFFF", borderLeft: "1px solid #E5E5E5", boxShadow: "-2px 0 24px rgba(0,0,0,0.10)", display: "flex", flexDirection: "column", animation: "vl-slide-r 0.25s ease" }}>
               {/* Header with avatar */}
               <div style={{ padding: "14px 16px", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, background: "#FAFAFA", flexShrink: 0 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>AI</div>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #1a73e8 0%, #4285f4 25%, #7baaf7 50%, #a1c4fd 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(26,115,232,0.3)" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round">
+                    <circle cx="12" cy="12" r="3" fill="#FFFFFF" fillOpacity="0.3"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                    <path d="M12 6a6 6 0 016 6" strokeDasharray="2 2"/>
+                    <circle cx="12" cy="12" r="1" fill="#FFFFFF"/>
+                  </svg>
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", letterSpacing: "-0.02em" }}>AI 助理</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", letterSpacing: "-0.02em" }}>AI 分析师</div>
                   <div style={{ fontSize: 11, color: "#737373", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{property.projectName}</div>
                 </div>
                 <button onClick={() => setCollapsed(true)} title="收起" style={{ width: 32, height: 32, border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", color: "#737373", fontSize: 14, lineHeight: "32px" }}>─</button>
@@ -216,7 +223,7 @@ export default function PropertyChat({ property, email, onClose }: { property: P
 
               {/* Compliance */}
               <div style={{ padding: "4px 16px", fontSize: 10, color: "#A3A3A3", textAlign: "center", fontFamily: "var(--font-sans)", borderTop: "1px solid #F7F7F7", flexShrink: 0 }}>
-                AI 助理基于大模型生成，内容仅供参考，不构成投资建议
+                AI 分析师基于大模型生成，内容仅供参考，不构成投资建议
               </div>
 
               {/* Input */}
@@ -258,9 +265,16 @@ export default function PropertyChat({ property, email, onClose }: { property: P
     <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "#FFFFFF", display: "flex", flexDirection: "column" }}>
       {/* Header with avatar */}
       <div style={{ padding: "10px 14px", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, background: "#FAFAFA", paddingTop: "max(10px, env(safe-area-inset-top))", flexShrink: 0 }}>
-        <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>AI</div>
+        <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #1a73e8 0%, #4285f4 25%, #7baaf7 50%, #a1c4fd 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", flexShrink: 0, boxShadow: "0 2px 8px rgba(26,115,232,0.3)" }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round">
+            <circle cx="12" cy="12" r="3" fill="#FFFFFF" fillOpacity="0.3"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            <path d="M12 6a6 6 0 016 6" strokeDasharray="2 2"/>
+            <circle cx="12" cy="12" r="1" fill="#FFFFFF"/>
+          </svg>
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>AI 助理</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>AI 分析师</div>
           <div style={{ fontSize: 11, color: "#737373", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{property.projectName}</div>
         </div>
         <button onClick={() => { setCollapsed(true); }} title="收起" style={{ width: 32, height: 32, border: "none", borderRadius: 6, background: "#F7F7F7", cursor: "pointer", color: "#171717" }}>
@@ -286,20 +300,27 @@ export default function PropertyChat({ property, email, onClose }: { property: P
 
       {/* Compliance */}
       <div style={{ padding: "4px 16px", fontSize: 10, color: "#A3A3A3", textAlign: "center", fontFamily: "var(--font-sans)", borderTop: "1px solid #F7F7F7", flexShrink: 0 }}>
-        AI 助理基于大模型生成，内容仅供参考，不构成投资建议
+        AI 分析师基于大模型生成，内容仅供参考，不构成投资建议
       </div>
 
-      {/* Quota + Recharge */}
-      <div style={{ padding: "6px 16px", borderTop: "1px solid #F7F7F7", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexShrink: 0 }}>
-        <span style={{ fontSize: 11, color: freeUsed < 10 ? "#0D9488" : "#E91E63", fontFamily: "var(--font-sans)" }}>
-          剩余 {10 - freeUsed}/10 条免费对话
-        </span>
-        <button
-          onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
-          style={{ padding: "4px 12px", borderRadius: 999, border: "1px solid #E5E5E5", background: "#FFFFFF", color: "#525252", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
-          对话额度
-        </button>
-      </div>
+      {/* Quota Bar + Purchase */}
+      {chatQuota.total > 0 && (
+        <div style={{ padding: "8px 16px", borderTop: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "#FAFAFA" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+              <span style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>AI对话额度</span>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.used}/{chatQuota.total}</span>
+            </div>
+            <div style={{ height: 4, background: "#E5E5E5", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ width: `${Math.min(100, (chatQuota.used / chatQuota.total) * 100)}%`, height: "100%", background: chatQuota.used >= chatQuota.total ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
+            </div>
+          </div>
+          <button onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
+            style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #2563EB", background: "#FFF", color: "#2563EB", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
+            购买AI对话额度
+          </button>
+        </div>
+      )}
 
       {/* Input */}
       <div style={{ padding: "8px 12px 14px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, paddingBottom: "max(14px, env(safe-area-inset-bottom))", flexShrink: 0 }}>
@@ -316,7 +337,7 @@ export default function PropertyChat({ property, email, onClose }: { property: P
         <div style={{ position: "fixed", inset: 0, zIndex: 11000, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setConfirmClose(false)}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#FFFFFF", borderRadius: 12, padding: "24px 20px", width: 280, textAlign: "center" }}>
             <p style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 8px" }}>关闭对话</p>
-            <p style={{ fontSize: 13, color: "#737373", fontFamily: "var(--font-sans)", margin: "0 0 20px" }}>确定要结束与 AI 助理的对话吗？</p>
+            <p style={{ fontSize: 13, color: "#737373", fontFamily: "var(--font-sans)", margin: "0 0 20px" }}>确定要结束与 AI 分析师的对话吗？</p>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setConfirmClose(false)} style={{ flex: 1, padding: "10px", border: "1px solid #E5E5E5", borderRadius: 8, background: "#FFFFFF", fontSize: 14, fontWeight: 500, color: "#737373", cursor: "pointer", fontFamily: "var(--font-sans)" }}>继续对话</button>
               <button onClick={onClose} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 8, background: "#E91E63", color: "#FFFFFF", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)" }}>确认关闭</button>

@@ -176,7 +176,7 @@ export default function Home() {
   });
   const [unlockedData, setUnlockedData] = useState<Record<string, any>>({});
   const [myReferralCode, setMyReferralCode] = useState(() =>
-    loadPersisted("referralCode", "sz2026")
+    loadPersisted("referralCode", "")
   );
   const [userEmail, setUserEmail] = useState(() =>
     loadPersisted<string | null>("userEmail", null)
@@ -992,7 +992,7 @@ export default function Home() {
                   color: "var(--accent)",
                 }}
                 onClick={() => {
-                  navigator.clipboard.writeText("https://pricecre.com/r/sz2026");
+                  navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}

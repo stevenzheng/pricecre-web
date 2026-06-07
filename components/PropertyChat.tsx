@@ -245,7 +245,7 @@ export default function PropertyChat({ property, email, onClose }: { property: P
               </div>
 
               {/* Input */}
-              <div> style={{ padding: "8px 12px 16px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, flexShrink: 0 }}>
+              <div style={{ padding: "8px 12px 16px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, flexShrink: 0 }}>
                 <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="输入你的问题..." disabled={loading} style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 10, outline: "none", fontSize: 13.5, fontFamily: "var(--font-sans)", background: loading ? "#F7F7F7" : "#FAFAFA" }} />
                 <button onClick={send} disabled={loading || !input.trim()} style={{ width: 42, height: 42, borderRadius: 10, border: "none", background: input.trim() && !loading ? "#171717" : "#E5E5E5", cursor: input.trim() && !loading ? "pointer" : "default", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>

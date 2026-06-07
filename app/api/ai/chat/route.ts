@@ -12,8 +12,13 @@ export async function POST(request: Request) {
   const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn").replace(/\/$/, "");
   const model = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
 
-  if (!apiKey || apiKey.length < 10) {
-    return NextResponse.json({ role: "assistant", content: "AI 服务未配置。" }, { status: 200 });
+  // 🔒 安全修复：更严格的API Key验证（Issue #3 - P1-Security）
+  if (!apiKey || apiKey.length < 20 || apiKey.includes('"') || apiKey.includes("'")) {
+    console.error('[AI Chat] Invalid API key configuration');
+    return NextResponse.json(
+      { role: "assistant", content: "AI 服务暂时不可用，请稍后重试。" },
+      { status: 503 }
+    );
   }
 
   // Read body once

@@ -80,10 +80,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ✅ 记录解锁日志
-    await prisma.userViewLog.create({
-      data: { userId: session.user.id, propertyId },
-    }).catch(() => {}); // 忽略重复写入
+    // ✅ 记录解锁日志（修复：不再静默忽略错误 - Issue #2）
+    try {
+      await prisma.userViewLog.create({
+        data: { userId: session.user.id, propertyId },
+      });
+    } catch (e: any) {
+      // P2002 = 唯一约束冲突（重复解锁），这是预期行为
+      if (e?.code !== 'P2002') {
+        console.error('[Unlock] Failed to create view log:', e.message);
+      }
+      // 重复解锁时继续执行，不影响用户体验
+    }
 
     const updated = await prisma.userCredit.findUnique({ where: { email } });
 

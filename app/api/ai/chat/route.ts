@@ -33,21 +33,20 @@ export async function POST(request: Request) {
   try {
     const { messages, property } = body;
 
-    // Token consumption
-    let token = await prisma.userChatToken.findUnique({ where: { email } });
-    if (!token) {
-      token = await prisma.userChatToken.create({ data: { email, tokens: 100, totalUsed: 0 } });
-    }
-
-    if (token.tokens <= 0) {
-      return NextResponse.json({ role: "assistant", content: "您的 AI 对话额度已用完。请前往个人中心购买更多额度。" }, { status: 200 });
-    }
-
-    // Deduct one token
-    await prisma.userChatToken.update({
-      where: { email },
-      data: { tokens: { decrement: 1 }, totalUsed: { increment: 1 } },
-    });
+    // Token consumption (skip if DB unavailable)
+    try {
+      let token = await prisma.userChatToken.findUnique({ where: { email } });
+      if (!token) {
+        token = await prisma.userChatToken.create({ data: { email, tokens: 100, totalUsed: 0 } });
+      }
+      if (token.tokens <= 0) {
+        return NextResponse.json({ role: "assistant", content: "您的 AI 对话额度已用完。请前往个人中心购买更多额度。" }, { status: 200 });
+      }
+      await prisma.userChatToken.update({
+        where: { email },
+        data: { tokens: { decrement: 1 }, totalUsed: { increment: 1 } },
+      });
+    } catch {}
 
     // Build system prompt
     const systemPrompt = property
@@ -57,7 +56,6 @@ export async function POST(request: Request) {
     const allMessages = [{ role: "system", content: systemPrompt }, ...(messages || [])];
 
     const isAnthropic = baseUrl.includes("anthropic");
-    console.log("[AI Chat]", { email, isAnthropic, baseUrl, model: model.slice(0, 20) + "...", hasKey: !!apiKey });
 
     if (isAnthropic) {
       const anthroRes = await fetch(`${baseUrl}/v1/messages`, {
@@ -99,6 +97,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ role: "assistant", content });
   } catch (err: any) {
     console.error("[AI Chat Error]", err.message);
-    return NextResponse.json({ role: "assistant", content: `AI 服务暂时不可用 (${err.message.slice(0, 80)})` }, { status: 200 });
+    return NextResponse.json({ role: "assistant", content: "AI 服务暂时不可用，请稍后重试。" }, { status: 200 });
   }
 }

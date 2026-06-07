@@ -147,6 +147,7 @@ export default function Home() {
 
   // Persistent state via localStorage
   const loadPersisted = <T,>(key: string, fallback: T): T => {
+    if (typeof window === "undefined") return fallback;
     try {
       const stored = localStorage.getItem(`pricecre_${key}`);
       if (stored) return JSON.parse(stored);
@@ -168,7 +169,7 @@ export default function Home() {
     loadPersisted("creditStats", { viewCount: 0, unlockCount: 0, conversations: 0 })
   );
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => {
-    // Only restore unlocked data if user is logged in
+    if (typeof window === "undefined") return new Set<string>();
     const isLoggedIn = !!JSON.parse(localStorage.getItem("pricecre_user") || "{}")?.email;
     if (!isLoggedIn) return new Set<string>();
     const arr = loadPersisted<string[]>("unlockedIds", []);

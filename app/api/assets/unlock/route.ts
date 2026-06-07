@@ -50,16 +50,6 @@ export async function POST(request: NextRequest) {
       await prisma.userCredit.update({ where: { email }, data: { purchasedCredits: { decrement: 1 } } });
     }
 
-    // Record the view
-    await prisma.userViewLog.create({
-      data: {
-        email,
-        propertyId,
-        projectName: projectName || "",
-        city: city || "",
-      },
-    }).catch(() => {});
-
     const updated = await prisma.userCredit.findUnique({ where: { email } });
     return NextResponse.json({
       unlocked: true,

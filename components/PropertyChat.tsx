@@ -56,8 +56,9 @@ export default function PropertyChat({ property, email, onClose }: { property: P
   }, []);
 
   useEffect(() => {
-    if (!email) return;
-    fetch(`/api/ai/chat-quota?email=${encodeURIComponent(email)}&assetId=__page__`).then(r => r.json()).then(d => {
+    const e = email || (typeof window !== "undefined" ? (() => { try { return JSON.parse(localStorage.getItem("pricecre_user") || "{}")?.email; } catch { return ""; } })() : "");
+    if (!e) return;
+    fetch(`/api/ai/chat-quota?email=${encodeURIComponent(e)}`).then(r => r.json()).then(d => {
       setChatQuota({ total: d.tokens || 0, used: d.totalUsed || 0 });
     }).catch(() => {});
   }, [email]);
@@ -303,24 +304,22 @@ export default function PropertyChat({ property, email, onClose }: { property: P
         AI 分析师基于大模型生成，内容仅供参考，不构成投资建议
       </div>
 
-      {/* Quota Bar + Purchase */}
-      {chatQuota.total > 0 && (
-        <div style={{ padding: "8px 16px", borderTop: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "#FAFAFA" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-              <span style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>AI对话额度</span>
-              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.used}/{chatQuota.total}</span>
-            </div>
-            <div style={{ height: 4, background: "#E5E5E5", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ width: `${Math.min(100, (chatQuota.used / chatQuota.total) * 100)}%`, height: "100%", background: chatQuota.used >= chatQuota.total ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
-            </div>
+      {/* Quota Bar + Purchase — always visible */}
+      <div style={{ padding: "8px 16px", borderTop: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "#FAFAFA" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+            <span style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>AI对话额度</span>
+            <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.total > 0 ? `${chatQuota.used}/${chatQuota.total}` : "加载中..."}</span>
           </div>
-          <button onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
-            style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #2563EB", background: "#FFF", color: "#2563EB", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
-            购买AI对话额度
-          </button>
+          <div style={{ height: 4, background: "#E5E5E5", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ width: `${chatQuota.total > 0 ? Math.min(100, (chatQuota.used / chatQuota.total) * 100) : 0}%`, height: "100%", background: chatQuota.used >= chatQuota.total && chatQuota.total > 0 ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
+          </div>
         </div>
-      )}
+        <button onClick={() => document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" }))}
+          style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #2563EB", background: "#FFF", color: "#2563EB", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
+          购买AI对话额度
+        </button>
+      </div>
 
       {/* Input */}
       <div style={{ padding: "8px 12px 14px", borderTop: "1px solid #E5E5E5", display: "flex", gap: 8, paddingBottom: "max(14px, env(safe-area-inset-bottom))", flexShrink: 0 }}>

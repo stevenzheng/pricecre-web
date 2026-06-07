@@ -97,6 +97,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ role: "assistant", content });
   } catch (err: any) {
     console.error("[AI Chat Error]", err.message);
-    return NextResponse.json({ role: "assistant", content: "AI 服务暂时不可用，请稍后重试。" }, { status: 200 });
+    return NextResponse.json({ role: "assistant", content: "AI 服务暂不可用: " + (err.message || "").slice(0, 60) }, { status: 200 });
   }
 }

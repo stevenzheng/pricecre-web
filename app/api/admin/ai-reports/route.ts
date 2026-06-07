@@ -1,15 +1,15 @@
-// GET /api/admin/ai-reports — Admin: list all AI reports
+// GET /api/admin/ai-reports — Admin: list all AI reports (file-based)
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import fs from "fs";
+import path from "path";
+
+const DB_FILE = path.join(process.cwd(), "data", "ai-reports.json");
+
+function readDB(): any[] {
+  try { return JSON.parse(fs.readFileSync(DB_FILE, "utf-8")); } catch { return []; }
+}
 
 export async function GET(req: NextRequest) {
-  try {
-    const reports = await (prisma as any).aIAnalysis?.findMany?.({
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }) || [];
-    return NextResponse.json({ reports });
-  } catch {
-    return NextResponse.json({ reports: [] });
-  }
+  const all = readDB();
+  return NextResponse.json({ reports: all });
 }

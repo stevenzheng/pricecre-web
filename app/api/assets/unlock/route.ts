@@ -35,19 +35,19 @@ export async function POST(request: NextRequest) {
     // Deduct credits
     let userCredit = await prisma.userCredit.findUnique({ where: { email } });
     if (!userCredit) {
-      userCredit = await prisma.userCredit.create({ data: { email, referralViewCount: 10, purchasedViewCount: 0 } });
+      userCredit = await prisma.userCredit.create({ data: { email, referralCredits: 10, purchasedCredits: 0 } });
     }
 
-    const total = userCredit.referralViewCount + userCredit.purchasedViewCount;
+    const total = userCredit.referralCredits + userCredit.purchasedCredits;
     if (total <= 0) {
       return NextResponse.json({ error: "额度不足，请购买或邀请好友获取" }, { status: 402 });
     }
 
     // Deduct from referral first
-    if (userCredit.referralViewCount > 0) {
-      await prisma.userCredit.update({ where: { email }, data: { referralViewCount: { decrement: 1 } } });
+    if (userCredit.referralCredits > 0) {
+      await prisma.userCredit.update({ where: { email }, data: { referralCredits: { decrement: 1 } } });
     } else {
-      await prisma.userCredit.update({ where: { email }, data: { purchasedViewCount: { decrement: 1 } } });
+      await prisma.userCredit.update({ where: { email }, data: { purchasedCredits: { decrement: 1 } } });
     }
 
     // Record the view
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     const updated = await prisma.userCredit.findUnique({ where: { email } });
     return NextResponse.json({
       unlocked: true,
-      remainingCredits: (updated?.referralViewCount || 0) + (updated?.purchasedViewCount || 0),
+      remainingCredits: (updated?.referralCredits || 0) + (updated?.purchasedCredits || 0),
       property: { id: propertyId, projectName: projectName || "", city: city || "" },
     });
   } catch (err: any) {

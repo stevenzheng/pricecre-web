@@ -22,6 +22,7 @@ function renderContent(text: string) {
 }
 
 export default function PropertyChat({ property, email, onClose }: { property: PropertyContext; email?: string; onClose: () => void }) {
+  const [chatQuota, setChatQuota] = useState<{ total: number; used: number }>({ total: 0, used: 0 });
   const [messages, setMessages] = useState<Msg[]>([{
     role: "assistant",
     content: `嗨！我是 **${property.projectName}** 的 AI 助理 👋
@@ -53,6 +54,13 @@ export default function PropertyChat({ property, email, onClose }: { property: P
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
   }, []);
+
+  useEffect(() => {
+    if (!email) return;
+    fetch(`/api/ai/chat-quota?email=${encodeURIComponent(email)}&assetId=__page__`).then(r => r.json()).then(d => {
+      setChatQuota({ total: d.tokens || 0, used: d.totalUsed || 0 });
+    }).catch(() => {});
+  }, [email]);
 
   const scrollBottom = () => {
     const el = scrollRef.current;
@@ -272,6 +280,18 @@ export default function PropertyChat({ property, email, onClose }: { property: P
         </button>
         <button onClick={handleClose} title="关闭" style={{ width: 32, height: 32, border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", color: "#171717" }}>✕</button>
       </div>
+
+      {/* Quota Bar */}
+      {chatQuota.total > 0 && (
+        <div style={{ padding: "6px 14px", background: "rgba(37,99,235,0.04)", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+          <span style={{ color: "#737373" }}>AI对话额度</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "#2563EB" }}>{chatQuota.used}/{chatQuota.total}</span>
+          <div style={{ flex: 1, height: 4, background: "#F0F0F0", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ width: `${Math.min(100, (chatQuota.used / chatQuota.total) * 100)}%`, height: "100%", background: chatQuota.used >= chatQuota.total ? "#EF4444" : "#2563EB", borderRadius: 2, transition: "width 0.3s" }} />
+          </div>
+          <span style={{ fontSize: 10, color: "#A3A3A3" }}>剩余 {chatQuota.total - chatQuota.used}</span>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>{messageList}</div>

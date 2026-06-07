@@ -119,8 +119,8 @@ export default function CreditPanel({ credits, chatTokens, creditStats, userEmai
             { label: "AI分析报告", value: creditStats.conversations, sub: "份", icon: "eye" as const },
           ].map((s) => (
             <div key={s.label}
-              onClick={s.label === "AI分析报告" ? () => document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: "ai-reports" })) : undefined}
-              style={{ padding: "8px 10px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: s.label === "AI分析报告" ? "pointer" : "default" }}>
+              onClick={s.label === "AI分析报告" ? () => document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: "ai-reports" })) : s.label === "已解锁资产" ? () => document.dispatchEvent(new CustomEvent("credit-panel-action", { detail: "unlocked-assets" })) : undefined}
+              style={{ padding: "8px 10px", borderRadius: 6, background: "#FAFAFA", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: (s.label === "AI分析报告" || s.label === "已解锁资产") ? "pointer" : "default" }}>
               <Icon type={s.icon} size={12} />
               <div style={{ ...monoLg, fontSize: 15, color: "#171717" }}>{s.value}</div>
               <div style={{ fontSize: 10, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>{s.label}</div>

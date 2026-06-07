@@ -268,6 +268,8 @@ export default function Home() {
           setShowReportDetail(null);
           setShowAiReports(true);
         }).catch(() => {});
+      } else if (action === "unlocked-assets") {
+        setShowUnlockedAssets(true);
       }
     };
     document.addEventListener("credit-panel-action", h);

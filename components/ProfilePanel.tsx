@@ -202,65 +202,67 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
         </button>
       </div>
 
-      {/* Responsive grid: 1-col mobile, 2-col desktop */}
+      {/* Responsive grid: 1-col mobile, 2-col desktop — all cards equal width */}
       <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
         <style>{`@media(min-width:768px){.profile-grid{grid-template-columns:1fr 1fr!important}}`}</style>
-        {/* LEFT COL: CreditPanel */}
+        {/* LEFT COL: CreditPanel — force full width */}
+        <div style={{ width: "100%" }}>
         <CreditPanel
           credits={credits ? { shared: 0, ...credits } : { shared: 0, referral: 0, purchased: 0 }}
           chatTokens={chatTokens || { total: 0, used: 0 }}
           creditStats={creditStats || { viewCount: 0, unlockCount: 0, conversations: 0 }}
           userEmail={userEmail}
         />
+        </div>
 
         {/* RIGHT COL: Referral + Redeem */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {/* Referral */}
-          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
               邀请好友
             </div>
-            <div style={{ fontSize: 11, color: "#A3A3A3", marginBottom: 8 }}>邀请好友注册，双方各得 10 次查看额度</div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
+            <div style={{ fontSize: 13, color: "#737373", marginBottom: 10 }}>邀请好友注册，双方各得 10 次查看额度</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input readOnly value="pricecre.com/r/sz2026" style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-mono)", background: "#F7F7F7" }} />
               <button onClick={() => { navigator.clipboard.writeText("pricecre.com/r/sz2026"); }}
-                style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
+                style={{ padding: "10px 18px", borderRadius: 8, border: "1px solid #0070F3", background: "#FFF", color: "#0070F3", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>复制</button>
             </div>
           </div>
 
           {/* Redeem */}
-          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.5"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.5"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
               激活兑换码
             </div>
-            <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               <input value={redeemCode} onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemStatus("idle"); }}
                 placeholder="6位激活码" maxLength={6} onKeyDown={e => { if (e.key === "Enter") handleRedeem(); }}
-                style={{ flex: 1, padding: "6px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
+                style={{ flex: 1, padding: "10px 14px", border: "1px solid #E5E5E5", borderRadius: 8, fontSize: 16, fontFamily: "var(--font-mono)", outline: "none", letterSpacing: "0.1em" }} />
               <button onClick={handleRedeem} disabled={redeemStatus === "loading"}
-                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 12, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
+                style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: redeemStatus === "loading" ? "default" : "pointer", opacity: redeemStatus === "loading" ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
                 {redeemStatus === "loading" ? "验证中" : "激活"}
               </button>
             </div>
             {redeemStatus !== "idle" && (
-              <div style={{ marginTop: 6, padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
+              <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)", background: redeemStatus === "success" ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: redeemStatus === "success" ? "#0070F3" : "#EE0000" }}>
                 {redeemMsg}
               </div>
             )}
           </div>
 
           {/* Purchase Card */}
-          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: "12px 14px" }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+          <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
               商业付费直通车
             </div>
             {!showPayment ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => { setPaymentProduct("single"); setShowPayment(true); }}
-                  style={{ padding: "10px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  style={{ padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)" }}>
                   查看权益 × 50次 · ¥99.00
                 </button>
                 <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", textAlign: "center", marginTop: -4, marginBottom: 2 }}>

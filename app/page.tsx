@@ -393,7 +393,7 @@ export default function Home() {
       if (activeCity !== "全部" && p.city !== activeCity) return false;
       if (activeType !== "ALL" && p.propertyType !== activeType) return false;
       if (statFilter === "unlocked") {
-        const unlockedIds = new Set(JSON.parse(localStorage.getItem("pricecre_unlocked") || "[]"));
+        const unlockedIds = new Set(JSON.parse(localStorage.getItem("pricecre_unlockedIds") || "[]"));
         if (!unlockedIds.has(p.id as any)) return false;
       }
       if (statFilter === "recent" && p.dataSource !== "成交量") return false;

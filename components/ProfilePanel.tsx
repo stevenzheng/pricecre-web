@@ -202,8 +202,9 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
         </button>
       </div>
 
-      {/* Desktop: 2-column grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      {/* Responsive grid: 1-col mobile, 2-col desktop */}
+      <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+        <style>{`@media(min-width:768px){.profile-grid{grid-template-columns:1fr 1fr!important}}`}</style>
         {/* LEFT COL: CreditPanel */}
         <CreditPanel
           credits={credits ? { shared: 0, ...credits } : { shared: 0, referral: 0, purchased: 0 }}

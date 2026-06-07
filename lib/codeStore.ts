@@ -1,43 +1,71 @@
-// Shared in-memory verification code store (singleton across API routes)
-interface CodeEntry { code: string; expires: number; }
-const store = new Map<string, CodeEntry>();
+import { prisma } from "@/lib/prisma";
 
-export function setCode(email: string, code: string, ttlMinutes = 10) {
-  store.set(email, { code, expires: Date.now() + ttlMinutes * 60 * 1000 });
+// ─── Email Verification Codes ────────────────────────────────────────────────
+
+export async function setCode(email: string, code: string, ttlMinutes = 10) {
+  const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
+  await prisma.verificationCode.upsert({
+    where: { key: `verify:${email}` },
+    update: { value: code, expiresAt },
+    create: { key: `verify:${email}`, value: code, expiresAt },
+  });
 }
 
-export function verifyCode(email: string, code: string): boolean {
-  const entry = store.get(email);
+export async function verifyCode(email: string, code: string): Promise<boolean> {
+  const entry = await prisma.verificationCode.findUnique({
+    where: { key: `verify:${email}` },
+  });
   if (!entry) return false;
-  if (Date.now() > entry.expires) { store.delete(email); return false; }
-  if (entry.code !== code) return false;
-  store.delete(email);
+  if (new Date() > entry.expiresAt) {
+    await prisma.verificationCode.delete({ where: { key: `verify:${email}` } });
+    return false;
+  }
+  if (entry.value !== code) return false;
+  await prisma.verificationCode.delete({ where: { key: `verify:${email}` } });
   return true;
 }
 
-// For activation codes
-export function setActivationCode(code: string, credits = 8, ttlDays = 30) {
-  store.set(`activation:${code}`, { code: String(credits), expires: Date.now() + ttlDays * 24 * 60 * 60 * 1000 });
+// ─── Activation Codes ────────────────────────────────────────────────────────
+
+export async function setActivationCode(code: string, credits = 8, ttlDays = 30) {
+  const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+  await prisma.verificationCode.upsert({
+    where: { key: `activation:${code}` },
+    update: { value: String(credits), expiresAt },
+    create: { key: `activation:${code}`, value: String(credits), expiresAt },
+  });
 }
 
-export function redeemActivationCode(code: string): number | null {
-  const entry = store.get(`activation:${code}`);
+export async function redeemActivationCode(code: string): Promise<number | null> {
+  const entry = await prisma.verificationCode.findUnique({
+    where: { key: `activation:${code}` },
+  });
   if (!entry) return null;
-  if (Date.now() > entry.expires) { store.delete(`activation:${code}`); return null; }
-  const credits = parseInt(entry.code, 10);
-  store.delete(`activation:${code}`);
+  if (new Date() > entry.expiresAt) {
+    await prisma.verificationCode.delete({ where: { key: `activation:${code}` } });
+    return null;
+  }
+  const credits = parseInt(entry.value, 10);
+  await prisma.verificationCode.delete({ where: { key: `activation:${code}` } });
   return credits;
 }
 
-// For referral tracking during registration
-const referralStore = new Map<string, string>();
+// ─── Referral Tracking ───────────────────────────────────────────────────────
 
-export function setReferral(email: string, referralCode: string) {
-  referralStore.set(email, referralCode);
+export async function setReferral(email: string, referralCode: string) {
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  await prisma.verificationCode.upsert({
+    where: { key: `referral:${email}` },
+    update: { value: referralCode, expiresAt },
+    create: { key: `referral:${email}`, value: referralCode, expiresAt },
+  });
 }
 
-export function getReferral(email: string): string | null {
-  const code = referralStore.get(email);
-  referralStore.delete(email);
-  return code || null;
+export async function getReferral(email: string): Promise<string | null> {
+  const entry = await prisma.verificationCode.findUnique({
+    where: { key: `referral:${email}` },
+  });
+  if (!entry) return null;
+  await prisma.verificationCode.delete({ where: { key: `referral:${email}` } });
+  return entry.value;
 }

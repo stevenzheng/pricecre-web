@@ -1,0 +1,11 @@
+// 把这段追加到你的 prisma/schema.prisma 文件末尾
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}

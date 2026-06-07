@@ -1,4 +1,4 @@
-// app/api/ai/chat/route.ts — Asset AI Chat (session-based token consumption)
+// app/api/ai/chat/route.ts — Asset AI Chat (session or body.email)
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -16,22 +16,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ role: "assistant", content: "AI 服务未配置。" }, { status: 200 });
   }
 
-  // Authenticate — session first, fallback to body email
+  // Read body once
+  let body: any;
+  try { body = await request.json(); } catch {
+    return NextResponse.json({ role: "assistant", content: "无效请求。" }, { status: 200 });
+  }
+
+  // Authenticate — session first, fallback to body.email
   const session = await getServerSession(authOptions);
-  let email = session?.user?.email || "";
+  const email = session?.user?.email || body.email || "";
+
   if (!email) {
-    try {
-      const body = await request.clone().json();
-      email = body.email || "";
-    } catch {}
-    // Validate email is in DB
-    if (!email) {
-      return NextResponse.json({ role: "assistant", content: "请先登录以使用 AI 对话功能。" }, { status: 200 });
-    }
+    return NextResponse.json({ role: "assistant", content: "请先登录以使用 AI 对话功能。" }, { status: 200 });
   }
 
   try {
-    const body = await request.json() as any;
     const { messages, property } = body;
 
     // Token consumption
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
       data: { tokens: { decrement: 1 }, totalUsed: { increment: 1 } },
     });
 
-    // Build system prompt from property data
+    // Build system prompt
     const systemPrompt = property
       ? `你是 PriceCRE 商业地产 AI 分析师。当前你正在分析以下资产：\n${JSON.stringify(property, null, 2)}\n请用专业、简洁的中文回答，重点分析租金水平、投资回报和商圈竞争力。`
       : "你是 PriceCRE 商业地产 AI 分析师。请用专业、简洁的中文回答用户关于商业地产的问题。";
@@ -67,17 +66,17 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      // Refund token on error
+      // Refund token on API failure
       await prisma.userChatToken.update({
         where: { email },
         data: { tokens: { increment: 1 }, totalUsed: { decrement: 1 } },
-      });
+      }).catch(() => {});
       const errText = await response.text().catch(() => "");
-      throw new Error(`AI API ${response.status}: ${errText.slice(0, 200)}`);
+      throw Error(`AI API ${response.status}: ${errText.slice(0, 200)}`);
     }
 
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content || "抱歉，AI 暂时无法生成回复。";
+    const result = await response.json();
+    const content = result?.choices?.[0]?.message?.content || "抱歉，AI 暂时无法生成回复。";
 
     return NextResponse.json({ role: "assistant", content });
   } catch (err: any) {

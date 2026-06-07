@@ -10,11 +10,13 @@ export const dynamic = "force-dynamic";
 // GET — returns current user's quota (self only)
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  const email = session?.user?.email || request.nextUrl.searchParams.get("email") || "";
+
+  if (!email) {
     return NextResponse.json({ tokens: 0, totalUsed: 0 });
   }
 
-  const token = await prisma.userChatToken.findUnique({ where: { email: session.user.email } });
+  const token = await prisma.userChatToken.findUnique({ where: { email } });
   return NextResponse.json({ tokens: token?.tokens || 0, totalUsed: token?.totalUsed || 0 });
 }
 

@@ -1,24 +1,19 @@
-// app/api/admin/audit-log/route.ts — Query audit logs
-import { NextResponse } from "next/server";
+// GET /api/admin/audit-log?type=redeem — Query audit logs by type
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const email = searchParams.get("email") || "";
-  const limit = Math.min(Number(searchParams.get("limit")) || 30, 100);
-
-  if (!email) return NextResponse.json({ logs: [] });
-
+export async function GET(req: NextRequest) {
+  const type = req.nextUrl.searchParams.get("type") || "";
   try {
+    const where: any = {};
+    if (type === "redeem") where.note = { contains: "激活码" };
     const logs = await prisma.creditAuditLog.findMany({
-      where: { email },
+      where,
       orderBy: { createdAt: "desc" },
-      take: limit,
+      take: 200,
     });
-    return NextResponse.json({ email, logs });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message, logs: [] }, { status: 500 });
+    return NextResponse.json({ logs });
+  } catch {
+    return NextResponse.json({ logs: [] });
   }
 }

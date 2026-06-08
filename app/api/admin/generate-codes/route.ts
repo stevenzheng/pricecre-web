@@ -1,38 +1,36 @@
-// POST /api/admin/generate-codes — Generate exchange codes for products
+// POST /api/admin/generate-codes — Generate activation code for a user
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 
-function genCode(): string {
+function generateAuthCode(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET;
+  const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
-  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 6; i++) code += chars[parseInt(hash.slice(i*2,i*2+2),16) % chars.length];
   return code;
 }
 
-const PRODUCT_MAP: Record<string, { name: string; credits: number; type: string }> = {
-  single: { name: "查看权益×50次", credits: 50, type: "view" },
-  monthly: { name: "不限次包月", credits: 999, type: "subscription" },
-  "ai-chat-100": { name: "AI对话×100条", credits: 100, type: "chat" },
-};
-
 export async function POST(req: NextRequest) {
   try {
-    const { product, count } = await req.json();
-    if (!PRODUCT_MAP[product]) return NextResponse.json({ error: "无效商品" }, { status: 400 });
-    const n = Math.min(Math.max(1, Number(count) || 1), 100);
+    const { email, credits } = await req.json();
+    if (!email) return NextResponse.json({ error: "邮箱必填" }, { status: 400 });
 
-    const codes: string[] = [];
-    for (let i = 0; i < n; i++) {
-      const code = genCode();
-      try {
-        await (prisma as any).exchangeCode?.create?.({
-          data: { code, product, productName: PRODUCT_MAP[product].name, credits: PRODUCT_MAP[product].credits, type: PRODUCT_MAP[product].type, isUsed: false },
-        });
-      } catch { /* table may not exist */ }
-      codes.push(code);
-    }
+    const code = generateAuthCode(email);
 
-    return NextResponse.json({ codes });
+    // Log to audit
+    await prisma.creditAuditLog.create({
+      data: {
+        email,
+        type: "add_credits",
+        amount: credits || 8,
+        balance: 0,
+        note: `管理后台生成激活码: ${code} · 互享额度+${credits || 8}`,
+      },
+    }).catch(() => {});
+
+    return NextResponse.json({ success: true, code, credits: credits || 8 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

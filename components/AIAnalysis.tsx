@@ -31,6 +31,17 @@ export default function AIAnalysis({
       setLoading(false);
       // Auto-save report
       try { fetch("/api/ai/save-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email || "anonymous", propertyId: propertyId || "", projectName, city, district, propertyType, content: data.conclusion, summary: data.score + "分 · " + (data.positives || []).slice(0, 2).join("; ") }) }); } catch {}
+      // Pre-generate share cache so "分享" is instant
+      if (data.score) {
+        try {
+          const cr = await fetch("/api/ai/analysis-cache", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ projectName, city, district, propertyType, faceRent, netEffectiveRent, analysis: { score: data.score, positives: data.positives || [], negatives: data.negatives || [], conclusion: data.conclusion }, indicators }),
+          });
+          const cd = await cr.json();
+          if (cd.id) setShareId(cd.id);
+        } catch {}
+      }
     }).catch(() => {
       if (!cancelled) { setError("分析失败"); setLoading(false); }
     });

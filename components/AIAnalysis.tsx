@@ -24,7 +24,7 @@ export default function AIAnalysis({
     fetch("/api/ai/analyze", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ projectName, city, district, propertyType, faceRent, netEffectiveRent, indicators, email }),
-    }).then(r => r.json()).then(data => {
+    }).then(r => r.json()).then(async data => {
       if (cancelled) return;
       if (data.error) { setError(data.error); setLoading(false); return; }
       setAnalysis({ score: data.score, positives: data.positives || [], negatives: data.negatives || [], conclusion: data.conclusion });

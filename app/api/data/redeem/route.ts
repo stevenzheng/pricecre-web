@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         type: "add_credits",
         amount: 8,
         balance: (uc.referralCredits || 0) + (uc.purchasedCredits || 0) + 8,
-        note: "激活码兑换（互享额度）",
+        note: `激活码兑换: ${code.toUpperCase()} · 互享额度+8`,
       },
     });
 

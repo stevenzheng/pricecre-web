@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AIReportsAdminPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedContent, setExpandedContent] = useState("");
+
+  useEffect(() => { loadReports(); }, []);
 
   const loadReports = async () => {
     setLoading(true);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { mockProperties, cityList } from "@/lib/mock-data";
+import { cityList } from "@/lib/property-constants";
 
 // Leaflet uses [lat, lng] order — all coords stored as [lat, lng]
 const cityCenter: Record<string, [number, number]> = {
@@ -119,6 +119,16 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+
+  // Mock dataset lazy-loaded out of the initial bundle (see lib/mock-data.ts)
+  const [mockProperties, setMockProperties] = useState<Property[]>([]);
+  useEffect(() => {
+    let alive = true;
+    import("@/lib/mock-data").then((m) => {
+      if (alive) setMockProperties(m.mockProperties);
+    });
+    return () => { alive = false; };
+  }, []);
 
   // Use provided properties or fallback to mock data
   const displayProperties = properties && properties.length > 0 ? properties : mockProperties;
@@ -247,7 +257,7 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         onSelectProperty?.(p.id);
       });
     });
-  }, [activeCity, loaded]);
+  }, [activeCity, loaded, displayProperties]);
 
   const cityProps = mockProperties.filter((p) => p.city === activeCity);
 

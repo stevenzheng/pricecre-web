@@ -1,23 +1,11 @@
-import { PropertyType, DynamicIndicators } from "@/types/indicators";
+import { PropertyType } from "@/types/indicators";
+import type { Property } from "@/lib/property-constants";
 
-export interface Property {
-  id: string;
-  projectName: string;
-  city: string;
-  district: string;
-  rawAddress: string;
-  propertyType: PropertyType;
-  faceRent: number;
-  dataSource: string;
-  isUnlocked: boolean;
-  area: number;
-  updatedAt: string;
-  dynamicIndicators: DynamicIndicators;
-}
-
-export const cityList: string[] = ["上海", "北京", "广州", "成都", "杭州", "深圳", "苏州", "西安", "长沙"];
-
-export const propertyTypeLabels: Record<PropertyType, string> = { OFFICE: "写字楼", SHOPS: "商业零售", INDUSTRIAL: "产业园" };
+// Shared types/constants now live in property-constants.ts. Re-exported here
+// for backward compatibility — but new code should import them directly from
+// "@/lib/property-constants" so it does not pull in the large array below.
+export type { Property } from "@/lib/property-constants";
+export { cityList, propertyTypeLabels } from "@/lib/property-constants";
 
 export const mockProperties: Property[] = [
   {

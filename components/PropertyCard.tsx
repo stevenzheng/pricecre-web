@@ -8,7 +8,7 @@ import {
   DynamicIndicators,
   PropertyType,
 } from "@/types/indicators";
-import { propertyTypeLabels } from "@/lib/mock-data";
+import { propertyTypeLabels } from "@/lib/property-constants";
 
 /* ===== State Machine ===== */
 

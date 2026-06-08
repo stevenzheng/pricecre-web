@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { PropertyType } from "@/types/indicators";
-import { cityList, propertyTypeLabels } from "@/lib/mock-data";
+import { cityList, propertyTypeLabels } from "@/lib/property-constants";
 
 /* ===== Unified SVG Icons ===== */
 

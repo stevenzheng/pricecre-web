@@ -16,7 +16,7 @@ import MapView from "@/components/MapView";
 import PropertyChat from "@/components/PropertyChat";
 import ShareCenter from "@/components/ShareCenter";
 import ProfilePanel from "@/components/ProfilePanel";
-import { mockProperties } from "@/lib/mock-data";
+import type { Property } from "@/lib/property-constants";
 import { PropertyType } from "@/types/indicators";
 
 // Fetch real properties alongside mock data
@@ -32,6 +32,16 @@ function useRealProperties() {
 
 export default function Home() {
   const realProperties = useRealProperties();
+  // Mock dataset is lazy-loaded out of the initial bundle (see lib/mock-data.ts).
+  // Starts empty and fills after mount, same async pattern as realProperties.
+  const [mockProperties, setMockProperties] = useState<Property[]>([]);
+  useEffect(() => {
+    let alive = true;
+    import("@/lib/mock-data").then((m) => {
+      if (alive) setMockProperties(m.mockProperties);
+    });
+    return () => { alive = false; };
+  }, []);
   // Filters
   const [activeCity, setActiveCity] = useState<string>("全部");
   const [activeType, setActiveType] = useState<PropertyType | "ALL">("ALL");
@@ -413,7 +423,7 @@ export default function Home() {
       dataSource: p.dataSource || "",
       dynamicIndicators: p.dynamicIndicators || {},
     }));
-  }, [realProperties]);
+  }, [realProperties, mockProperties]);
 
   // Filtered data
   const filteredProperties = useMemo(() => {
@@ -434,7 +444,7 @@ export default function Home() {
         return false;
       return true;
     });
-  }, [activeCity, activeType, searchQuery]);
+  }, [allProperties, activeCity, activeType, searchQuery]);
 
   // Card list with inline referral card at random position
   const cardList = useMemo(() => {
@@ -529,7 +539,7 @@ export default function Home() {
       showModal("网络异常，请稍后重试");
       document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
     }
-  }, [userEmail]); // Must depend on userEmail for closure to update after login
+  }, [userEmail, mockProperties]); // depend on userEmail (closure after login) + mockProperties (lazy-loaded)
 
   const handleCityChange = useCallback((city: string) => {
     setActiveCity(city);

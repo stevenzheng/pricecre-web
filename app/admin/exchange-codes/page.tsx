@@ -24,11 +24,11 @@ export default function ExchangeCodesPage() {
     try {
       const res = await fetch("/api/admin/audit-log?type=redeem");
       const data = await res.json();
-      // Transform audit logs into code records
-      const codes = (data.logs || []).filter((l: any) => l.note?.includes("激活码兑换"))
+      // Transform audit logs into code records — match both "激活码兑换:" and "管理后台生成激活码:"
+      const codes = (data.logs || []).filter((l: any) => l.note?.includes("激活码"))
         .map((l: any) => ({
           id: l.id,
-          code: (l.note?.match(/激活码兑换:\s*(\w+)/)?.[1] || "—"),
+          code: (l.note?.match(/激活码[:兑换]*\s*:?\s*(\w{6})/i)?.[1] || "—"),
           email: l.email,
           credits: l.amount,
           redeemedAt: l.createdAt,

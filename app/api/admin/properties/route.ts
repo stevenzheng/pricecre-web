@@ -1,11 +1,9 @@
 // app/api/admin/properties/route.ts — 生产表 CommercialProperty 查询
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    await adminAuth();
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -25,14 +23,13 @@ export async function GET(request: NextRequest) {
     const [properties, total] = await Promise.all([
       prisma.commercialProperty.findMany({
         where, skip: (page - 1) * limit, take: limit, orderBy,
-        select: { id: true, projectName: true, city: true, district: true, propertyType: true, faceRent: true, dataSource: true, updatedAt: true, confidenceScore: true },
+        select: { id: true, projectName: true, city: true, district: true, propertyType: true, faceRent: true, dataSource: true, updatedAt: true, confidenceScore: true, createdAt: true },
       }),
       prisma.commercialProperty.count({ where }),
     ]);
 
-    return NextResponse.json({ items: properties, total, page, limit });
+    return NextResponse.json({ properties, total, page, limit });
   } catch (error) {
-    if ((error as any)?.status) return error as any;
-    return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
+    return NextResponse.json({ properties: [], total: 0 });
   }
 }

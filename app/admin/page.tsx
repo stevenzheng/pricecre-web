@@ -267,7 +267,6 @@ const BW_CSS = `
   --bw-negative: #DC2626;
   --bw-track: rgba(17,24,39,0.07);
   --bw-shadow: 0 1px 3px rgba(16,24,40,0.06), 0 8px 24px rgba(16,24,40,0.05);
-  margin: -32px -40px;
   padding: 28px 36px 40px;
   min-height: calc(100vh - 0px);
   background: var(--bw-bg);
@@ -345,7 +344,7 @@ html[data-bw-admin="light"] .vl-content { background: #F6F8FB; }
 .bw-bar-val { font-size: 11px; font-weight: 600; color: var(--bw-text); font-family: var(--font-geist-mono); width: 28px; text-align: right; }
 
 @media (max-width: 768px) {
-  .bw-root { margin: -16px; padding: 16px 14px 32px; }
+  .bw-root { padding: 16px 14px 32px; }
   .bw-hero { flex-direction: column; align-items: flex-start; }
 }
 `;

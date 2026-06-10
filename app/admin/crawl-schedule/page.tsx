@@ -1,185 +1,301 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
-interface Job { id: string; label: string; targetUrl: string; propertyType: string; city: string; district: string; isActive: boolean; lastRunAt: string | null; lastRunStatus: string; lastPipelineCount: number; }
+// ── 常量 ──────────────────────────────────────────────
 
-const typeLabel: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业零售", INDUSTRIAL: "产业园" };
-const cityLabel: Record<string, string> = {
-  shanghai: "上海", beijing: "北京", shenzhen: "深圳", suzhou: "苏州",
-  chengdu: "成都", guangzhou: "广州", hangzhou: "杭州", changsha: "长沙", xian: "西安",
+const CITIES = [
+  { key: "shanghai", zh: "上海" },
+  { key: "beijing", zh: "北京" },
+  { key: "shenzhen", zh: "深圳" },
+  { key: "guangzhou", zh: "广州" },
+  { key: "hangzhou", zh: "杭州" },
+  { key: "chengdu", zh: "成都" },
+  { key: "suzhou", zh: "苏州" },
+  { key: "changsha", zh: "长沙" },
+  { key: "xian", zh: "西安" },
+] as const;
+
+const TYPES = [
+  { key: "OFFICE", zh: "写字楼", icon: "🏢" },
+  { key: "SHOPS", zh: "商业零售", icon: "🛍️" },
+  { key: "INDUSTRIAL", zh: "产业园", icon: "🏭" },
+] as const;
+
+type CellKey = string; // "city|type"
+type CellData = {
+  city: string; cityZh: string;
+  type: string; typeZh: string;
+  lastRunAt: string | null;
+  lastCount: number;
+  lastApproved: number;
 };
-const statusLabel: Record<string, string> = { SUCCESS: "成功", FAILED: "失败", PENDING: "等待中", RUNNING: "运行中" };
-const statusColor: Record<string, string> = { SUCCESS: "#0D9488", FAILED: "#E91E63", PENDING: "#F59E0B", RUNNING: "#0070F3" };
+
+// ── 辅助函数 ──────────────────────────────────────────
+
+function timeAgo(iso: string | null): string {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "刚刚";
+  if (mins < 60) return `${mins}分钟前`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}天前`;
+  return new Date(iso).toLocaleDateString("zh-CN");
+}
+
+// ── 组件 ──────────────────────────────────────────────
 
 export default function CrawlSchedulePage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [cells, setCells] = useState<CellData[]>([]);
+  const [summary, setSummary] = useState({ totalCrawled: 0, totalApproved: 0, neverRun: 0, recentlyRun: 0, total: 27 });
   const [loading, setLoading] = useState(true);
-  const [edit, setEdit] = useState<Partial<Job>>({});
-  const [showForm, setShowForm] = useState(false);
-  const [actionMsg, setActionMsg] = useState("");
-  const [crawling, setCrawling] = useState(false);
-  const [filter, setFilter] = useState("all");
-  const [filterType, setFilterType] = useState("all");
+  const [running, setRunning] = useState<Set<CellKey>>(new Set());
+  const [msg, setMsg] = useState("");
+  const [crawlingAll, setCrawlingAll] = useState(false);
+  const msgTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchJobs = useCallback(async () => { setLoading(true); try { const res = await fetch("/api/agent/schedule"); setJobs(Array.isArray(await res.json()) ? await res.json() : []); } catch { setJobs([]); } setLoading(false); }, []);
-  useEffect(() => { fetchJobs(); }, [fetchJobs]);
+  // ── 数据加载 ──────────────────────────────────────
 
-  const handleSave = async (e: React.FormEvent) => { e.preventDefault(); const url = edit.id ? `/api/agent/schedule/${edit.id}` : "/api/agent/schedule"; await fetch(url, { method: edit.id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(edit) }); setShowForm(false); setEdit({}); fetchJobs(); };
-  const toggleActive = async (j: Job) => { await fetch(`/api/agent/schedule/${j.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !j.isActive }) }); fetchJobs(); };
-  const deleteJob = async (j: Job) => { if (!confirm(`确定删除「${j.label}」？此操作不可撤销。`)) return; await fetch(`/api/agent/schedule/${j.id}`, { method: "DELETE" }); fetchJobs(); };
-  const runSingle = async (j: Job) => { setActionMsg(`正在抓取：${j.label}...`); try { const res = await fetch("/api/agent/crawl-all", { method: "POST" }); const data = await res.json(); setActionMsg(data.success ? `${j.label}：获取 ${data.totalListings || 0} 条房源` : "抓取失败"); } catch { setActionMsg("网络请求失败"); } fetchJobs(); };
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agent/status");
+      const data = await res.json();
+      if (data.cells) { setCells(data.cells); setSummary(data.summary); }
+    } catch {}
+    setLoading(false);
+  }, []);
 
-  const activeJobs = jobs.filter(j => j.isActive);
-  const crawlAll = async () => { setCrawling(true); setActionMsg("全量数据抓取已启动，正在请求各数据源..."); try { const res = await fetch("/api/agent/crawl-all", { method: "POST" }); const data = await res.json(); setActionMsg(data.success ? `抓取完成：共获取 ${data.totalListings || 0} 条房源数据` : "抓取过程出现错误，请检查数据源配置"); } catch { setActionMsg("网络请求失败，请检查后端服务状态"); } setCrawling(false); fetchJobs(); };
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
-  const filtered = jobs.filter(j => {
-    if (filter !== "all" && (filter === "active" ? !j.isActive : j.isActive)) return false;
-    if (filterType !== "all" && j.propertyType !== filterType) return false;
-    return true;
-  });
+  // ── 操作 ──────────────────────────────────────────
+
+  const showMsg = (text: string) => {
+    setMsg(text);
+    if (msgTimer.current) clearTimeout(msgTimer.current);
+    msgTimer.current = setTimeout(() => setMsg(""), 8000);
+  };
+
+  const runCell = async (city: string, type: string) => {
+    const key: CellKey = `${city}|${type}`;
+    setRunning((prev) => new Set(prev).add(key));
+    showMsg(`正在抓取 ${CITIES.find(c=>c.key===city)?.zh}·${TYPES.find(t=>t.key===type)?.zh} ...`);
+
+    try {
+      const res = await fetch("/api/agent/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ city, district: "all", propertyType: type, maxResults: 20 }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg(
+          `${data.raw || 0}条搜索 → ${data.processed || 0}条入库 → 可发布 ${data.approved || 0}条`
+        );
+      } else {
+        showMsg(`失败: ${data.msg || data.error || "未知错误"}`);
+      }
+      fetchStatus();
+    } catch {
+      showMsg("网络请求失败");
+    }
+    setRunning((prev) => { const n = new Set(prev); n.delete(key); return n; });
+  };
+
+  const runAll = async () => {
+    setCrawlingAll(true);
+    const neverRunCells = cells.filter((c) => !c.lastRunAt);
+    const targets = neverRunCells.length > 0 ? neverRunCells : cells;
+    showMsg(`全量抓取启动，共 ${targets.length} 个目标...`);
+
+    for (const cell of targets) {
+      await runCell(cell.city, cell.type);
+      // 间隔避免 API 限频
+      await new Promise((r) => setTimeout(r, 800));
+    }
+    setCrawlingAll(false);
+    showMsg("全量抓取完成！");
+  };
+
+  // ── 单元格渲染 ────────────────────────────────────
+
+  const cellMap = new Map<CellKey, CellData>();
+  for (const c of cells) cellMap.set(`${c.city}|${c.type}`, c);
+
+  const getCell = (city: string, type: string): CellData | undefined =>
+    cellMap.get(`${city}|${type}`);
+
+  const renderCell = (city: string, type: string) => {
+    const cell = getCell(city, type);
+    const key: CellKey = `${city}|${type}`;
+    const isRunning = running.has(key);
+    const hasData = cell && cell.lastRunAt;
+    const isRecent = hasData && Date.now() - new Date(cell!.lastRunAt!).getTime() < 7 * 86400000;
+
+    return (
+      <td key={key} style={{ padding: 0 }}>
+        <button
+          onClick={() => runCell(city, type)}
+          disabled={isRunning}
+          style={{
+            width: "100%", minWidth: 130, padding: "10px 12px",
+            border: isRunning ? "2px solid #0070F3" : "1px solid transparent",
+            borderRadius: 8,
+            background: isRunning
+              ? "linear-gradient(135deg, rgba(0,112,243,0.08), rgba(0,112,243,0.02))"
+              : hasData
+                ? isRecent ? "#F0FDF4" : "#FAFAFA"
+                : "#FFFBF0",
+            cursor: isRunning ? "default" : "pointer",
+            transition: "all 0.2s ease",
+            textAlign: "left" as const,
+            fontFamily: "var(--font-sans)",
+            position: "relative" as const,
+            overflow: "hidden",
+          }}
+          onMouseEnter={(e) => {
+            if (!isRunning) {
+              (e.currentTarget as HTMLElement).style.borderColor = "#D4D4D4";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = isRunning ? "#0070F3" : "transparent";
+            (e.currentTarget as HTMLElement).style.transform = "none";
+            (e.currentTarget as HTMLElement).style.boxShadow = "none";
+          }}
+        >
+          {isRunning ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0070F3" strokeWidth="2.5" style={{ animation: "spin 0.8s linear infinite", flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="10" strokeDasharray="35 65" strokeLinecap="round" />
+              </svg>
+              <span style={{ fontSize: 12, color: "#0070F3", fontWeight: 500 }}>抓取中</span>
+            </div>
+          ) : hasData ? (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                <span style={{ fontSize: 11, color: isRecent ? "#16A34A" : "#A3A3A3" }}>
+                  {isRecent ? "●" : "○"}
+                </span>
+                <span style={{ fontSize: 11, color: "#737373" }}>{timeAgo(cell!.lastRunAt!)}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 18, fontWeight: 600, color: "#171717", lineHeight: 1 }}>
+                  {cell?.lastCount || 0}
+                </span>
+                <span style={{ fontSize: 10, color: "#A3A3A3" }}>条</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "6px 0" }}>
+              <div style={{ fontSize: 20, marginBottom: 2, opacity: 0.5 }}>+</div>
+              <div style={{ fontSize: 10, color: "#A3A3A3" }}>点击抓取</div>
+            </div>
+          )}
+        </button>
+      </td>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="vl-content-inner">
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#A3A3A3" }}>加载中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="vl-content-inner">
-      <div className="vl-page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+      `}</style>
+
+      {/* ── 页面头部 ────────────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
         <div>
-          <h1 className="vl-page-title">数据爬取计划</h1>
-          <p className="vl-page-desc">
-            {jobs.length} 个抓取目标 · {activeJobs.length} 个活跃 · {jobs.filter(j => j.lastRunStatus === "SUCCESS").length} 个最新成功
+          <h1 className="vl-page-title" style={{ margin: "0 0 4px" }}>数据抓取看板</h1>
+          <p style={{ fontSize: 13, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>
+            {summary.total} 个目标 · 最近 7 天运行 {summary.recentlyRun} 个 · 累计入库 {summary.totalCrawled.toLocaleString()} 条
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button onClick={() => { setEdit({ label: "", targetUrl: "", propertyType: "OFFICE", city: "shanghai", district: "pudong", isActive: true }); setShowForm(true); }} className="vl-btn-outline" style={{ fontSize: 13, padding: "6px 14px" }}>+ 新建目标</button>
-          <button onClick={crawlAll} disabled={crawling || activeJobs.length === 0} className="vl-btn-primary" style={{ fontSize: 13, padding: "6px 16px" }}>
-            {crawling ? "正在抓取..." : `全量抓取 (${activeJobs.length})`}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            onClick={runAll}
+            disabled={crawlingAll}
+            className="vl-btn-primary"
+            style={{ fontSize: 13, padding: "8px 20px" }}
+          >
+            {crawlingAll ? "▶ 运行中..." : `▶ 全量抓取 (${summary.total})`}
           </button>
         </div>
       </div>
 
-      {actionMsg && (
-        <div style={{ marginBottom: 16, padding: "10px 16px", borderRadius: 6, background: "#F0F7FF", border: "1px solid #B8D8FF", color: "#0070F3", fontSize: 13, fontFamily: "var(--font-sans)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }} onClick={() => setActionMsg("")}>
-          <span>{actionMsg}</span><span style={{ fontSize: 11, opacity: 0.6 }}>点击关闭</span>
+      {/* ── 提示条 ──────────────────────────────────── */}
+      {msg && (
+        <div style={{
+          marginBottom: 16, padding: "10px 16px", borderRadius: 8,
+          background: "linear-gradient(135deg, #F0F7FF, #EBF5FF)",
+          border: "1px solid #B8D8FF", color: "#0070F3",
+          fontSize: 13, fontFamily: "var(--font-sans)",
+          animation: "fadeIn 0.3s ease",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          <span>{msg}</span>
+          <button onClick={() => setMsg("")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#A3A3A3", padding: "0 0 0 8px" }}>✕</button>
         </div>
       )}
 
-      {/* Add/Edit Form */}
-      {showForm && (
-        <form onSubmit={handleSave} className="vl-card" style={{ marginBottom: 20, padding: 16 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 12px" }}>{edit.id ? "编辑抓取目标" : "新建抓取目标"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <label className="vl-label">目标名称</label>
-              <input className="vl-input" value={edit.label || ""} onChange={e => setEdit({...edit, label: e.target.value})} placeholder="例如：贝壳商办-上海浦东" required />
-            </div>
-            <div>
-              <label className="vl-label">抓取网址</label>
-              <input className="vl-input" style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 12 }} value={edit.targetUrl || ""} onChange={e => setEdit({...edit, targetUrl: e.target.value})} placeholder="https://..." required />
-            </div>
-            <div>
-              <label className="vl-label">业态类型</label>
-              <select className="vl-select" style={{ width: "100%" }} value={edit.propertyType} onChange={e => setEdit({...edit, propertyType: e.target.value})}>
-                <option value="OFFICE">写字楼</option>
-                <option value="SHOPS">商业零售</option>
-                <option value="INDUSTRIAL">产业园</option>
-              </select>
-            </div>
-            <div>
-              <label className="vl-label">城市 / 区域</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input className="vl-input" value={edit.city || ""} onChange={e => setEdit({...edit, city: e.target.value})} placeholder="如 shanghai" />
-                <input className="vl-input" value={edit.district || ""} onChange={e => setEdit({...edit, district: e.target.value})} placeholder="如 pudong" />
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-            <button type="submit" className="vl-btn-primary" style={{ fontSize: 13, padding: "6px 16px" }}>{edit.id ? "保存修改" : "添加目标"}</button>
-            <button type="button" onClick={() => { setShowForm(false); setEdit({}); }} className="vl-btn-ghost">取消</button>
-          </div>
-        </form>
-      )}
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-        <div className="vl-filter-tabs" style={{ borderBottom: "none" }}>
-          {(["all", "active", "inactive"] as const).map(s => (
-            <button key={s} className={`vl-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}
-              style={{ borderBottom: filter === s ? "2px solid #171717" : "2px solid transparent", padding: "6px 12px", fontSize: 12 }}>
-              {s === "all" ? "全部状态" : s === "active" ? "活跃中" : "已停用"}
-            </button>
-          ))}
-        </div>
-        <span style={{ color: "#E5E5E5", fontSize: 16, margin: "0 4px" }}>|</span>
-        <div className="vl-filter-tabs" style={{ borderBottom: "none" }}>
-          {(["all", "OFFICE", "SHOPS", "INDUSTRIAL"] as const).map(t => (
-            <button key={t} className={`vl-filter-tab${filterType === t ? " active" : ""}`} onClick={() => setFilterType(t)}
-              style={{ borderBottom: filterType === t ? "2px solid #171717" : "2px solid transparent", padding: "6px 12px", fontSize: 12 }}>
-              {t === "all" ? "全部业态" : typeLabel[t]}
-            </button>
-          ))}
-        </div>
+      {/* ── 矩阵表格 ────────────────────────────────── */}
+      <div className="vl-card" style={{ padding: 0, overflow: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-sans)" }}>
+          <thead>
+            <tr>
+              <th style={{
+                padding: "12px 16px", textAlign: "left", fontSize: 10, fontWeight: 500,
+                color: "#A3A3A3", textTransform: "uppercase", letterSpacing: "0.05em",
+                borderBottom: "1px solid #F5F5F5", whiteSpace: "nowrap",
+              }}>城市</th>
+              {TYPES.map((t) => (
+                <th key={t.key} style={{
+                  padding: "12px 8px", textAlign: "center", fontSize: 12, fontWeight: 600,
+                  color: "#171717", borderBottom: "1px solid #F5F5F5", whiteSpace: "nowrap",
+                }}>
+                  {t.icon} {t.zh}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {CITIES.map((city, i) => (
+              <tr key={city.key} style={{
+                background: i % 2 === 0 ? "transparent" : "rgba(0,0,0,0.01)",
+              }}>
+                <td style={{
+                  padding: "0 16px", fontSize: 14, fontWeight: 600, color: "#171717",
+                  whiteSpace: "nowrap", borderRight: "1px solid #F5F5F5",
+                }}>
+                  {city.zh}
+                </td>
+                {TYPES.map((type) => renderCell(city.key, type.key))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Job Cards */}
-      {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">正在加载抓取计划...</p></div>
-      ) : filtered.length === 0 ? (
-        <div className="vl-empty">
-          <div className="vl-empty-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#A3A3A3" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
-          </div>
-          <p className="vl-empty-title">暂无抓取目标</p>
-          <p className="vl-empty-desc">点击「新建目标」添加数据源，配置后即可自动抓取商业地产数据</p>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {filtered.map(j => (
-            <div key={j.id} style={{
-              display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
-              borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFFFFF",
-              opacity: j.isActive ? 1 : 0.45, transition: "opacity 0.15s",
-            }}>
-              {/* Status dot + Name */}
-              <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: j.isActive ? "#0D9488" : "#A3A3A3", flexShrink: 0 }} />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", letterSpacing: "-0.01em" }}>{j.label}</span>
-                  <span className="vl-badge vl-badge-accent" style={{ fontSize: 10, padding: "1px 6px" }}>{typeLabel[j.propertyType]}</span>
-                </div>
-                <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-geist-mono), monospace", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 320 }}>{j.targetUrl}</div>
-              </div>
-
-              {/* City */}
-              <div style={{ flex: "0 0 auto", fontSize: 12, color: "#737373", whiteSpace: "nowrap" }}>
-                {cityLabel[j.city] || j.city} · {j.district || "—"}
-              </div>
-
-              {/* Last Run */}
-              <div style={{ flex: "0 0 auto", textAlign: "center", minWidth: 80 }}>
-                {j.lastRunAt ? (
-                  <div>
-                    <div style={{ fontSize: 12, color: "#171717", fontWeight: 500 }}>{new Date(j.lastRunAt).toLocaleDateString("zh-CN")}</div>
-                    <div style={{ fontSize: 10, color: statusColor[j.lastRunStatus] || "#A3A3A3", fontWeight: 500 }}>
-                      {statusLabel[j.lastRunStatus] || j.lastRunStatus}
-                      {j.lastPipelineCount > 0 && <span style={{ marginLeft: 3, color: "#A3A3A3" }}>· {j.lastPipelineCount}条</span>}
-                    </div>
-                  </div>
-                ) : (
-                  <span style={{ fontSize: 12, color: "#D4D4D4" }}>从未运行</span>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div style={{ flex: "0 0 auto", display: "flex", gap: 4 }}>
-                <button onClick={() => runSingle(j)} className="vl-btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }} title="单独运行此目标">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <button onClick={() => toggleActive(j)} className="vl-btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }}>{j.isActive ? "停用" : "启用"}</button>
-                <button onClick={() => { setEdit({...j}); setShowForm(true); }} className="vl-btn-ghost" style={{ fontSize: 12, padding: "4px 8px" }}>编辑</button>
-                <button onClick={() => deleteJob(j)} className="vl-btn-danger" style={{ fontSize: 12, padding: "4px 8px" }}>删除</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── 图例 ────────────────────────────────────── */}
+      <div style={{ marginTop: 12, display: "flex", gap: 20, fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>
+        <span>● 7天内运行过</span>
+        <span>○ 超过7天未更新</span>
+        <span style={{ color: "#D4A800" }}>+ 从未运行</span>
+        <span style={{ color: "#0070F3" }}>⟳ 运行中</span>
+      </div>
     </div>
   );
 }

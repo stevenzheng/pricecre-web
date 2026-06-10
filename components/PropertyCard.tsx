@@ -9,8 +9,6 @@ import {
   PropertyType,
 } from "@/types/indicators";
 import { propertyTypeLabels } from "@/lib/property-constants";
-import CorrectionModal from "@/components/CorrectionModal";
-import FieldCorrectionBadge from "@/components/FieldCorrectionBadge";
 
 /* ===== State Machine ===== */
 
@@ -230,20 +228,6 @@ export default function PropertyCard({
   }, [property.id]);
 
   const isUnlocked = property.isUnlocked || state.hasUnlocked;
-
-  // Correction state
-  const [corrections, setCorrections] = useState<any[]>([]);
-  const [correctionField, setCorrectionField] = useState<{ key: string; label: string; value: string; unit?: string } | null>(null);
-
-  // Fetch corrections when unlocked
-  useEffect(() => {
-    const propId = property?.id;
-    if (isUnlocked && propId) {
-      fetch(`/api/property/${encodeURIComponent(propId)}/corrections`).then(r => r.json()).then(d => {
-        setCorrections(d.corrections || []);
-      }).catch(() => setCorrections([]));
-    }
-  }, [isUnlocked, property?.id]);
 
   const indicatorFields = useMemo(
     () => getIndicatorFields(property.dynamicIndicators, property.propertyType),
@@ -622,17 +606,6 @@ export default function PropertyCard({
                           >
                             {displayValue}
                           </span>
-                          <span style={{ position: "absolute", bottom: 0, right: 0 }}>
-                            <FieldCorrectionBadge
-                              fieldKey={field.key}
-                              corrections={corrections}
-                              onCorrect={() => setCorrectionField({
-                                key: field.key,
-                                label: field.label,
-                                value: String(field.value),
-                              })}
-                            />
-                          </span>
                         </>
                       )}
                     </div>
@@ -642,26 +615,6 @@ export default function PropertyCard({
             </div>
           </div>
         </div>
-      )}
-
-      {/* Correction Modal */}
-      {correctionField && (
-        <CorrectionModal
-          propertyId={property.id}
-          fieldKey={correctionField.key}
-          fieldLabel={correctionField.label}
-          currentValue={correctionField.value}
-          email={email}
-          onClose={() => setCorrectionField(null)}
-          onSubmit={() => {
-            // Refresh corrections after submit
-            if (property.id) {
-              fetch(`/api/property/${property.id}/corrections`).then(r => r.json()).then(d => {
-                setCorrections(d.corrections || []);
-              }).catch(() => {});
-            }
-          }}
-        />
       )}
     </div>
   );

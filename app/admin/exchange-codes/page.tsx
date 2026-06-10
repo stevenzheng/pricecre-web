@@ -43,7 +43,7 @@ export default function ExchangeCodesPage() {
         // 本地也留一份，作为服务端不可用时的降级显示
         const rec: CodeRecord = { id: Date.now().toString(36), code: d.code, email: email.trim(), credits: t.credits, type: t.label, createdAt: new Date().toISOString() };
         try { localStorage.setItem("pricecre_code_log", JSON.stringify([rec, ...records].slice(0,200))); } catch {}
-        setMsg(`已生成 ${d.code} (${t.label})`); setEmail("");
+        setMsg(`已生成 ${d.code} (${t.label})${d.emailSent ? " · 邮件已发送" : " · 邮件发送失败，请手动告知用户"}`); setEmail("");
         loadHistory();
       } else { setMsg(d.error || "失败"); }
     } catch { setMsg("网络错误"); }

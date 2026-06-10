@@ -1,5 +1,7 @@
-// POST /api/data/submit — 用户提报交易（进入审核队列）
+// POST /api/data/submit — 用户提报租金成交数据（进入审核队列）
+// 存储：AgentReviewQueue（dataSource = USER_SUBMISSION），schema 无独立 Submission 表
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
@@ -11,22 +13,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "项目名称和邮箱不能为空" }, { status: 400 });
     }
 
-    // Store submission for admin review — code will be generated on approval
-    try {
-      await (prisma as any).submission?.create?.({
-        data: {
-          email,
-          projectName,
-          netRent: parseFloat(netRent) || 0,
-          city: city || "",
-          propertyType: propertyType || "OFFICE",
-          status: "PENDING_REVIEW",
-          attachmentUrl: attachmentUrl || null,
+    await prisma.agentReviewQueue.create({
+      data: {
+        id: randomUUID(),
+        projectName,
+        city: city || "",
+        district: "",
+        rawAddress: `${city || ""}${projectName}`,
+        propertyType: ["OFFICE", "SHOPS", "INDUSTRIAL"].includes(propertyType) ? propertyType : "OFFICE",
+        faceRent: parseFloat(netRent) || 0,
+        dataSource: "USER_SUBMISSION",
+        dynamicIndicators: {
+          _submittedBy: email,
+          _rentFree: rentFree || null,
+          _attachmentUrl: attachmentUrl || null,
         },
-      });
-    } catch {
-      // Table may not exist yet — still return success
-    }
+        status: "PENDING_REVIEW",
+        confidenceScore: 0.5,
+        agentTimestamp: new Date(),
+        auditLog: JSON.stringify([{ action: "USER_SUBMIT", operator: email, timestamp: new Date().toISOString() }]),
+      },
+    });
 
     return NextResponse.json({
       success: true,

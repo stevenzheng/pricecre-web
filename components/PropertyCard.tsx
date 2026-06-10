@@ -475,7 +475,7 @@ export default function PropertyCard({
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/>
                     </svg>
-                    AI 报告
+                    价值数据
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); openChat(); }}

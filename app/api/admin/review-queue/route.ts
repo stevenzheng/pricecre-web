@@ -3,20 +3,21 @@
 // POST — 创建新审核条目
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { adminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
   try {
-    await adminAuth();
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const type = searchParams.get("type");
+    const city = searchParams.get("city");
     const search = searchParams.get("search") || undefined;
     const status = searchParams.get("status") || "PENDING_REVIEW";
 
-    const where: any = { status };
+    const where: any = {};
+    if (status !== "all") where.status = status;
     if (type && type !== "all") where.propertyType = type;
+    if (city && city !== "all") where.city = city;
     if (search) where.projectName = { contains: search, mode: "insensitive" };
 
     const [items, total] = await Promise.all([

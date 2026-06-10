@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { sendEmail, redeemCodeEmailTemplate } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,18 @@ export async function POST(req: NextRequest) {
       },
     }).catch(() => {});
 
-    return NextResponse.json({ success: true, code, credits: amount, type: codeType });
+    // 邮件发送兑换码给用户
+    const benefit =
+      codeType === "ai200" ? `${amount} 条 AI 对话额度` :
+      codeType === "monthly" ? "包月不限次查看权益" :
+      `${amount} 次资产查看额度`;
+    const sent = await sendEmail({
+      to: email,
+      subject: `PriceCRE 兑换码 · ${label || benefit}`,
+      html: redeemCodeEmailTemplate(code, `${benefit}待激活`),
+    });
+
+    return NextResponse.json({ success: true, code, credits: amount, type: codeType, emailSent: sent.success });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

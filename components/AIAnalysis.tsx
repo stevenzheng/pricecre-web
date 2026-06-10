@@ -71,7 +71,8 @@ export default function AIAnalysis({
     }
   };
 
-  const getShareUrl = (id: string) => `${window.location.origin}/a/${id}`;
+  // 短链接：报告页支持前 8 位短编号访问
+  const getShareUrl = (id: string) => `${window.location.origin}/a/${id.slice(0, 8)}`;
 
   return (
     <div className="fixed inset-0 z-[400] flex items-center justify-center" onClick={onClose}>

@@ -1,8 +1,5 @@
 import { Metadata } from "next";
-import { PrismaClient } from "@prisma/client";
 import ReferralClient from "./ReferralClient";
-
-const prisma = new PrismaClient();
 
 export async function generateMetadata({
   params,

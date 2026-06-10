@@ -7,10 +7,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 interface PropertyRow {
   id: string; projectName: string; city: string; district: string;
   propertyType: string; faceRent: number; dataSource: string;
-  confidenceScore: number; updatedAt: string;
+  confidenceScore: number; status?: string; createdAt?: string;
 }
 
 const typeLabels: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业", INDUSTRIAL: "产业园" };
+const statusLabels: Record<string, { label: string; color: string }> = {
+  PENDING_REVIEW: { label: "待审核", color: "#F5A623" },
+  APPROVED: { label: "已通过", color: "#10B981" },
+  REJECTED: { label: "已驳回", color: "#EF4444" },
+  CRITICAL_MISSING: { label: "数据缺损", color: "#EE0000" },
+};
+const cityMap: Record<string, string> = { shanghai: "上海", beijing: "北京", shenzhen: "深圳", guangzhou: "广州", hangzhou: "杭州", chengdu: "成都", suzhou: "苏州", changsha: "长沙", xian: "西安" };
 
 function ResultsContent() {
   const router = useRouter();
@@ -23,19 +30,19 @@ function ResultsContent() {
   useEffect(() => {
     if (!city || !type) { setLoading(false); return; }
     setLoading(true);
-    fetch("/api/admin/mock-properties").then(r => r.json()).then(data => {
-      const filtered = (data.properties || []).filter((p: any) => 
-        p.city === city && p.propertyType === type
-      );
-      setProperties(filtered);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    // 读取真实抓取数据（agent_review_queue 审核队列），本地 Agent 与在线抓取写入的都在这里
+    const cityZh = cityMap[city] || city;
+    fetch(`/api/admin/review-queue?city=${encodeURIComponent(cityZh)}&type=${encodeURIComponent(type)}&status=all&limit=200`)
+      .then(r => r.json())
+      .then(data => {
+        setProperties(Array.isArray(data.items) ? data.items : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [city, type]);
 
   if (loading) return <div style={{ padding: 24, color: "#737373" }}>加载中...</div>;
   if (!city || !type) return <div style={{ padding: 24, color: "#737373" }}>缺少城市或业态参数</div>;
-
-  const cityMap: Record<string, string> = { shanghai: "上海", beijing: "北京", shenzhen: "深圳", guangzhou: "广州", hangzhou: "杭州", chengdu: "成都", suzhou: "苏州", changsha: "长沙", xian: "西安" };
 
   return (
     <div style={{ padding: 24, maxWidth: 1100 }}>
@@ -50,15 +57,15 @@ function ResultsContent() {
             </p>
           </div>
           <p style={{ fontSize: 13, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
-            本次爬取结果：{properties.length} 条资产
+            抓取结果（审核队列）：{properties.length} 条 · 待审核 {properties.filter(p => p.status === "PENDING_REVIEW").length} 条
           </p>
         </div>
       </div>
 
       {properties.length === 0 ? (
         <div style={{ padding: 40, textAlign: "center", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
-          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>暂无数据</p>
-          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>该网格的数据尚未爬取或结果为空</p>
+          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>暂无抓取数据</p>
+          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>该城市×业态尚未有抓取入队的数据。在爬取计划页点击对应格子触发抓取，或运行本地 Agent（npx tsx agent/run-pipeline.ts）后数据会出现在这里</p>
         </div>
       ) : (
         <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", overflow: "hidden" }}>
@@ -71,6 +78,7 @@ function ResultsContent() {
                   <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>面价</th>
                   <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>可信度</th>
                   <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>数据源</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>状态</th>
                   <th style={{ padding: "10px 14px" }}></th>
                 </tr>
               </thead>
@@ -83,11 +91,16 @@ function ResultsContent() {
                     <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: (p.confidenceScore||0) >= 0.8 ? "#10B981" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EF4444" }}>
                       {((p.confidenceScore||0)*100).toFixed(0)}%
                     </td>
-                    <td style={{ padding: "10px 14px", color: "#737373", fontSize: 12 }}>{p.dataSource}</td>
+                    <td style={{ padding: "10px 14px", color: "#737373", fontSize: 12, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.dataSource}</td>
                     <td style={{ padding: "10px 14px" }}>
-                      <button onClick={() => router.push(`/admin/data-review/${p.id}`)}
+                      <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 4, fontFamily: "var(--font-sans)", background: `${statusLabels[p.status || ""]?.color || "#A3A3A3"}15`, color: statusLabels[p.status || ""]?.color || "#A3A3A3" }}>
+                        {statusLabels[p.status || ""]?.label || p.status || "—"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "10px 14px" }}>
+                      <button onClick={() => router.push(`/admin/submissions`)}
                         style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", color: "#0070F3", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>
-                        编辑
+                        去审核
                       </button>
                     </td>
                   </tr>

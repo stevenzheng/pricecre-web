@@ -5,7 +5,10 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function SharedAnalysisPage({ params, searchParams }: { params: { id: string }; searchParams?: { print?: string } }) {
-  const cached = await prisma.aiAnalysisCache.findUnique({ where: { id: params.id } });
+  // 支持短链接：完整 uuid 或前 8 位短编号均可访问
+  const cached = params.id.length >= 32
+    ? await prisma.aiAnalysisCache.findUnique({ where: { id: params.id } })
+    : await prisma.aiAnalysisCache.findFirst({ where: { id: { startsWith: params.id } }, orderBy: { createdAt: "desc" } });
   if (!cached) notFound();
 
   const a = cached.analysisData as any;

@@ -607,26 +607,31 @@ export default function PropertyCard({
                             {displayValue}
                           </span>
                           <button
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              document.dispatchEvent(new CustomEvent("open-correction", {
-                                detail: {
-                                  propertyId: property.id,
-                                  fieldKey: field.key,
-                                  fieldLabel: field.label,
-                                  currentValue: String(field.value),
-                                  email,
-                                },
-                              }));
+                              const newVal = window.prompt(`纠错: ${field.label}\n当前值: ${field.value}`, "");
+                              if (!newVal || newVal === String(field.value)) return;
+                              try {
+                                await fetch("/api/data/correct", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    propertyId: property.id,
+                                    fieldKey: field.key,
+                                    fieldLabel: field.label,
+                                    newValue: newVal,
+                                    email: email || "",
+                                  }),
+                                });
+                                showModal("纠错已提交，管理员审核通过后将奖励额度");
+                              } catch { showModal("提交失败"); }
                             }}
                             style={{
-                              marginLeft: 2, padding: "1px 3px", border: "none", background: "none",
-                              cursor: "pointer", fontSize: 10, color: "#737373", opacity: 0.3,
-                              lineHeight: 1, borderRadius: 2, verticalAlign: "top",
+                              marginLeft: 2, padding: "1px 4px", border: "none", background: "none",
+                              cursor: "pointer", fontSize: 10, color: "#737373", opacity: 0.4,
+                              lineHeight: 1, fontFamily: "var(--font-sans)",
                             }}
-                            onMouseEnter={(e: any) => { e.target.style.opacity = "0.8"; e.target.style.background = "#F0F0F0"; }}
-                            onMouseLeave={(e: any) => { e.target.style.opacity = "0.3"; e.target.style.background = "none"; }}
                             title="提报数据纠错"
                           >✎</button>
                         </>

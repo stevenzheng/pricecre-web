@@ -192,9 +192,9 @@ export default function CrawlSchedulePage() {
               </div>
               <div style={{ marginTop: 4, borderTop: "1px solid #E5E5E5", paddingTop: 4 }}>
                 <span
-                  onClick={(e) => { e.stopPropagation(); router.push(`/admin/data-review?city=${encodeURIComponent(city)}&type=${encodeURIComponent(type)}`); }}
+                  onClick={(e) => { e.stopPropagation(); router.push(`/admin/crawl-schedule/results?city=${encodeURIComponent(city)}&type=${encodeURIComponent(type)}`); }}
                   style={{ fontSize: 10, color: "#0070F3", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500 }}>
-                  查看数据 →
+                  {cell?.lastCount || 0}条 查看 →
                 </span>
               </div>
             </div>

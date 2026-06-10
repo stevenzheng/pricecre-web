@@ -118,6 +118,7 @@ export default function DataReviewPage() {
           <button onClick={() => setShowAddForm(!showAddForm)} className="vl-btn-primary" style={{ fontSize: 12, padding: "6px 14px" }}>
             {showAddForm ? "取消" : "+ 手动添加"}
           </button>
+          <button onClick={() => router.push('/admin/corrections')} className="vl-btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }}>纠错审核</button>
         </div>
       </div>
 

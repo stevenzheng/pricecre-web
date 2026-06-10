@@ -214,6 +214,11 @@ export default function Home() {
   useEffect(() => { savePersisted("unlockedIds", [...unlockedIds]); }, [unlockedIds]);
   useEffect(() => { savePersisted("referralCode", myReferralCode); }, [myReferralCode]);
 
+  // Keep creditStats.unlockCount in sync with actual unlockedIds
+  useEffect(() => {
+    setCreditStats((prev) => ({ ...prev, unlockCount: unlockedIds.size }));
+  }, [unlockedIds]);
+
   // Handle ?p=prop-001 parameter from QR code / shared links
   useEffect(() => {
     try {
@@ -313,6 +318,16 @@ export default function Home() {
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }, 300);
       } else if (action === "unlocked-assets") {
+        // Refresh unlockedIds from localStorage before showing drawer
+        try {
+          const stored = localStorage.getItem("pricecre_unlockedIds");
+          if (stored) {
+            const arr = JSON.parse(stored);
+            if (Array.isArray(arr)) {
+              setUnlockedIds(new Set(arr));
+            }
+          }
+        } catch {}
         setShowUnlockedAssets(true);
       }
     };
@@ -741,19 +756,13 @@ export default function Home() {
 
             <div
               className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center cursor-pointer hover:ring-2 transition-all"
-              style={{ background: userEmail ? `hsl(${(userEmail || "?").charCodeAt(0) % 360}, 60%, 45%)` : "var(--panel)" }}
+              style={{ background: userEmail ? "var(--accent)" : "var(--panel)" }}
               onClick={() => setMobileTab("profile")}
             >
-              {userEmail ? (
-                <span style={{ color: "#fff", fontSize: 13, fontWeight: 600, lineHeight: 1 }}>
-                  {(userEmail.charAt(0) || "?").toUpperCase()}
-                </span>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              )}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={userEmail ? "var(--text-inverse)" : "var(--text-muted)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
             </div>
           </div>
         </div>

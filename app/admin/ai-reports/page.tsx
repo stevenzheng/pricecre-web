@@ -59,7 +59,7 @@ export default function AIReportsAdminPage() {
       )}
 
       {reports.length === 0 && !loading && !error && (
-        <div style={{ textAlign: "center", padding: 40, color: "#A3A3A3" }}>暂无报告。用户在前台资产卡片中运行 AI 精算分析后会显示在此处。</div>
+        <div style={{ textAlign: "center", padding: 40, color: "#A3A3A3" }}>暂无报告。用户在前台资产卡片中生成资产全维度价值指标报告后会显示在此处。</div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

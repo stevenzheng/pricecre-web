@@ -107,7 +107,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "演示数据不可删除，仅数据库中的资产可删除" }, { status: 400 });
     }
     const { prisma } = await import("@/lib/prisma");
-    await prisma.commercialProperty.delete({ where: { id } });
+    // deleteMany 幂等：记录不存在不抛 P2025（重复点击/已被删除的情况）
+    const result = await prisma.commercialProperty.deleteMany({ where: { id } });
+    if (result.count === 0) {
+      return NextResponse.json({ error: "该记录不存在或已被删除，请刷新列表" }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: "删除失败：" + (err.message || "").slice(0, 120) }, { status: 500 });

@@ -254,6 +254,19 @@ export default function Home() {
   // Fetch real credit/token/stats from server when logged in
   useEffect(() => {
     if (!userEmail) return;
+    // 邀请码：登录后从服务端取（老用户 localStorage 里没有，否则邀请链接永远是空码）
+    fetch("/api/auth/ensure-user", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail }),
+    }).then(r => r.json()).then(d => {
+      if (d.referralCode) {
+        setMyReferralCode(d.referralCode);
+        try {
+          const u = JSON.parse(localStorage.getItem("pricecre_user") || "{}");
+          localStorage.setItem("pricecre_user", JSON.stringify({ ...u, email: userEmail, referralCode: d.referralCode }));
+        } catch {}
+      }
+    }).catch(() => {});
     const fetchQuota = async () => {
       try {
         const [cr, tk, ud] = await Promise.all([
@@ -285,6 +298,10 @@ export default function Home() {
       } catch {}
     };
     fetchQuota();
+    // 购买/兑换成功后由 ProfilePanel 派发，余额即时刷新
+    const refreshHandler = () => fetchQuota();
+    document.addEventListener("refresh-quota", refreshHandler);
+    return () => document.removeEventListener("refresh-quota", refreshHandler);
   }, [userEmail]);
 
   // Handle CreditPanel quick actions
@@ -1063,7 +1080,7 @@ export default function Home() {
         {mobileTab === "share" && <ShareCenter />}
 
         {/* Profile Tab */}
-        {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} chatTokens={chatTokens} creditStats={creditStats} userEmail={userEmail} />}
+        {mobileTab === "profile" && <ProfilePanel credits={credits} totalCredits={totalCredits} chatTokens={chatTokens} creditStats={creditStats} userEmail={userEmail} referralCode={myReferralCode} />}
 
         {/* Order History Page */}
         {mobileTab === "orders" && (

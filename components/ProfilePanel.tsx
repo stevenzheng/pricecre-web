@@ -11,12 +11,13 @@ const caption = { fontSize: 12, fontWeight: 400, color: "#A3A3A3", fontFamily: "
 const title = { fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" } as const;
 const badge = { fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)" } as const;
 
-export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats, userEmail }: {
+export default function ProfilePanel({ credits, totalCredits, chatTokens, creditStats, userEmail, referralCode: referralCodeProp }: {
   credits?: { referral: number; purchased: number };
   totalCredits?: number;
   chatTokens?: { total: number; used: number };
   creditStats?: { viewCount: number; unlockCount: number; conversations: number };
   userEmail?: string | null;
+  referralCode?: string;
 }) {
   const [step, setStep] = useState<Step>("login");
   const [form, setForm] = useState({ email: "", password: "", confirm: "", code: "" });
@@ -69,7 +70,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
         body: JSON.stringify({ code: redeemCode, email: userEmail || "" })
       });
       const d = await res.json();
-      if (d.success) { setRedeemMsg(`激活成功！${d.credits} 次查询权益已到账`); setRedeemStatus("success"); setRedeemCode(""); }
+      if (d.success) { setRedeemMsg(d.message || `激活成功！${d.credits} 次权益已到账`); setRedeemStatus("success"); setRedeemCode(""); document.dispatchEvent(new CustomEvent("refresh-quota")); }
       else { setRedeemMsg(d.error || "激活失败"); setRedeemStatus("error"); }
     } catch { setRedeemMsg("网络错误"); setRedeemStatus("error"); }
   };
@@ -243,7 +244,8 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
   }
 
   // ── 已登录界面 ──
-  const referralCode = (() => {
+  // 邀请码：优先用服务端拉取的 prop（page.tsx 登录后获取），localStorage 仅兜底
+  const referralCode = referralCodeProp || (() => {
     try { return JSON.parse(localStorage.getItem("pricecre_user") || "{}").referralCode || ""; } catch { return ""; }
   })();
 
@@ -364,7 +366,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
                       body: JSON.stringify({ email: userEmail, product: paymentProduct, amount: paymentProduct === "monthly" ? 299 : 99, paymentMethod }),
                     });
                     const d = await res.json();
-                    if (d.success) { setShowPayment(false); showModal("支付成功！额度已到账"); }
+                    if (d.success) { setShowPayment(false); showModal(`支付成功！${d.product || "额度"}已到账`); document.dispatchEvent(new CustomEvent("refresh-quota")); }
                     else showModal(d.error || "支付失败");
                   } catch { showModal("网络错误"); }
                   setBuying(false);
@@ -414,7 +416,7 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
                       body: JSON.stringify({ email: userEmail, product: "ai-chat-100", amount: 10, paymentMethod: aiPaymentMethod }),
                     });
                     const d = await res.json();
-                    if (d.success) { setShowAiPayment(false); showModal("AI对话100条已到账！"); }
+                    if (d.success) { setShowAiPayment(false); showModal("AI对话100条已到账！"); document.dispatchEvent(new CustomEvent("refresh-quota")); }
                     else showModal(d.error || "购买失败");
                   } catch { showModal("网络错误"); }
                   setBuying(false);

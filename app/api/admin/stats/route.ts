@@ -40,6 +40,24 @@ export async function GET(request: NextRequest) {
     const chatTokensAgg = await safe(() => prisma.userChatToken.aggregate({ _sum: { tokens: true } }), { _sum: { tokens: 0 } });
     const lastCrawl = await safe(() => prisma.scheduledCrawlJob.findFirst({ orderBy: { lastRunAt: "desc" }, select: { lastRunAt: true } }), null);
 
+    // AI 报告生成量
+    const totalReports = await safe(() => prisma.aiAnalysisCache.count(), 0);
+    const reportsThisWeek = await safe(() => prisma.aiAnalysisCache.count({ where: { createdAt: { gte: weekAgo } } }), 0);
+
+    // 兑换码生成量 + 类别分布（从 generate_code 审计日志解析）
+    const codesGenerated = await safe(() => prisma.creditAuditLog.count({ where: { type: "generate_code" } }), 0);
+    const codesRedeemed = await safe(() => prisma.creditAuditLog.count({ where: { type: "redeem_code" } }), 0);
+    const codesByType: Record<string, number> = {};
+    try {
+      const codeLogs = await prisma.creditAuditLog.findMany({
+        where: { type: "generate_code" }, select: { note: true }, take: 500, orderBy: { createdAt: "desc" },
+      });
+      for (const l of codeLogs) {
+        const label = ((l.note || "").match(/LABEL:([^|]*)/) || [])[1] || ((l.note || "").match(/TYPE:([^|]*)/) || [])[1] || "其他";
+        codesByType[label || "其他"] = (codesByType[label || "其他"] || 0) + 1;
+      }
+    } catch {}
+
     // By type
     const byType: Record<string, number> = { OFFICE: 0, SHOPS: 0, INDUSTRIAL: 0 };
     try {
@@ -78,6 +96,8 @@ export async function GET(request: NextRequest) {
         totalViewCredits: (viewCreditsAgg._sum.referralCredits || 0) + (viewCreditsAgg._sum.purchasedCredits || 0),
         totalChatTokens: chatTokensAgg._sum.tokens || 0,
       },
+      reports: { total: totalReports, thisWeek: reportsThisWeek },
+      codes: { generated: codesGenerated, redeemed: codesRedeemed, byType: codesByType },
       byType, dailyViews,
     });
   } catch (err: any) {

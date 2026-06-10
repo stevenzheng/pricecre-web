@@ -1,15 +1,18 @@
 // /api/admin/generate-codes — 生成兑换码（POST）+ 生成历史（GET）
-// 历史记录持久化到 CreditAuditLog（type = "generate_code"），不再依赖浏览器 localStorage
+// 每次生成的码都是随机且唯一的，存入 VerificationCode 表（key 前缀 redeem:），单次使用
+// 历史记录持久化到 CreditAuditLog（type = "generate_code"）
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "crypto";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 
-function generateAuthCode(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET;
-  const hash = createHash("sha256").update(`${email}:${secret}:activate`).digest("hex");
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const dynamic = "force-dynamic";
+
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 去除易混淆字符
+
+function randomCode(): string {
+  const bytes = randomBytes(6);
   let code = "";
-  for (let i = 0; i < 6; i++) code += chars[parseInt(hash.slice(i*2,i*2+2),16) % chars.length];
+  for (let i = 0; i < 6; i++) code += CODE_CHARS[bytes[i] % CODE_CHARS.length];
   return code;
 }
 
@@ -18,11 +21,29 @@ export async function POST(req: NextRequest) {
     const { email, credits, type, label } = await req.json();
     if (!email) return NextResponse.json({ error: "邮箱必填" }, { status: 400 });
 
-    const code = generateAuthCode(email);
     const amount = Number(credits) || 8;
     const codeType = type || "view";
 
-    // 持久化生成记录（结构化 note，供 GET 历史与 redeem 按类型发放使用）
+    // 生成随机唯一码（key 唯一约束兜底，碰撞则重试）
+    let code = "";
+    for (let attempt = 0; attempt < 5; attempt++) {
+      code = randomCode();
+      try {
+        await prisma.verificationCode.create({
+          data: {
+            key: `redeem:${code}`,
+            value: JSON.stringify({ email, type: codeType, credits: amount, label: label || "" }),
+            expiresAt: new Date(Date.now() + 365 * 86400000), // 1年有效
+          },
+        });
+        break;
+      } catch {
+        code = "";
+      }
+    }
+    if (!code) return NextResponse.json({ error: "生成失败，请重试" }, { status: 500 });
+
+    // 历史记录
     await prisma.creditAuditLog.create({
       data: {
         email,

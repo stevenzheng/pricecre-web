@@ -5,6 +5,8 @@
 > 2026-06-10 第二批：抓取/清洗链路重构（详见 `CRAWL_PIPELINE_REVIEW.md`），新增/修改：`agent/job-runner.ts`（新增，cron 与 crawl-all 共用执行器）、`agent/master-pipeline.ts`（并发化+去重指纹改楼名+城市+舆情不伪造数值）、`agent/scrapers/tavily-scraper.ts`（删除"均价"伪资产）、`agent/uploader.ts`（服务器内不再自调 API）、`agent/review-queue.ts`（改用 lib/prisma 单例）、`app/api/cron/route.ts`（轮转批次，每天 3 个最久未跑任务）、`app/api/agent/crawl-all/route.ts`（分批接口，body {limit}，返回 remaining）、`app/api/agent/crawl/route.ts`（加 maxDuration）、`vercel.json`（CSP connect-src 放行 ipapi.co 与 nominatim，修复前台定位转圈）。无 schema 变更。环境变量确认存在：`TAVILY_API_KEY`、`CRON_SECRET`；可选：`EXASEARCH_API_KEY`、`ANTHROPIC_API_KEY`。
 > 同批还有 `app/admin/data-review/page.tsx`（新增分城市/分业态筛选栏）。
 
+> 2026-06-10 第三批：① **新建 `app/api/payment/test-buy/route.ts`**——此前前台购买调用的接口不存在导致支付全部失败；现在模拟支付会创建已支付订单+发放额度+审计日志（注意：仍是模拟通道，未接真实支付网关）。② 邀请码修复：`app/page.tsx` 登录后调 ensure-user 拉取邀请码（老用户此前永远"加载中"），`components/ProfilePanel.tsx` 接收 referralCode prop；购买/兑换成功后派发 refresh-quota 事件即时刷新余额。③ 兑换码唯一化：`app/api/admin/generate-codes/route.ts` 改为随机唯一码（存 VerificationCode 表，key 前缀 redeem:，1年有效），`app/api/data/redeem/route.ts` 查表校验、按类型发放、兑换即销码，兼容旧哈希码。④ `app/api/admin/properties/route.ts` DELETE 改 deleteMany 幂等（修复 P2025 删除报错）。⑤ `app/api/admin/corrections/route.ts` + `app/admin/corrections/page.tsx`：纠错记录联查并展示资产主信息（名称/城市/区域/业态）。⑥ `app/api/admin/stats/route.ts` + `app/admin/page.tsx`：仪表盘全部数据卡可点击跳转对应管理页，新增「生成报告量」「兑换码」（含类别分布与已兑换数）两张卡。⑦ 「AI 精算分析」全部改名「资产全维度价值指标」（AIAnalysis 弹窗标题/分享标题/免责声明、/a/[id] 报告页标题、后台空态文案）。无 schema 变更。
+
 ## 一、部署步骤
 
 ```bash

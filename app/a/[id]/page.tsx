@@ -29,7 +29,7 @@ export default async function SharedAnalysisPage({ params, searchParams }: { par
 
   return (
     <html lang="zh">
-      <head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width"/><title>{cached.projectName} - AI精算分析报告</title><style>{`
+      <head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width"/><title>{cached.projectName} - 资产全维度价值指标报告</title><style>{`
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;color:#1a1a2e;line-height:1.7;max-width:860px;margin:0;padding:40px 36px;background:#FFF}
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}

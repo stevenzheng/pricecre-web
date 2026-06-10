@@ -61,7 +61,7 @@ export default function AIAnalysis({
 
   const copyToClipboard = async (text: string) => {
     try {
-      if (navigator.share) { await navigator.share({ title: `${projectName} - AI精算分析`, url: text }); return; }
+      if (navigator.share) { await navigator.share({ title: `${projectName} - 资产全维度价值指标`, url: text }); return; }
       await navigator.clipboard.writeText(text);
     } catch {
       const ta = document.createElement("textarea");
@@ -83,7 +83,7 @@ export default function AIAnalysis({
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--accent)" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 014 4c0 1.1-.4 2.1-1.2 2.8l1.2 1.2c1.5-1 3.5-1.2 5.2-.4-1.1 1.6-2.3 3.1-3.7 4.4A12 12 0 0121 17.6c-1.7-1-3.7-1.4-5.6-.8l-2.4 2.4V22h-2v-2.8l-2.4-2.4c-1.9-.6-3.9-.2-5.6.8A12 12 0 016.3 14c1.4-1.3 2.6-2.8 3.7-4.4 1.7-.8 3.7-.6 5.2.4l1.2-1.2A3.9 3.9 0 0112 6a4 4 0 010-4z"/><circle cx="12" cy="4" r="1.5" fill="#fff"/></svg>
             </div>
-            <span className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>AI 精算分析</span>
+            <span className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>资产全维度价值指标</span>
           </div>
           <div className="flex items-center gap-2">
             {analysis && (
@@ -173,7 +173,7 @@ export default function AIAnalysis({
               </div>
 
               <p className="text-[10px] text-center mb-4" style={{ color: "var(--text-hint)" }}>
-                AI 精算分析基于大模型生成，内容仅供参考，不构成投资建议
+                资产全维度价值指标基于大模型生成，内容仅供参考，不构成投资建议
               </p>
             </>
           )}

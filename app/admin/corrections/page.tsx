@@ -16,7 +16,10 @@ interface Correction {
   reviewedBy?: string;
   createdAt: string;
   reviewedAt?: string;
+  asset?: { projectName: string; city: string; district: string; propertyType: string } | null;
 }
+
+const assetTypeLabels: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业零售", INDUSTRIAL: "产业园" };
 
 const statusLabel: Record<string, string> = {
   PENDING: "待审核",
@@ -88,8 +91,17 @@ export default function CorrectionsAdminPage() {
             <div key={c.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                 <div>
+                  {/* 资产主信息 */}
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 2 }}>
+                    {c.asset ? c.asset.projectName : "（未匹配到资产）"}
+                    {c.asset && (
+                      <span style={{ fontSize: 11, fontWeight: 400, color: "#737373", marginLeft: 8 }}>
+                        {c.asset.city} · {c.asset.district} · {assetTypeLabels[c.asset.propertyType] || c.asset.propertyType}
+                      </span>
+                    )}
+                  </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{c.fieldLabel}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-sans)" }}>纠错字段：{c.fieldLabel || c.fieldKey}</span>
                     <span style={{ fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: `${statusColor[c.status]}15`, color: statusColor[c.status] }}>
                       {statusLabel[c.status] || c.status}
                     </span>

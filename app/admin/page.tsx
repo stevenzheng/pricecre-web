@@ -1,6 +1,7 @@
 // app/admin/page.tsx — Business Dashboard (null-safe)
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface StatsData {
   summary: { totalAssets: number; cities: number; totalUsers: number; totalViews: number; newAssetsThisWeek: number; newUsersThisWeek: number; viewsThisWeek: number };
@@ -12,6 +13,8 @@ interface StatsData {
     totalUnlockedAssets: number; totalConversations: number; conversationsThisWeek: number;
   };
   quotaPool: { totalViewCredits: number; totalChatTokens: number };
+  reports?: { total: number; thisWeek: number };
+  codes?: { generated: number; redeemed: number; byType: Record<string, number> };
   byType: Record<string, number>;
   dailyViews: { date: string; count: number }[];
 }
@@ -40,6 +43,7 @@ function timeAgo(dateStr: string | null): string {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,51 +73,33 @@ export default function DashboardPage() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 8, marginBottom: 20 }}>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />资产总量</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.summary.totalAssets}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{s.summary.cities} 座城市</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm1 5h-2v5h2V7zm0 7h-2v2h2v-2z" />本周新增</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#0D9488", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>+{s.summary.newAssetsThisWeek}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>资产</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />待审核</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: reviewBacklog > 10 ? "#EE0000" : reviewBacklog > 0 ? "#F5A623" : "#0070F3", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{reviewBacklog}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{reviewBacklog > 0 ? "待处理" : "已清空"}</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm-1 14h2v2h-2zm0-8h2v6h-2z" />数据质量</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: qScore >= 80 ? "#0070F3" : qScore >= 60 ? "#F5A623" : "#EE0000", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{qScore}%</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{qScore >= 80 ? "良好" : qScore >= 60 ? "一般" : "需关注"}</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0zm14 14v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />注册用户</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.summary.totalUsers}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>+{s.summary.newUsersThisWeek} 本周</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z" />资产浏览量</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.summary.totalViews}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{s.summary.viewsThisWeek} 本周</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M6 2l3 6-1.5 1.5L9 12l3 2.5L15 12l1.5-2.5L15 8l3-6H6zM3 22h18v-2H3v2z" />购买订单</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.growth.totalOrdersPaid}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>+{s.growth.totalOrdersThisWeek} 本周</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M12 2l10 5-10 5-10-5 10-5zm0 7.5L2 12l10 5 10-5-10-4.5z" />已解锁资产</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#0D9488", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.growth.totalUnlockedAssets}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>卡片总数</div>
-        </div>
-        <div className="vl-card-static" style={{ padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" />总对话量</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{s.growth.totalConversations}</div>
-          <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{s.growth.conversationsThisWeek} 本周</div>
-        </div>
+        {([
+          { icon: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z", label: "资产总量", value: String(s.summary.totalAssets), color: "#171717", sub: `${s.summary.cities} 座城市`, href: "/admin/data-review" },
+          { icon: "M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm1 5h-2v5h2V7zm0 7h-2v2h2v-2z", label: "本周新增", value: `+${s.summary.newAssetsThisWeek}`, color: "#0D9488", sub: "资产", href: "/admin/data-review" },
+          { icon: "M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11", label: "待审核", value: String(reviewBacklog), color: reviewBacklog > 10 ? "#EE0000" : reviewBacklog > 0 ? "#F5A623" : "#0070F3", sub: reviewBacklog > 0 ? "待处理" : "已清空", href: "/admin/submissions" },
+          { icon: "M12 2a10 10 0 1010 10A10 10 0 0012 2zm-1 14h2v2h-2zm0-8h2v6h-2z", label: "数据质量", value: `${qScore}%`, color: qScore >= 80 ? "#0070F3" : qScore >= 60 ? "#F5A623" : "#EE0000", sub: qScore >= 80 ? "良好" : qScore >= 60 ? "一般" : "需关注", href: "/admin/data-review" },
+          { icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0zm14 14v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75", label: "注册用户", value: String(s.summary.totalUsers), color: "#171717", sub: `+${s.summary.newUsersThisWeek} 本周`, href: "/admin/users" },
+          { icon: "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z", label: "资产浏览量", value: String(s.summary.totalViews), color: "#171717", sub: `${s.summary.viewsThisWeek} 本周`, href: "/admin/users" },
+          { icon: "M6 2l3 6-1.5 1.5L9 12l3 2.5L15 12l1.5-2.5L15 8l3-6H6zM3 22h18v-2H3v2z", label: "购买订单", value: String(s.growth.totalOrdersPaid), color: "#0070F3", sub: `+${s.growth.totalOrdersThisWeek} 本周`, href: "/admin/orders" },
+          { icon: "M12 2l10 5-10 5-10-5 10-5zm0 7.5L2 12l10 5 10-5-10-4.5z", label: "已解锁资产", value: String(s.growth.totalUnlockedAssets), color: "#0D9488", sub: "解锁记录", href: "/admin/users" },
+          { icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z", label: "总对话量", value: String(s.growth.totalConversations), color: "#171717", sub: `${s.growth.conversationsThisWeek} 本周`, href: "/admin/users" },
+          { icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8", label: "生成报告量", value: String(s.reports?.total ?? 0), color: "#7C3AED", sub: `+${s.reports?.thisWeek ?? 0} 本周`, href: "/admin/ai-reports" },
+          { icon: "M2 4h20v16H2zM10 9h4M10 13h4M10 17h2", label: "兑换码", value: String(s.codes?.generated ?? 0), color: "#F5A623", sub: (() => {
+              const t = s.codes?.byType || {};
+              const parts = Object.entries(t).slice(0, 2).map(([k, v]) => `${k}×${v}`);
+              return parts.length > 0 ? `${parts.join(" ")} · 已兑${s.codes?.redeemed ?? 0}` : `已兑换 ${s.codes?.redeemed ?? 0}`;
+            })(), href: "/admin/exchange-codes" },
+        ]).map((card) => (
+          <div key={card.label} className="vl-card-static" onClick={() => router.push(card.href)}
+            title={`点击查看 ${card.label} 详情`}
+            style={{ padding: "14px 16px", cursor: "pointer", transition: "border-color 0.15s, box-shadow 0.15s" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0070F3"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,112,243,0.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}>
+            <div style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4, display: "flex", alignItems: "center" }}><StatIcon d={card.icon} />{card.label}</div>
+            <div style={{ fontSize: 22, fontWeight: 600, color: card.color, fontFamily: "var(--font-geist-mono)", letterSpacing: "-0.04em" }}>{card.value}</div>
+            <div style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.sub}</div>
+          </div>
+        ))}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 12, marginBottom: 16 }}>

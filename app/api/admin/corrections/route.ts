@@ -16,7 +16,32 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       take: 100,
     });
-    return NextResponse.json({ corrections });
+
+    // 联查资产主信息（数据库优先，mock 数据兜底），供审核页展示
+    const propertyIds = Array.from(new Set(corrections.map((c) => c.propertyId)));
+    const assetMap: Record<string, { projectName: string; city: string; district: string; propertyType: string }> = {};
+    if (propertyIds.length > 0) {
+      try {
+        const dbProps = await prisma.commercialProperty.findMany({
+          where: { id: { in: propertyIds } },
+          select: { id: true, projectName: true, city: true, district: true, propertyType: true },
+        });
+        dbProps.forEach((p) => { assetMap[p.id] = { projectName: p.projectName, city: p.city, district: p.district, propertyType: p.propertyType }; });
+      } catch {}
+      try {
+        const missing = propertyIds.filter((id) => !assetMap[id]);
+        if (missing.length > 0) {
+          const m = await import("@/lib/mock-data");
+          for (const id of missing) {
+            const p = (m.mockProperties as any[]).find((x) => x.id === id);
+            if (p) assetMap[id] = { projectName: p.projectName, city: p.city, district: p.district, propertyType: String(p.propertyType) };
+          }
+        }
+      } catch {}
+    }
+
+    const enriched = corrections.map((c) => ({ ...c, asset: assetMap[c.propertyId] || null }));
+    return NextResponse.json({ corrections: enriched });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

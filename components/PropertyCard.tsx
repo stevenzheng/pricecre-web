@@ -606,6 +606,25 @@ export default function PropertyCard({
                           >
                             {displayValue}
                           </span>
+                          {/* Correction button — dispatches event to page-level modal */}
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              document.dispatchEvent(new CustomEvent("open-correction", {
+                                detail: {
+                                  propertyId: property.id,
+                                  fieldKey: field.key,
+                                  fieldLabel: field.label,
+                                  currentValue: String(field.value),
+                                  email,
+                                },
+                              }));
+                            }}
+                            style={{ position: "absolute", bottom: 0, right: 0, width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", opacity: 0.4, fontSize: 10, color: "#737373", userSelect: "none" }}
+                            title="提报数据纠错"
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.4"; }}
+                          >✎</span>
                         </>
                       )}
                     </div>

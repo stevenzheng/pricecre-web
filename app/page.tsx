@@ -10,6 +10,7 @@ import CreditPanel from "@/components/CreditPanel";
 import Modal from "@/components/Toast";
 import WechatCard from "@/components/WechatCard";
 import AIAnalysis from "@/components/AIAnalysis";
+import CorrectionModal from "@/components/CorrectionModal";
 import { showModal } from "@/components/Toast";
 
 import MapView from "@/components/MapView";
@@ -82,6 +83,14 @@ export default function Home() {
     };
     document.addEventListener("open-wechat-card", h);
     return () => document.removeEventListener("open-wechat-card", h);
+  }, []);
+
+  // Correction modal — page-level, not inside cards
+  const [correctionData, setCorrectionData] = useState<any>(null);
+  useEffect(() => {
+    const h = (e: Event) => { setCorrectionData((e as CustomEvent).detail); };
+    document.addEventListener("open-correction", h);
+    return () => document.removeEventListener("open-correction", h);
   }, []);
 
   useEffect(() => {
@@ -1155,6 +1164,16 @@ export default function Home() {
       <Modal />
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
+      {correctionData && (
+        <CorrectionModal
+          propertyId={correctionData.propertyId}
+          fieldKey={correctionData.fieldKey}
+          fieldLabel={correctionData.fieldLabel}
+          currentValue={correctionData.currentValue}
+          onClose={() => setCorrectionData(null)}
+          onSubmit={() => setCorrectionData(null)}
+        />
+      )}
       {chatProp && <PropertyChat property={chatProp} email={userEmail || undefined} onClose={() => setChatProp(null)} />}
 
       <MobileNav activeTab={mobileTab} onTabChange={handleTabChange} />

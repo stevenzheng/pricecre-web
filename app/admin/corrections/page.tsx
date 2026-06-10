@@ -1,93 +1,133 @@
+// app/admin/corrections/page.tsx — 纠错审核管理
 "use client";
+
 import { useState, useEffect } from "react";
 
-const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-  PENDING: { bg: "rgba(245,166,35,0.08)", text: "#B5791A", label: "待审核" },
-  APPROVED: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已采纳" },
-  REJECTED: { bg: "#F7F7F7", text: "#737373", label: "已驳回" },
+interface Correction {
+  id: string;
+  propertyId: string;
+  fieldKey: string;
+  fieldLabel: string;
+  oldValue: string;
+  newValue: string;
+  reason: string;
+  status: string;
+  submittedBy: string;
+  reviewedBy?: string;
+  createdAt: string;
+  reviewedAt?: string;
+}
+
+const statusLabel: Record<string, string> = {
+  PENDING: "待审核",
+  APPROVED: "已通过",
+  REJECTED: "已拒绝",
 };
 
-export default function CorrectionsPage() {
-  const [corrections, setCorrections] = useState<any[]>([]);
+const statusColor: Record<string, string> = {
+  PENDING: "#F5A623",
+  APPROVED: "#10B981",
+  REJECTED: "#EF4444",
+};
+
+export default function CorrectionsAdminPage() {
+  const [corrections, setCorrections] = useState<Correction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState("");
+  const [filter, setFilter] = useState("PENDING");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/corrections");
-      const d = await res.json();
-      setCorrections(d.corrections || []);
+      const res = await fetch(`/api/admin/corrections?status=${filter}`);
+      const data = await res.json();
+      setCorrections(data.corrections || []);
     } catch {}
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [filter]);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     try {
-      const res = await fetch("/api/admin/corrections", {
-        method: "PUT", headers: { "Content-Type": "application/json" },
+      await fetch("/api/admin/corrections", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, action }),
       });
-      if (res.ok) { setMsg(action === "approve" ? "已采纳" : "已驳回"); fetchData(); }
-    } catch { setMsg("操作失败"); }
-    setTimeout(() => setMsg(""), 2000);
+      fetchData();
+    } catch {}
   };
 
   return (
-    <div className="vl-content-inner">
-      <div className="vl-page-header">
-        <h1 className="vl-page-title">字段纠错管理</h1>
-        <p className="vl-page-desc">{corrections.length} 条纠错记录</p>
+    <div style={{ padding: 24, maxWidth: 1100 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <p style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>精算纠错审核</p>
+          <p style={{ fontSize: 13, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+            {corrections.length} 条 · {corrections.filter(c => c.status === "PENDING").length} 条待审
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 4, background: "#F0F0F0", borderRadius: 6, padding: 2 }}>
+          {(["PENDING","APPROVED","REJECTED"] as const).map(s => (
+            <button key={s} onClick={() => setFilter(s)}
+              style={{ padding: "5px 14px", borderRadius: 5, border: "none", background: filter === s ? "#FFF" : "transparent", color: filter === s ? "#171717" : "#737373", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", boxShadow: filter === s ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}>
+              {statusLabel[s]}
+            </button>
+          ))}
+        </div>
       </div>
-      {msg && <div style={{ marginBottom: 12, padding: "8px 16px", borderRadius: 6, background: "rgba(0,112,243,0.08)", color: "#0070F3", fontSize: 13, cursor: "pointer" }} onClick={() => setMsg("")}>{msg}</div>}
 
-      {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
-      ) : corrections.length === 0 ? (
-        <div className="vl-empty"><p className="vl-empty-title">暂无纠错记录</p></div>
+      {loading ? <div style={{ padding: 40, textAlign: "center", color: "#737373" }}>加载中...</div> : corrections.length === 0 ? (
+        <div style={{ padding: 40, textAlign: "center", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
+          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", margin: "0 0 4px", fontFamily: "var(--font-sans)" }}>暂无纠错记录</p>
+          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>用户在资产卡片中提交精算字段纠错后会显示在此处</p>
+        </div>
       ) : (
-        <div className="vl-table-wrap">
-          <table className="vl-table">
-            <thead>
-              <tr>
-                <th style={{ minWidth: 100 }}>资产/字段</th>
-                <th>原值</th>
-                <th>建议值</th>
-                <th>提报人</th>
-                <th>时间</th>
-                <th>状态</th>
-                <th style={{ width: 120 }}>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {corrections.map(c => {
-                const sc = statusColors[c.status] || statusColors.PENDING;
-                return (
-                  <tr key={c.id}>
-                    <td>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{c.fieldLabel || c.fieldKey}</div>
-                      <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-mono)" }}>{c.propertyId?.substring(0, 8)}</div>
-                    </td>
-                    <td><span style={{ color: "#EE0000", textDecoration: "line-through", fontSize: 12 }}>{c.oldValue}</span></td>
-                    <td><span style={{ color: "#0D9488", fontWeight: 600, fontSize: 12 }}>{c.newValue}</span></td>
-                    <td style={{ fontSize: 11, color: "#737373" }}>{c.submittedBy || "—"}</td>
-                    <td style={{ fontSize: 11, color: "#A3A3A3", whiteSpace: "nowrap" }}>{new Date(c.createdAt).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}</td>
-                    <td><span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 10, fontWeight: 500, background: sc.bg, color: sc.text }}>{sc.label}</span></td>
-                    <td>
-                      {c.status === "PENDING" && (
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <button onClick={() => handleAction(c.id, "approve")} style={{ padding: "3px 10px", borderRadius: 4, border: "none", background: "#0070F3", color: "#FFF", fontSize: 11, fontWeight: 500, cursor: "pointer" }}>采纳</button>
-                          <button onClick={() => handleAction(c.id, "reject")} style={{ padding: "3px 10px", borderRadius: 4, border: "1px solid #E5E5E5", background: "#FFF", color: "#737373", fontSize: 11, cursor: "pointer" }}>驳回</button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {corrections.map(c => (
+            <div key={c.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{c.fieldLabel}</span>
+                    <span style={{ fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: `${statusColor[c.status]}15`, color: statusColor[c.status] }}>
+                      {statusLabel[c.status] || c.status}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-mono)", margin: 0 }}>
+                    {c.propertyId} · {c.fieldKey}
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {c.status === "PENDING" && (
+                    <>
+                      <button onClick={() => handleAction(c.id, "approve")}
+                        style={{ padding: "5px 14px", borderRadius: 5, border: "none", background: "#10B981", color: "#FFF", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>通过</button>
+                      <button onClick={() => handleAction(c.id, "reject")}
+                        style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid #EF4444", background: "#FFF", color: "#EF4444", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>拒绝</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center", padding: "10px 14px", background: "#FAFAFA", borderRadius: 8, marginBottom: 8 }}>
+                <div>
+                  <span style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", display: "block" }}>原值</span>
+                  <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", color: "#737373", textDecoration: "line-through" }}>{c.oldValue}</span>
+                </div>
+                <span style={{ fontSize: 14, color: "#A3A3A3" }}>→</span>
+                <div>
+                  <span style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", display: "block" }}>新值</span>
+                  <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", color: "#0070F3", fontWeight: 600 }}>{c.newValue}</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>
+                <span>提交人：{c.submittedBy || "匿名"} · {new Date(c.createdAt).toLocaleString("zh-CN")}</span>
+                <span>{c.reason ? `理由：${c.reason}` : ""}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

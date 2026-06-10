@@ -9,6 +9,8 @@ import {
   PropertyType,
 } from "@/types/indicators";
 import { propertyTypeLabels } from "@/lib/property-constants";
+import CorrectionModal from "@/components/CorrectionModal";
+import FieldCorrectionBadge from "@/components/FieldCorrectionBadge";
 
 /* ===== State Machine ===== */
 
@@ -228,6 +230,19 @@ export default function PropertyCard({
   }, [property.id]);
 
   const isUnlocked = property.isUnlocked || state.hasUnlocked;
+
+  // Correction state
+  const [corrections, setCorrections] = useState<any[]>([]);
+  const [correctionField, setCorrectionField] = useState<{ key: string; label: string; value: string; unit?: string } | null>(null);
+
+  // Fetch corrections when unlocked
+  useEffect(() => {
+    if (isUnlocked && property.id) {
+      fetch(`/api/property/${property.id}/corrections`).then(r => r.json()).then(d => {
+        setCorrections(d.corrections || []);
+      }).catch(() => {});
+    }
+  }, [isUnlocked, property.id]);
 
   const indicatorFields = useMemo(
     () => getIndicatorFields(property.dynamicIndicators, property.propertyType),
@@ -606,39 +621,17 @@ export default function PropertyCard({
                           >
                             {displayValue}
                           </span>
-                          <button
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              const newVal = prompt(`纠错: ${field.label}`, String(field.value));
-                              if (!newVal || newVal === String(field.value)) return;
-                              let ue = "";
-                              try { const s = localStorage.getItem("pricecre_user"); if (s) ue = JSON.parse(s).email || ""; } catch {}
-                              try {
-                                await fetch("/api/data/correct", {
-                                  method: "POST", headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    propertyId: property.id || property.projectName,
-                                    fieldKey: field.key || field.label,
-                                    fieldLabel: field.label,
-                                    oldValue: String(field.value),
-                                    newValue: newVal,
-                                    reason: "",
-                                    email: ue,
-                                  }),
-                                });
-                                showModal("纠错已提交");
-                              } catch { showModal("提交失败"); }
-                            }}
-                            style={{
-                              position: "absolute", bottom: 0, right: 0,
-                              width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center",
-                              fontSize: 9, color: "#F59E0B", background: "none",
-                              border: "none", cursor: "pointer", opacity: 0.7, padding: 0,
-                            }}
-                            title="提报数据纠错"
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                          </button>
+                          <span style={{ position: "absolute", bottom: 0, right: 0 }}>
+                            <FieldCorrectionBadge
+                              fieldKey={field.key}
+                              corrections={corrections}
+                              onCorrect={() => setCorrectionField({
+                                key: field.key,
+                                label: field.label,
+                                value: String(field.value),
+                              })}
+                            />
+                          </span>
                         </>
                       )}
                     </div>
@@ -648,6 +641,26 @@ export default function PropertyCard({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Correction Modal */}
+      {correctionField && (
+        <CorrectionModal
+          propertyId={property.id}
+          fieldKey={correctionField.key}
+          fieldLabel={correctionField.label}
+          currentValue={correctionField.value}
+          email={email}
+          onClose={() => setCorrectionField(null)}
+          onSubmit={() => {
+            // Refresh corrections after submit
+            if (property.id) {
+              fetch(`/api/property/${property.id}/corrections`).then(r => r.json()).then(d => {
+                setCorrections(d.corrections || []);
+              }).catch(() => {});
+            }
+          }}
+        />
       )}
     </div>
   );

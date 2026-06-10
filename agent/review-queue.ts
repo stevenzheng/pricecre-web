@@ -3,10 +3,10 @@
 // Supabase agent_review_queue 读写层（替代原 SQLite local-db.ts）
 // 管线输出 → PENDING_REVIEW → 管理员 approve → 移到 CommercialProperty
 // ============================================================
-import { PrismaClient } from "@prisma/client";
 import { ProcessedAsset } from "./schemas";
-
-const prisma = new PrismaClient();
+// 复用全局 Prisma 单例：在 Vercel serverless 内避免每次冷启动新建连接打爆 Supabase 连接池；
+// 本地 tsx 运行同样适用（相对路径导入，不依赖 tsconfig paths）
+import { prisma } from "../lib/prisma";
 
 export { prisma };
 

@@ -10,6 +10,9 @@ import { batchUploadAssets } from "@/agent/uploader";
 import { validateBatch } from "@/agent/data-quality";
 import type { PropertyType } from "@/agent/schemas";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // Tavily + Exa + MiniMax 外呼需要时间
+
 const VALID_CITIES = [
   "shanghai","beijing","shenzhen","guangzhou","hangzhou",
   "chengdu","suzhou","changsha","xian",

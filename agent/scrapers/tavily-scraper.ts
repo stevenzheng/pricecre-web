@@ -231,23 +231,8 @@ function parseProperties(
       }
     }
 
-    // 全局价格: Tavily answer 总体摘要
-    const globalPrice = extractPrice(answerText);
-    if (globalPrice.value && packages.length === 0) {
-      // 用城市+业态作为项目名
-      const label = `${cityZh}${districtZh}${PROPERTY_ZH[propertyType]}均价`;
-      if (!seenNames.has(label)) {
-        seenNames.add(label);
-        packages.push({
-          projectName: label, city: cityZh, district: districtEn,
-          roughAddress: `${cityZh}${districtZh}`, propertyType,
-          rawPriceText: `${globalPrice.value}元/㎡/天`,
-          freeRentMonthsText: "", area: null as any,
-          leaseTotalMonths: 36, macroSubmarketVacancy: 0.15,
-          inputLtv: 0.6, noiCagr3Y: 0.02,
-        });
-      }
-    }
+    // 注意：此处刻意不再用"城市均价"造伪资产记录。
+    // 提取不到具体楼盘名 = 没有楼盘级数据，宁缺毋滥（数据准确性优先）。
   }
 
   // ── 策略2: 逐条解析搜索结果的 content ──

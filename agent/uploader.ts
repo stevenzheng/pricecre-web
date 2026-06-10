@@ -69,7 +69,10 @@ export async function batchUploadAssets(assets: ProcessedAsset[]): Promise<{
   const result = await writeBatchToReviewQueue(assets);
   console.log(`[Supabase] 成功 ${result.written} 条，失败 ${result.failed} 条`);
 
-  const token = getAgentToken();
+  // API 冗余通道只在「本地 Agent」运行时启用。
+  // 在 Vercel 函数内部再 POST 自己的线上域名 = 同批数据写两遍 + 外网回环开销，纯属浪费。
+  const runningOnServer = !!process.env.VERCEL;
+  const token = runningOnServer ? "" : getAgentToken();
   if (token) {
     const chunks: ProcessedAsset[][] = [];
     for (let i = 0; i < assets.length; i += BATCH_CHUNK_SIZE) {

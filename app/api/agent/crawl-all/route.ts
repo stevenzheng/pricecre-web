@@ -1,149 +1,42 @@
 // app/api/agent/crawl-all/route.ts
 // ============================================================
-// POST /api/agent/crawl-all — 全量抓取所有活跃爬取任务
-// 遍历 scheduledCrawlJob → Tavily → 质检 → 精算 → 入库 → 回写状态
+// POST /api/agent/crawl-all — 分批全量抓取（serverless 安全）
+// body: { limit?: number }  每次最多处理 limit 个任务（默认 5），
+// 按「最久未跑优先」轮转；响应返回 remaining，调用方循环到 0 即全量完成。
+// 执行路径与 cron 完全一致（agent/job-runner.ts）。
 // ============================================================
-import { NextResponse } from "next/server";
-import { TavilyScraper } from "@/agent/scrapers/tavily-scraper";
-import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
-import { batchUploadAssets } from "@/agent/uploader";
-import { validateBatch } from "@/agent/data-quality";
+import { NextRequest, NextResponse } from "next/server";
+import { runCrawlJobs, pickStalestJobs } from "@/agent/job-runner";
 import { prisma } from "@/lib/prisma";
-import type { PropertyType } from "@/agent/schemas";
 
-const VALID_TYPES = ["OFFICE", "SHOPS", "INDUSTRIAL"];
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const now = new Date();
-  console.log(`[CrawlAll] ${now.toISOString()} — 全量抓取启动`);
-
   try {
-    const jobs = await prisma.scheduledCrawlJob.findMany({
-      where: { isActive: true },
+    const body = await request.json().catch(() => ({}));
+    const limit = Math.min(Math.max(Number(body?.limit) || 5, 1), 10);
+
+    const totalActive = await prisma.scheduledCrawlJob.count({ where: { isActive: true } });
+    if (totalActive === 0) {
+      return NextResponse.json({ success: true, msg: "无活跃爬取目标", crawled: 0, remaining: 0 });
+    }
+
+    console.log(`[CrawlAll] ${now.toISOString()} — 批次启动（${limit}/${totalActive}）`);
+    const jobs = await pickStalestJobs(limit);
+    const summary = await runCrawlJobs(jobs);
+
+    // 还有多少任务从未在本轮跑过（lastRunAt 早于本次启动时间）
+    const remaining = await prisma.scheduledCrawlJob.count({
+      where: { isActive: true, OR: [{ lastRunAt: null }, { lastRunAt: { lt: now } }] },
     });
-
-    if (jobs.length === 0) {
-      return NextResponse.json({
-        success: true,
-        msg: "无活跃爬取目标",
-        crawled: 0,
-      });
-    }
-
-    const results: Array<{
-      label: string;
-      status: string;
-      listings: number;
-      approved: number;
-      error?: string;
-    }> = [];
-
-    const allRawItems: any[] = [];
-    let totalListings = 0;
-    let totalApproved = 0;
-
-    for (const job of jobs) {
-      console.log(`[CrawlAll] → ${job.label} (${job.city}/${job.district})`);
-      try {
-        const type = (VALID_TYPES.includes(job.propertyType)
-          ? job.propertyType
-          : "OFFICE") as PropertyType;
-
-        // 爬取
-        const rawPackages = await TavilyScraper.crawlAndEnrich({
-          city: job.city,
-          district: job.district,
-          propertyType: type,
-          maxResults: 20,
-        });
-
-        const jobListings = rawPackages.length;
-
-        if (rawPackages.length > 0) {
-          // 质检
-          const quality = validateBatch(rawPackages);
-
-          if (quality.validPackages.length > 0) {
-            allRawItems.push(...quality.validPackages);
-          }
-
-          totalListings += jobListings;
-
-          await prisma.scheduledCrawlJob.update({
-            where: { id: job.id },
-            data: {
-              lastRunAt: now,
-              lastRunStatus: "SUCCESS",
-              lastPipelineCount: quality.validPackages.length,
-              lastRunError: null,
-            },
-          });
-
-          results.push({
-            label: job.label,
-            status: "SUCCESS",
-            listings: jobListings,
-            approved: quality.validPackages.length,
-          });
-        } else {
-          await prisma.scheduledCrawlJob.update({
-            where: { id: job.id },
-            data: {
-              lastRunAt: now,
-              lastRunStatus: "SUCCESS",
-              lastPipelineCount: 0,
-            },
-          });
-
-          results.push({
-            label: job.label,
-            status: "SUCCESS",
-            listings: 0,
-            approved: 0,
-          });
-        }
-      } catch (err: any) {
-        console.error(`[CrawlAll] ${job.label} 失败:`, err.message);
-        await prisma.scheduledCrawlJob.update({
-          where: { id: job.id },
-          data: {
-            lastRunAt: now,
-            lastRunStatus: "FAILED",
-            lastRunError: err.message?.slice(0, 500),
-          },
-        });
-        results.push({
-          label: job.label,
-          status: "FAILED",
-          listings: 0,
-          approved: 0,
-          error: err.message,
-        });
-      }
-    }
-
-    console.log(`[CrawlAll] 共 ${totalListings} 条原始数据`);
-
-    // 批量精算 + 入库
-    if (allRawItems.length > 0) {
-      const processed =
-        await LocalAgentMasterOrchestrator.executeFullPipeline(allRawItems);
-
-      await batchUploadAssets(processed);
-
-      totalApproved = processed.filter(
-        (p) => p.status !== "CRITICAL_MISSING"
-      ).length;
-    }
 
     return NextResponse.json({
       success: true,
-      msg: `全量完成: ${totalListings}条原始 / ${allRawItems.length}条质检通过 / ${totalApproved}条入库`,
-      totalListings,
-      qualityPassed: allRawItems.length,
-      approved: totalApproved,
-      jobs: jobs.length,
-      results,
+      msg: `批次完成: ${summary.totalListings}条原始 / ${summary.qualityPassed}条质检通过 / ${summary.written}条入库 · 剩余 ${remaining} 个任务`,
+      ...summary,
+      remaining,
     });
   } catch (err: any) {
     console.error("[CrawlAll]", err);

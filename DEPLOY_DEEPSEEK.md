@@ -2,6 +2,9 @@
 
 本次改动已全部完成并通过 `tsc --noEmit` 类型检查。按以下步骤原样部署即可，**不要改动任何业务代码**。
 
+> 2026-06-10 第二批：抓取/清洗链路重构（详见 `CRAWL_PIPELINE_REVIEW.md`），新增/修改：`agent/job-runner.ts`（新增，cron 与 crawl-all 共用执行器）、`agent/master-pipeline.ts`（并发化+去重指纹改楼名+城市+舆情不伪造数值）、`agent/scrapers/tavily-scraper.ts`（删除"均价"伪资产）、`agent/uploader.ts`（服务器内不再自调 API）、`agent/review-queue.ts`（改用 lib/prisma 单例）、`app/api/cron/route.ts`（轮转批次，每天 3 个最久未跑任务）、`app/api/agent/crawl-all/route.ts`（分批接口，body {limit}，返回 remaining）、`app/api/agent/crawl/route.ts`（加 maxDuration）、`vercel.json`（CSP connect-src 放行 ipapi.co 与 nominatim，修复前台定位转圈）。无 schema 变更。环境变量确认存在：`TAVILY_API_KEY`、`CRON_SECRET`；可选：`EXASEARCH_API_KEY`、`ANTHROPIC_API_KEY`。
+> 同批还有 `app/admin/data-review/page.tsx`（新增分城市/分业态筛选栏）。
+
 ## 一、部署步骤
 
 ```bash

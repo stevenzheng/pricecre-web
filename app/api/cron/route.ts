@@ -1,14 +1,17 @@
 /**
- * GET /api/cron — Vercel Cron Job trigger
- * Automatically runs full crawl pipeline on schedule
+ * GET /api/cron — Vercel Cron（每天 8:00，见 vercel.json）
+ *
+ * 轮转批次设计：每次只跑「最久未跑」的 CRON_BATCH 个任务，
+ * 多天滚动覆盖全部任务 — 单次调用永不超时。
+ * 执行路径与手动「全量抓取」完全一致（agent/job-runner.ts）。
  */
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { LocalAgentMasterOrchestrator } from "@/agent/master-pipeline";
-import { SsrHydrationScraper } from "@/agent/scrapers/ssr-hydration-scraper";
-import { batchUploadAssets } from "@/agent/uploader";
+import { runCrawlJobs, pickStalestJobs } from "@/agent/job-runner";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // 给足精算外呼时间（按 Vercel 套餐自动封顶）
 
+const CRON_BATCH = 3;
 
 export async function GET(request: NextRequest) {
   // Verify cron secret to prevent unauthorized access
@@ -22,80 +25,20 @@ export async function GET(request: NextRequest) {
   }
 
   const now = new Date();
-  console.log(`[Cron] ${now.toISOString()} — 定时抓取触发`);
+  console.log(`[Cron] ${now.toISOString()} — 定时抓取触发（轮转批次 ${CRON_BATCH}）`);
 
   try {
-    const jobs = await prisma.scheduledCrawlJob.findMany({
-      where: { isActive: true },
-    });
-
+    const jobs = await pickStalestJobs(CRON_BATCH);
     if (jobs.length === 0) {
-      console.log("[Cron] 无活跃爬取目标");
       return NextResponse.json({ success: true, crawled: 0, msg: "无活跃爬取目标" });
     }
 
-    const allRawItems: any[] = [];
-    let totalListings = 0;
+    const summary = await runCrawlJobs(jobs);
 
-    for (const job of jobs) {
-      try {
-        const crawlResults = await SsrHydrationScraper.crawlJob({
-          targetUrl: job.targetUrl,
-          label: job.label,
-          propertyType: job.propertyType as any,
-          city: job.city,
-          district: job.district,
-        });
-
-        for (const item of crawlResults) {
-          allRawItems.push({
-            projectName: item.projectName,
-            city: item.cityKeystring,
-            district: item.district,
-            roughAddress: item.address || item.projectName,
-            propertyType: item.propertyType,
-            rawPriceText: item.rawPriceText || `${item.pricePerDay ?? 0}元/㎡/天`,
-            freeRentMonthsText: item.freeRentMonthsText || "0",
-            leaseTotalMonths: 36,
-            macroSubmarketVacancy: 0.15,
-            inputLtv: 0.6,
-            noiCagr3Y: 0.02,
-            area: item.area > 0 ? item.area : undefined,
-          });
-        }
-
-        totalListings += crawlResults.length;
-
-        await prisma.scheduledCrawlJob.update({
-          where: { id: job.id },
-          data: {
-            lastRunAt: now,
-            lastRunStatus: "SUCCESS",
-            lastPipelineCount: crawlResults.length,
-          },
-        });
-      } catch (err: any) {
-        await prisma.scheduledCrawlJob.update({
-          where: { id: job.id },
-          data: {
-            lastRunAt: now,
-            lastRunStatus: "FAILED",
-            lastRunError: err.message?.slice(0, 500),
-          },
-        });
-      }
-    }
-
-    if (allRawItems.length > 0) {
-      const processed = await LocalAgentMasterOrchestrator.executeFullPipeline(allRawItems);
-      await batchUploadAssets(processed);
-    }
-
-    console.log(`[Cron] 完成 — ${totalListings} 条房源`);
+    console.log(`[Cron] 完成 — ${summary.totalListings} 条房源 / 入库 ${summary.written} 条`);
     return NextResponse.json({
       success: true,
-      totalListings,
-      jobsRun: jobs.length,
+      ...summary,
       timestamp: now.toISOString(),
     });
   } catch (err: any) {

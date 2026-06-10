@@ -5,10 +5,23 @@
 // ============================================================
 import crypto from "crypto";
 import axios from "axios";
+import pLimit from "p-limit";
 import { RawScrapedPackage, ProcessedAsset } from "./schemas";
 import { runFullFinancialCalc } from "./financial-engine";
 import { getBenchmark } from "./submarket-benchmarks";
 import { batchUploadAssets } from "./uploader";
+
+/** 管线内部并发度（Exa+MiniMax 外呼） */
+const PIPELINE_CONCURRENCY = 3;
+
+/** 楼盘名标准化：去空白/全角符号，用于去重指纹 */
+function normalizeProjectName(name: string): string {
+  return (name || "")
+    .replace(/\s+/g, "")
+    .replace(/[（(]/g, "(").replace(/[）)]/g, ")")
+    .replace(/·|•|・/g, "")
+    .toLowerCase();
+}
 
 const MINIMAX_API_URL = "https://mydamoxing.cn/v1/chat/completions";
 const MINIMAX_MODEL = "MiniMax-M2.7-highspeed";
@@ -24,8 +37,9 @@ export class LocalAgentMasterOrchestrator {
   private static async runMiniMaxSentimentAnalysis(
     projectName: string,
     corpus: string
-  ): Promise<number> {
-    if (!corpus || corpus.trim() === "") return 0.02;
+  ): Promise<number | null> {
+    // 没有任何舆情文本 = 未发现负面 → 0；模型/网络失败 → null（不伪造数值）
+    if (!corpus || corpus.trim() === "") return 0;
     try {
       const key = getMiniMaxKey();
       const prompt = `以下是关于"${projectName}"写字楼/商业地产的网络评论摘录。请深度分析其中负面评价（投诉、维权、避雷、物业差、停电、漏水等）占全部评论的真实比例。只输出一个0.0000到1.0000之间的纯数字。\n\n评论文本：\n${corpus}`;
@@ -46,9 +60,9 @@ export class LocalAgentMasterOrchestrator {
         }
       );
       const rate = parseFloat(response.data?.choices?.[0]?.message?.content?.trim() ?? "");
-      return isNaN(rate) || rate < 0 || rate > 1 ? 0.05 : rate;
+      return isNaN(rate) || rate < 0 || rate > 1 ? null : rate;
     } catch {
-      return 0.05;
+      return null;
     }
   }
 
@@ -80,9 +94,37 @@ export class LocalAgentMasterOrchestrator {
   public static async executeFullPipeline(
     rawItems: RawScrapedPackage[]
   ): Promise<ProcessedAsset[]> {
-    const processedOutputQueue: ProcessedAsset[] = [];
+    // 舆情外呼可用性只判断一次（无 key 时整批快速跳过，不再逐条尝试）
+    const sentimentEnabled =
+      !!(process.env.EXASEARCH_API_KEY || process.env.EXA_API_KEY) &&
+      !!process.env.ANTHROPIC_API_KEY;
+    if (!sentimentEnabled) {
+      console.warn("[管线] Exa/MiniMax key 未配置，本批跳过舆情扫描（negativeSentimentRate 置 null）");
+    }
 
-    for (const raw of rawItems) {
+    // 批内去重：同一 楼盘名+城市 只保留第一条
+    const seenFingerprints = new Set<string>();
+    const dedupedItems = rawItems.filter((raw) => {
+      const fp = `${normalizeProjectName(raw.projectName)}_${raw.city}`;
+      if (seenFingerprints.has(fp)) return false;
+      seenFingerprints.add(fp);
+      return true;
+    });
+    if (dedupedItems.length < rawItems.length) {
+      console.log(`[管线] 批内去重: ${rawItems.length} → ${dedupedItems.length} 条`);
+    }
+
+    const limit = pLimit(PIPELINE_CONCURRENCY);
+    const results = await Promise.all(
+      dedupedItems.map((raw) => limit(() => this.processOne(raw, sentimentEnabled)))
+    );
+    return results.filter((r): r is ProcessedAsset => r !== null);
+  }
+
+  private static async processOne(
+    raw: RawScrapedPackage,
+    sentimentEnabled: boolean
+  ): Promise<ProcessedAsset | null> {
       try {
         const faceRentPerDay =
           parseFloat(raw.rawPriceText?.replace(/[^0-9.]/g, "")) || 0;
@@ -91,9 +133,11 @@ export class LocalAgentMasterOrchestrator {
           faceRentPerDay <= 0 || !raw.projectName || !raw.roughAddress;
 
         const standardAddress = raw.roughAddress.trim().replace(/\s+/g, "");
+        // 去重指纹 = 标准化楼盘名 + 城市（地址抓取不稳，跨平台同楼地址写法各异，
+        // 用名称+城市做主键可避免同一栋楼在审核队列里重复堆积）
         const assetId = crypto
           .createHash("md5")
-          .update(`${raw.projectName}_${standardAddress}`)
+          .update(`${normalizeProjectName(raw.projectName)}_${raw.city}`)
           .digest("hex");
 
         const { benchmark, isDefault } = getBenchmark(
@@ -104,15 +148,14 @@ export class LocalAgentMasterOrchestrator {
         const activeAssetPrice = raw.compTxPrice ?? benchmark.benchmarkAssetPrice;
         const activeOpexRatio = raw.opexRatio ?? benchmark.opexRatio;
 
-        let negativeSentimentRate: number | null = 0.02;
-        if (!isCriticalMissing) {
+        // 舆情：只有具备外呼条件且数据完整时才扫描；否则置 null（不要伪造 0.02/0.05 这种假精度）
+        let negativeSentimentRate: number | null = null;
+        if (!isCriticalMissing && sentimentEnabled) {
           const { corpus } = await this.searchExaSentiment(raw.projectName);
           negativeSentimentRate = await this.runMiniMaxSentimentAnalysis(
             raw.projectName,
             corpus
           );
-        } else {
-          negativeSentimentRate = null;
         }
 
         const calcResult = runFullFinancialCalc({
@@ -215,16 +258,13 @@ export class LocalAgentMasterOrchestrator {
           ],
         };
 
-        processedOutputQueue.push(assetRecord);
+        return assetRecord;
       } catch (err) {
         console.error(
           `[中枢异动] 资产 [${raw.projectName}] 计算中断，丢弃隔离。`,
           err
         );
-        continue;
+        return null;
       }
-    }
-
-    return processedOutputQueue;
   }
 }

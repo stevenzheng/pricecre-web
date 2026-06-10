@@ -2,18 +2,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { Property } from "@/lib/property-constants";
 
-interface Property {
+type ViewMode = "list" | "card";
+
+const typeLabels: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业", INDUSTRIAL: "产业园" };
+const cities = ["上海","北京","广州","成都","杭州","深圳","苏州","西安","长沙"];
+
+interface PropertyRow {
   id: string; projectName: string; city: string; district: string;
   propertyType: string; faceRent: number; dataSource: string;
   confidenceScore: number; createdAt: string;
 }
 
-const typeLabels: Record<string, string> = { OFFICE: "写字楼", SHOPS: "商业", INDUSTRIAL: "产业园" };
-const cities = ["上海","北京","广州","成都","杭州","深圳","苏州","西安","长沙"];
-
 export default function DataReviewPage() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyRow[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -105,6 +109,10 @@ export default function DataReviewPage() {
           <p style={{ fontSize: 13, fontWeight: 400, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>{properties.length} 条资产</p>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ display: "inline-flex", borderRadius: 6, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+            <button onClick={() => setViewMode("list")} style={{ padding: "5px 10px", border: "none", background: viewMode === "list" ? "#0070F3" : "#FFF", color: viewMode === "list" ? "#FFF" : "#737373", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>列表</button>
+            <button onClick={() => setViewMode("card")} style={{ padding: "5px 10px", border: "none", borderLeft: "1px solid #E5E5E5", background: viewMode === "card" ? "#0070F3" : "#FFF", color: viewMode === "card" ? "#FFF" : "#737373", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>卡片</button>
+          </div>
           <button onClick={fetchData} className="vl-btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }}>刷新</button>
           <button onClick={() => setShowAddForm(!showAddForm)} className="vl-btn-primary" style={{ fontSize: 12, padding: "6px 14px" }}>
             {showAddForm ? "取消" : "+ 手动添加"}
@@ -139,8 +147,8 @@ export default function DataReviewPage() {
         </div>
       )}
 
-      {/* Table */}
-      {properties.length > 0 && (
+      {/* List View */}
+      {viewMode === "list" && properties.length > 0 && (
         <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -176,6 +184,59 @@ export default function DataReviewPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Card View */}
+      {viewMode === "card" && properties.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+          {properties.map(p => (
+            <div key={p.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+              {/* Card Header */}
+              <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0F0F0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.projectName}</p>
+                  <p style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>{p.city} · {p.district}</p>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(0,112,243,0.06)", color: "#0070F3", whiteSpace: "nowrap" }}>
+                  {typeLabels[p.propertyType]||p.propertyType}
+                </span>
+              </div>
+
+              {/* Card Body */}
+              <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>挂牌面价</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 600, color: "#171717" }}>
+                    ¥{Number(p.faceRent||0).toFixed(1)}
+                    <span style={{ fontSize: 11, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>/㎡/天</span>
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>可信度</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 80, height: 6, borderRadius: 3, background: "#F0F0F0", overflow: "hidden" }}>
+                      <div style={{ width: `${Math.min((p.confidenceScore||0)*100, 100)}%`, height: "100%", borderRadius: 3, background: (p.confidenceScore||0) >= 0.8 ? "#10B981" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EE0000" }} />
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-mono)", color: (p.confidenceScore||0) >= 0.8 ? "#10B981" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EE0000" }}>
+                      {((p.confidenceScore||0)*100).toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>数据来源</span>
+                  <span style={{ fontSize: 12, color: "#404040", fontFamily: "var(--font-sans)" }}>{p.dataSource}</span>
+                </div>
+              </div>
+
+              {/* Card Footer */}
+              <div style={{ padding: "10px 16px", borderTop: "1px solid #F0F0F0", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <button onClick={()=>handleDelete(p.id)} style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #EE0000", background: "rgba(238,0,0,0.04)", color: "#EE0000", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>删除</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -144,6 +144,7 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
     const script = document.createElement("script");
     script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
     script.onload = () => setLoaded(true);
+    script.onerror = () => { setLoaded(true); }; // fallback on CDN failure
     document.head.appendChild(script);
   }, []);
 

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Property } from "@/lib/property-constants";
+import { useRouter } from "next/navigation";
 
 type ViewMode = "list" | "card";
 
@@ -16,6 +16,7 @@ interface PropertyRow {
 }
 
 export default function DataReviewPage() {
+  const router = useRouter();
   const [properties, setProperties] = useState<PropertyRow[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [loading, setLoading] = useState(true);
@@ -176,7 +177,8 @@ export default function DataReviewPage() {
                       {((p.confidenceScore||0)*100).toFixed(0)}%
                     </td>
                     <td style={{ padding: "10px 14px", color: "#737373", fontSize: 12, fontFamily: "var(--font-sans)" }}>{p.dataSource}</td>
-                    <td style={{ padding: "10px 14px" }}>
+                    <td style={{ padding: "10px 14px", display: "flex", gap: 6 }}>
+                      <button onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "3px 8px", borderRadius: 4, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", color: "#0070F3", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>编辑</button>
                       <button onClick={()=>handleDelete(p.id)} style={{ padding: "3px 8px", borderRadius: 4, border: "1px solid #EE0000", background: "rgba(238,0,0,0.04)", color: "#EE0000", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>删除</button>
                     </td>
                   </tr>
@@ -204,7 +206,7 @@ export default function DataReviewPage() {
               </div>
 
               {/* Card Body */}
-              <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+              <div onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>挂牌面价</span>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 600, color: "#171717" }}>
@@ -233,6 +235,7 @@ export default function DataReviewPage() {
 
               {/* Card Footer */}
               <div style={{ padding: "10px 16px", borderTop: "1px solid #F0F0F0", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <button onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", color: "#0070F3", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>编辑</button>
                 <button onClick={()=>handleDelete(p.id)} style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #EE0000", background: "rgba(238,0,0,0.04)", color: "#EE0000", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>删除</button>
               </div>
             </div>

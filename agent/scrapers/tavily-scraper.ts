@@ -238,10 +238,11 @@ function parseSearchResults(
         propertyType,
         rawPriceText: `${price}元/㎡/天`,
         freeRentMonthsText: "",
-        area,
+        area: area ?? undefined,
         leaseTotalMonths: 36,
         macroSubmarketVacancy: 0.15,
         inputLtv: 0.6,
+        noiCagr3Y: 0.02,
       });
     }
   }
@@ -267,10 +268,11 @@ function parseSearchResults(
         propertyType,
         rawPriceText: price ? `${price}元/㎡/天` : "",
         freeRentMonthsText: "",
-        area,
+        area: area ?? undefined,
         leaseTotalMonths: 36,
         macroSubmarketVacancy: 0.15,
         inputLtv: 0.6,
+        noiCagr3Y: 0.02,
       });
 
       // 限制每条搜索最多10个项目

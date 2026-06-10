@@ -29,7 +29,7 @@ export async function GET() {
 
         // 从 scheduledCrawlJob 查最后运行状态（兼容旧数据）
         const job = await prisma.scheduledCrawlJob.findFirst({
-          where: { city, propertyType: type },
+          where: { city, propertyType: type as any },
           orderBy: { lastRunAt: "desc" },
           select: { lastRunAt: true, lastPipelineCount: true },
         });

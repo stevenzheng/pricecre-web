@@ -63,7 +63,7 @@ export function validateRawPackage(
   const checks: QualityCheck[] = [];
 
   // 1. 项目名非空
-  const hasName = pkg.projectName && pkg.projectName.trim().length >= 2;
+  const hasName = !!(pkg.projectName && pkg.projectName.trim().length >= 2);
   checks.push({
     field: "projectName",
     rule: "项目名至少2个字符",
@@ -101,7 +101,7 @@ export function validateRawPackage(
   });
 
   // 4. 地址非空
-  const hasAddress = pkg.roughAddress && pkg.roughAddress.trim().length >= 5;
+  const hasAddress = !!(pkg.roughAddress && pkg.roughAddress.trim().length >= 5);
   checks.push({
     field: "roughAddress",
     rule: "地址至少5个字符",

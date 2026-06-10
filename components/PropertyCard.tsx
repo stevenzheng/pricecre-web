@@ -606,10 +606,10 @@ export default function PropertyCard({
                           >
                             {displayValue}
                           </span>
-                          {/* Correction button — dispatches event to page-level modal */}
-                          <span
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              e.preventDefault();
                               document.dispatchEvent(new CustomEvent("open-correction", {
                                 detail: {
                                   propertyId: property.id,
@@ -620,11 +620,15 @@ export default function PropertyCard({
                                 },
                               }));
                             }}
-                            style={{ position: "absolute", bottom: 0, right: 0, width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", opacity: 0.4, fontSize: 10, color: "#737373", userSelect: "none" }}
+                            style={{
+                              marginLeft: 2, padding: "1px 3px", border: "none", background: "none",
+                              cursor: "pointer", fontSize: 10, color: "#737373", opacity: 0.3,
+                              lineHeight: 1, borderRadius: 2, verticalAlign: "top",
+                            }}
+                            onMouseEnter={(e: any) => { e.target.style.opacity = "0.8"; e.target.style.background = "#F0F0F0"; }}
+                            onMouseLeave={(e: any) => { e.target.style.opacity = "0.3"; e.target.style.background = "none"; }}
                             title="提报数据纠错"
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.4"; }}
-                          >✎</span>
+                          >✎</button>
                         </>
                       )}
                     </div>

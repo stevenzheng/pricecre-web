@@ -88,7 +88,10 @@ export default function Home() {
   // Correction modal — page-level, not inside cards
   const [correctionData, setCorrectionData] = useState<any>(null);
   useEffect(() => {
-    const h = (e: Event) => { setCorrectionData((e as CustomEvent).detail); };
+    const h = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      if (d?.propertyId) setCorrectionData(d);
+    };
     document.addEventListener("open-correction", h);
     return () => document.removeEventListener("open-correction", h);
   }, []);

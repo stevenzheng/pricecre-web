@@ -237,12 +237,13 @@ export default function PropertyCard({
 
   // Fetch corrections when unlocked
   useEffect(() => {
-    if (isUnlocked && property.id) {
-      fetch(`/api/property/${property.id}/corrections`).then(r => r.json()).then(d => {
+    const propId = property?.id;
+    if (isUnlocked && propId) {
+      fetch(`/api/property/${encodeURIComponent(propId)}/corrections`).then(r => r.json()).then(d => {
         setCorrections(d.corrections || []);
-      }).catch(() => {});
+      }).catch(() => setCorrections([]));
     }
-  }, [isUnlocked, property.id]);
+  }, [isUnlocked, property?.id]);
 
   const indicatorFields = useMemo(
     () => getIndicatorFields(property.dynamicIndicators, property.propertyType),

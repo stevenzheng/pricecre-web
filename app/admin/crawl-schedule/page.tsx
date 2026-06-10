@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 // ── 常量 ──────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ function timeAgo(iso: string | null): string {
 // ── 组件 ──────────────────────────────────────────────
 
 export default function CrawlSchedulePage() {
+  const router = useRouter();
   const [cells, setCells] = useState<CellData[]>([]);
   const [summary, setSummary] = useState({ totalCrawled: 0, totalApproved: 0, neverRun: 0, recentlyRun: 0, total: 27 });
   const [loading, setLoading] = useState(true);
@@ -187,6 +189,13 @@ export default function CrawlSchedulePage() {
                   {cell?.lastCount || 0}
                 </span>
                 <span style={{ fontSize: 10, color: "#A3A3A3" }}>条</span>
+              </div>
+              <div style={{ marginTop: 4, borderTop: "1px solid #E5E5E5", paddingTop: 4 }}>
+                <span
+                  onClick={(e) => { e.stopPropagation(); router.push(`/admin/data-review?city=${encodeURIComponent(city)}&type=${encodeURIComponent(type)}`); }}
+                  style={{ fontSize: 10, color: "#0070F3", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500 }}>
+                  查看数据 →
+                </span>
               </div>
             </div>
           ) : (

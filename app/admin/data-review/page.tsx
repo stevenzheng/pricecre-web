@@ -32,18 +32,41 @@ export default function DataReviewPage() {
       if (props.length > 0) {
         setProperties(props);
       } else {
-        import("@/lib/mock-data").then(m => {
-          setProperties(m.mockProperties.map((p: any) => ({
-            ...p, confidenceScore: p.confidenceScore || 0.85, status: "published",
-          })));
-        });
+        // Fallback: load mock data via dynamic import
+        try {
+          const m = await import("@/lib/mock-data");
+          const mapped = m.mockProperties.map((p: any) => ({
+            id: p.id || "",
+            projectName: p.projectName || "",
+            city: p.city || "",
+            district: p.district || "",
+            propertyType: typeof p.propertyType === "number" ? ["OFFICE","SHOPS","INDUSTRIAL"][p.propertyType] || "OFFICE" : p.propertyType || "OFFICE",
+            faceRent: Number(p.faceRent) || 0,
+            dataSource: p.dataSource || "mock",
+            confidenceScore: Number(p.confidenceScore) || 0.85,
+            createdAt: p.createdAt || p.updatedAt || "",
+            status: "published",
+          }));
+          setProperties(mapped);
+        } catch { setProperties([]); }
       }
     } catch {
-      import("@/lib/mock-data").then(m => {
-        setProperties(m.mockProperties.map((p: any) => ({
-          ...p, confidenceScore: p.confidenceScore || 0.85, status: "published",
-        })));
-      });
+      try {
+        const m = await import("@/lib/mock-data");
+        const mapped = m.mockProperties.map((p: any) => ({
+          id: p.id || "",
+          projectName: p.projectName || "",
+          city: p.city || "",
+          district: p.district || "",
+          propertyType: typeof p.propertyType === "number" ? ["OFFICE","SHOPS","INDUSTRIAL"][p.propertyType] || "OFFICE" : p.propertyType || "OFFICE",
+          faceRent: Number(p.faceRent) || 0,
+          dataSource: p.dataSource || "mock",
+          confidenceScore: Number(p.confidenceScore) || 0.85,
+          createdAt: p.createdAt || p.updatedAt || "",
+          status: "published",
+        }));
+        setProperties(mapped);
+      } catch { setProperties([]); }
     }
     setLoading(false);
   };
@@ -145,10 +168,10 @@ export default function DataReviewPage() {
                     <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{p.city}</td>
                     <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{p.district}</td>
                     <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{typeLabels[p.propertyType]||p.propertyType}</td>
-                    <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: "#171717" }}>¥{p.faceRent.toFixed(1)}</td>
+                    <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: "#171717" }}>¥{(p.faceRent ?? 0).toFixed(1)}</td>
                     <td style={{ padding: "10px 14px" }}>
-                      <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, color: p.confidenceScore >= 0.8 ? "#0070F3" : p.confidenceScore >= 0.6 ? "#F5A623" : "#EE0000", background: p.confidenceScore >= 0.8 ? "rgba(0,112,243,0.06)" : p.confidenceScore >= 0.6 ? "rgba(245,166,35,0.08)" : "rgba(238,0,0,0.06)" }}>
-                        {(p.confidenceScore*100).toFixed(0)}%
+                      <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, color: (p.confidenceScore ?? 0) >= 0.8 ? "#0070F3" : (p.confidenceScore ?? 0) >= 0.6 ? "#F5A623" : "#EE0000", background: (p.confidenceScore ?? 0) >= 0.8 ? "rgba(0,112,243,0.06)" : (p.confidenceScore ?? 0) >= 0.6 ? "rgba(245,166,35,0.08)" : "rgba(238,0,0,0.06)" }}>
+                        {((p.confidenceScore ?? 0) * 100).toFixed(0)}%
                       </span>
                     </td>
                     <td style={{ padding: "10px 14px", color: "#737373", fontSize: 12, fontFamily: "var(--font-sans)" }}>{p.dataSource}</td>

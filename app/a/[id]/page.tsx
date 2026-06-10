@@ -4,12 +4,19 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function SharedAnalysisPage({ params }: { params: { id: string } }) {
+export default async function SharedAnalysisPage({ params, searchParams }: { params: { id: string }; searchParams?: { print?: string } }) {
   const cached = await prisma.aiAnalysisCache.findUnique({ where: { id: params.id } });
   if (!cached) notFound();
 
   const a = cached.analysisData as any;
-  const analysis = { score: a.score, positives: a.positives || [], negatives: a.negatives || [], conclusion: a.conclusion };
+  // 兼容两种存储格式：analysis-cache（score/positives/negatives/conclusion）与 save-report（content）
+  const analysis = {
+    score: a.score ?? "—",
+    positives: a.positives || [],
+    negatives: a.negatives || [],
+    conclusion: typeof a.conclusion === "string" && a.conclusion ? a.conclusion : (typeof a.content === "string" ? a.content : ""),
+  };
+  const autoPrint = searchParams?.print === "1";
   const indicators: { label: string; value: string }[] = a.indicators || [];
   const faceRent = a.faceRent || 0;
   const netEffectiveRent = a.netEffectiveRent || null;
@@ -119,6 +126,9 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
             </div>
           </div>
         </div>
+        {autoPrint && (
+          <script dangerouslySetInnerHTML={{ __html: "window.addEventListener('load',function(){setTimeout(function(){window.print()},600)});" }} />
+        )}
       </body>
     </html>
   );

@@ -16,13 +16,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ id, projectName: "", city: "", createdAt: "", content: "", summary: "" });
     }
 
+    const a = (r.analysisData as any) || {};
+    const toText = (v: any) => v == null ? "" : typeof v === "string" ? v : (() => { try { return JSON.stringify(v); } catch { return String(v); } })();
+    // content 兼容两种存储格式：save-report 的 content，analysis-cache 的 conclusion(+positives/negatives)
+    let content = toText(a.content);
+    if (!content && a.conclusion) {
+      const pos = Array.isArray(a.positives) ? a.positives.map((p: any) => `+ ${toText(p)}`).join("\n") : "";
+      const neg = Array.isArray(a.negatives) ? a.negatives.map((n: any) => `- ${toText(n)}`).join("\n") : "";
+      content = [a.score !== undefined ? `综合评分：${a.score}/100` : "", pos && `【利好因素】\n${pos}`, neg && `【风险提示】\n${neg}`, `【结论】\n${toText(a.conclusion)}`].filter(Boolean).join("\n\n");
+    }
     return NextResponse.json({
       id: r.id,
-      projectName: r.projectName,
-      city: r.city,
+      projectName: toText(r.projectName),
+      city: toText(r.city),
       createdAt: r.createdAt,
-      content: (r.analysisData as any)?.content || "",
-      summary: (r.analysisData as any)?.summary || "",
+      content,
+      summary: toText(a.summary),
     });
   } catch {
     return NextResponse.json({ id, projectName: "", city: "", createdAt: "", content: "", summary: "" });

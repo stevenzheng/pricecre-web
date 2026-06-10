@@ -12,13 +12,13 @@ const cities = ["上海","北京","广州","成都","杭州","深圳","苏州","
 interface PropertyRow {
   id: string; projectName: string; city: string; district: string;
   propertyType: string; faceRent: number; dataSource: string;
-  confidenceScore: number; createdAt: string;
+  confidenceScore: number; createdAt: string; isMock?: boolean;
 }
 
 export default function DataReviewPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<PropertyRow[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("card");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -28,6 +28,10 @@ export default function DataReviewPage() {
   });
   const [adding, setAdding] = useState(false);
   const [msg, setMsg] = useState("");
+  // 筛选：分城市、分业态、关键词
+  const [filterCity, setFilterCity] = useState("全部");
+  const [filterType, setFilterType] = useState("全部");
+  const [search, setSearch] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,27 +50,11 @@ export default function DataReviewPage() {
         dataSource: String(p.dataSource || ""),
         confidenceScore: Number(p.confidenceScore) || 0,
         createdAt: String(p.createdAt || ""),
+        isMock: !!p.isMock,
       })));
     } catch (e: any) {
-      // Fallback to mock properties served via API
-      try {
-        const mockRes = await fetch("/api/admin/mock-properties");
-        const mockData = await mockRes.json();
-        setProperties((mockData.properties || []).map((p: any) => ({
-          id: String(p.id || ""),
-          projectName: String(p.projectName || ""),
-          city: String(p.city || ""),
-          district: String(p.district || ""),
-          propertyType: String(p.propertyType || "OFFICE"),
-          faceRent: Number(p.faceRent) || 0,
-          dataSource: String(p.dataSource || ""),
-          confidenceScore: Number(p.confidenceScore) || 0,
-          createdAt: String(p.createdAt || ""),
-        })));
-      } catch {
-        setError("数据加载失败");
-        setProperties([]);
-      }
+      setError("数据加载失败，请刷新重试");
+      setProperties([]);
     }
     setLoading(false);
   };
@@ -91,9 +79,22 @@ export default function DataReviewPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("确认删除？")) return;
-    try { await fetch(`/api/admin/properties?id=${id}`, { method: "DELETE" }); fetchData(); } catch {}
+    if (!confirm("确认删除该资产？删除后不可恢复。")) return;
+    try {
+      const res = await fetch(`/api/admin/properties?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const d = await res.json();
+      if (d.success) { setMsg("删除成功"); fetchData(); }
+      else { setMsg(d.error || "删除失败"); }
+    } catch { setMsg("网络错误，删除失败"); }
   };
+
+  // 应用筛选（数据已全量加载，切换即时生效）
+  const filtered = properties.filter(p => {
+    if (filterCity !== "全部" && p.city !== filterCity) return false;
+    if (filterType !== "全部" && p.propertyType !== filterType) return false;
+    if (search && !p.projectName.toLowerCase().includes(search.toLowerCase()) && !p.district.includes(search)) return false;
+    return true;
+  });
 
   if (loading) return (
     <div style={{ padding: 24 }}>
@@ -107,7 +108,9 @@ export default function DataReviewPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
           <p style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>资产数据管理</p>
-          <p style={{ fontSize: 13, fontWeight: 400, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>{properties.length} 条资产</p>
+          <p style={{ fontSize: 13, fontWeight: 400, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+            {filterCity === "全部" && filterType === "全部" && !search ? `共 ${properties.length} 条资产` : `筛选结果 ${filtered.length} 条 / 共 ${properties.length} 条`}
+          </p>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <div style={{ display: "inline-flex", borderRadius: 6, border: "1px solid #E5E5E5", overflow: "hidden" }}>
@@ -122,6 +125,42 @@ export default function DataReviewPage() {
         </div>
       </div>
 
+      {/* 筛选栏：分城市 / 分业态 / 搜索 */}
+      <div style={{ marginBottom: 16, padding: "12px 16px", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>城市</span>
+          {["全部", ...cities].map(c => {
+            const active = filterCity === c;
+            const count = c === "全部" ? properties.length : properties.filter(p => p.city === c).length;
+            return (
+              <button key={c} onClick={() => setFilterCity(c)}
+                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid #E5E5E5", background: active ? "rgba(0,112,243,0.06)" : "#FFF", color: active ? "#0070F3" : "#404040", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
+                {c} <span style={{ fontSize: 10, color: active ? "#0070F3" : "#A3A3A3" }}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>业态</span>
+          {[["全部","全部"], ...Object.entries(typeLabels)].map(([k, v]) => {
+            const active = filterType === k;
+            const count = k === "全部" ? properties.length : properties.filter(p => p.propertyType === k).length;
+            return (
+              <button key={k} onClick={() => setFilterType(k)}
+                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid #E5E5E5", background: active ? "rgba(0,112,243,0.06)" : "#FFF", color: active ? "#0070F3" : "#404040", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
+                {v} <span style={{ fontSize: 10, color: active ? "#0070F3" : "#A3A3A3" }}>{count}</span>
+              </button>
+            );
+          })}
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索项目名称 / 区域..."
+            style={{ marginLeft: "auto", width: 200, padding: "5px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", outline: "none" }} />
+          {(filterCity !== "全部" || filterType !== "全部" || search) && (
+            <button onClick={() => { setFilterCity("全部"); setFilterType("全部"); setSearch(""); }}
+              style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "none", color: "#737373", fontSize: 12, fontFamily: "var(--font-sans)", cursor: "pointer", textDecoration: "underline" }}>清除筛选</button>
+          )}
+        </div>
+      </div>
+
       {msg && <div style={{ marginBottom: 12, padding: "6px 12px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: msg.includes("成功") ? "rgba(0,112,243,0.06)" : "rgba(238,0,0,0.06)", color: msg.includes("成功") ? "#0070F3" : "#EE0000" }}>{msg}</div>}
       {error && <div style={{ marginBottom: 12, padding: "6px 12px", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", background: "rgba(238,0,0,0.06)", color: "#EE0000" }}>{error}</div>}
 
@@ -133,6 +172,8 @@ export default function DataReviewPage() {
           <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>区域</label><input value={form.district} onChange={e => setForm({...form, district: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
           <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>业态</label><select value={form.propertyType} onChange={e => setForm({...form, propertyType: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }}>{Object.entries(typeLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
           <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>面价 (元/㎡/天)</label><input type="number" step="0.1" value={form.faceRent} onChange={e => setForm({...form, faceRent: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>可信度 (0~1)</label><input type="number" step="0.05" min="0" max="1" value={form.confidenceScore} onChange={e => setForm({...form, confidenceScore: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>数据来源</label><input value={form.dataSource} onChange={e => setForm({...form, dataSource: e.target.value})} placeholder="如：manual / 点点租" style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <button type="submit" disabled={adding} style={{ width: "100%", padding: "8px", borderRadius: 6, border: "none", background: "#10B981", color: "#FFF", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>
               {adding ? "添加中..." : "确认添加"}
@@ -142,15 +183,19 @@ export default function DataReviewPage() {
       )}
 
       {/* Empty state */}
-      {properties.length === 0 && !loading && !error && (
+      {filtered.length === 0 && !loading && !error && (
         <div style={{ padding: 40, textAlign: "center", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
-          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>暂无资产数据</p>
-          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>数据库中没有资产记录，点击"+ 手动添加"开始录入</p>
+          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>
+            {properties.length === 0 ? "暂无资产数据" : "当前筛选条件下无资产"}
+          </p>
+          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+            {properties.length === 0 ? "数据库中没有资产记录，点击\"+ 手动添加\"开始录入" : "调整城市/业态筛选或清除筛选条件"}
+          </p>
         </div>
       )}
 
       {/* List View */}
-      {viewMode === "list" && properties.length > 0 && (
+      {viewMode === "list" && filtered.length > 0 && (
         <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -167,7 +212,7 @@ export default function DataReviewPage() {
                 </tr>
               </thead>
               <tbody>
-                {properties.map(p => (
+                {filtered.map(p => (
                   <tr key={p.id} style={{ borderBottom: "1px solid #F0F0F0" }}>
                     <td style={{ padding: "10px 14px", fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{p.projectName}</td>
                     <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{p.city}</td>
@@ -191,9 +236,9 @@ export default function DataReviewPage() {
       )}
 
       {/* Card View */}
-      {viewMode === "card" && properties.length > 0 && (
+      {viewMode === "card" && filtered.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
-          {properties.map(p => (
+          {filtered.map(p => (
             <div key={p.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
               {/* Card Header */}
               <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0F0F0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -201,8 +246,11 @@ export default function DataReviewPage() {
                   <p style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.projectName}</p>
                   <p style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>{p.city} · {p.district}</p>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(0,112,243,0.06)", color: "#0070F3", whiteSpace: "nowrap" }}>
-                  {typeLabels[p.propertyType]||p.propertyType}
+                <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                  {p.isMock && <span style={{ fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(245,166,35,0.1)", color: "#F5A623", whiteSpace: "nowrap" }}>演示</span>}
+                  <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(0,112,243,0.06)", color: "#0070F3", whiteSpace: "nowrap" }}>
+                    {typeLabels[p.propertyType]||p.propertyType}
+                  </span>
                 </span>
               </div>
 

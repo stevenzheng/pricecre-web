@@ -318,16 +318,6 @@ export default function Home() {
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }, 300);
       } else if (action === "unlocked-assets") {
-        // Refresh unlockedIds from localStorage before showing drawer
-        try {
-          const stored = localStorage.getItem("pricecre_unlockedIds");
-          if (stored) {
-            const arr = JSON.parse(stored);
-            if (Array.isArray(arr)) {
-              setUnlockedIds(new Set(arr));
-            }
-          }
-        } catch {}
         setShowUnlockedAssets(true);
       }
     };
@@ -457,10 +447,7 @@ export default function Home() {
     return allProperties.filter((p) => {
       if (activeCity !== "全部" && p.city !== activeCity) return false;
       if (activeType !== "ALL" && p.propertyType !== activeType) return false;
-      if (statFilter === "unlocked") {
-        const unlockedIds = new Set(JSON.parse(localStorage.getItem("pricecre_unlockedIds") || "[]"));
-        if (!unlockedIds.has(p.id as any)) return false;
-      }
+      if (statFilter === "unlocked" && !unlockedIds.has(p.id)) return false;
       if (statFilter === "recent" && p.dataSource !== "成交量") return false;
       if (
         searchQuery &&
@@ -471,7 +458,7 @@ export default function Home() {
         return false;
       return true;
     });
-  }, [allProperties, activeCity, activeType, searchQuery]);
+  }, [allProperties, activeCity, activeType, searchQuery, statFilter, unlockedIds]);
 
   // Card list with inline referral card at random position
   const cardList = useMemo(() => {
@@ -482,17 +469,23 @@ export default function Home() {
   }, [filteredProperties]);
 
   // Stats (reactive to unlocks)
-  const [serverStats, setServerStats] = useState({ total: mockProperties.length, cities: 0, volume: 0 });
+  const [serverStats, setServerStats] = useState({ total: 0, cities: 0, volume: 0 });
+
+  // 已解锁列表唯一数据源：与抽屉、计数、筛选保持完全一致
+  const unlockedProperties = useMemo(
+    () => allProperties.filter((p) => unlockedIds.has(p.id)),
+    [allProperties, unlockedIds]
+  );
 
   const stats = useMemo(() => {
-    const cities = new Set(mockProperties.map((p) => p.city)).size;
+    const cities = new Set(allProperties.map((p) => p.city)).size;
     return {
-      total: mockProperties.length,
-      unlocked: unlockedIds.size,
+      total: allProperties.length,
+      unlocked: unlockedProperties.length,
       cities,
       volume: serverStats.volume || 12,
     };
-  }, [unlockedIds, serverStats.volume, mockProperties.length]);
+  }, [allProperties, unlockedProperties.length, serverStats.volume]);
 
   // Fetch real stats from API
   useEffect(() => {
@@ -508,7 +501,7 @@ export default function Home() {
   // Handlers
   const handleUnlock = useCallback(async (propertyId: string) => {
     try {
-      const prop = mockProperties.find(p => p.id === propertyId);
+      const prop = allProperties.find(p => p.id === propertyId);
       const res = await fetch("/api/assets/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -566,7 +559,7 @@ export default function Home() {
       showModal("网络异常，请稍后重试");
       document.dispatchEvent(new CustomEvent("unlock-fail", { detail: propertyId }));
     }
-  }, [userEmail, mockProperties]); // depend on userEmail (closure after login) + mockProperties (lazy-loaded)
+  }, [userEmail, allProperties]); // depend on userEmail (closure after login) + allProperties (real+mock merged)
 
   const handleCityChange = useCallback((city: string) => {
     setActiveCity(city);
@@ -815,8 +808,8 @@ export default function Home() {
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>覆盖资产</div>
                 <div className="stat-value">{stats.total}</div>
               </div>
-              <div className="stat-item" onClick={() => { setStatFilter(statFilter === "unlocked" ? null : "unlocked"); setShowUnlockedAssets(true); }}
-                style={{ cursor: "pointer", background: statFilter === "unlocked" ? "rgba(0,197,112,0.06)" : undefined, borderRadius: statFilter === "unlocked" ? 8 : undefined }}
+              <div className="stat-item" onClick={() => setShowUnlockedAssets(true)}
+                style={{ cursor: "pointer" }}
                 title="点击查看已解锁资产清单">
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M11 1a2 2 0 012 2v3.5a.5.5 0 01-.5.5H10V3a2 2 0 012-2z"/><path d="M5 1a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2v-.5a.5.5 0 00-.5-.5H6V3a2 2 0 00-2-2z"/></svg>已解锁资产</div>
                 <div className="stat-value" style={{ color: statFilter === "unlocked" ? "#0D9488" : "var(--positive)" }}>{stats.unlocked}</div>
@@ -870,7 +863,7 @@ export default function Home() {
                 { key: "INDUSTRIAL", label: "产业园", icon: (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-0.5"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7-6-7 6v12"/><path d="M9 18h2M13 18h2"/></svg>) },
               ].map((t) => {
                 const isActive = activeType === t.key;
-                const count = mockProperties.filter(p =>
+                const count = allProperties.filter(p =>
                   (activeCity === "全部" || p.city === activeCity) && p.propertyType === t.key
                 ).length;
                 return (
@@ -1115,17 +1108,17 @@ export default function Home() {
           </RightDrawer>
         )}
         {showUnlockedAssets && (
-          <RightDrawer title="已解锁资产" onClose={() => setShowUnlockedAssets(false)}>
+          <RightDrawer title={`已解锁资产 (${unlockedProperties.length})`} onClose={() => setShowUnlockedAssets(false)}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {mockProperties.filter(p => unlockedIds.has(p.id)).map(p => (
-                <div key={p.id} onClick={() => { setShowUnlockedAssets(false); setFocusedPropertyId(p.id); }}
+              {unlockedProperties.map(p => (
+                <div key={p.id} onClick={() => { setShowUnlockedAssets(false); setMobileTab("market"); setFocusedPropertyId(p.id); }}
                   style={{ padding: "10px 12px", background: "#FAFAFA", borderRadius: 8, border: "1px solid #F0F0F0", cursor: "pointer" }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>{p.projectName}</div>
                   <div style={{ fontSize: 11, color: "#A3A3A3", marginTop: 2 }}>{p.city} · {p.district || "—"} · {p.propertyType === "OFFICE" ? "写字楼" : p.propertyType === "SHOPS" ? "商业零售" : "产业园"}</div>
                 </div>
               ))}
-              {mockProperties.filter(p => unlockedIds.has(p.id)).length === 0 && (
-                <div style={{ textAlign: "center", padding: 24, color: "#A3A3A3" }}>暂无已解锁资产</div>
+              {unlockedProperties.length === 0 && (
+                <div style={{ textAlign: "center", padding: 24, color: "#A3A3A3" }}>暂无已解锁资产，去市场页解锁感兴趣的资产吧</div>
               )}
             </div>
           </RightDrawer>
@@ -1134,8 +1127,13 @@ export default function Home() {
           <RightDrawer title="AI分析报告" onClose={() => setShowAiReports(false)}>
             {showReportDetail ? (
               <div>
-                <button onClick={() => setShowReportDetail(null)}
-                  style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 12, cursor: "pointer", marginBottom: 12, color: "#2563EB" }}>← 返回列表</button>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  <button onClick={() => setShowReportDetail(null)}
+                    style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 12, cursor: "pointer", color: "#2563EB" }}>← 返回列表</button>
+                  <button onClick={() => window.open(`/a/${showReportDetail.id}?print=1`, "_blank")}
+                    title="打开打印版报告，在打印对话框中选择「另存为 PDF」"
+                    style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", fontSize: 12, cursor: "pointer", color: "#0070F3" }}>导出PDF</button>
+                </div>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{showReportDetail.projectName}</div>
                 <div style={{ fontSize: 12, color: "#737373", marginBottom: 12 }}>{showReportDetail.city} · {new Date(showReportDetail.createdAt).toLocaleString("zh-CN")}</div>
                 <div style={{ padding: "12px", background: "#F7F7F7", borderRadius: 8, whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7 }}>{showReportDetail.content}</div>
@@ -1170,9 +1168,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* ====== Mobile Bottom Nav ====== */}
-      <Modal />
-
       <Modal />
       {wechatCardData && <WechatCard {...wechatCardData} onClose={() => setWechatCardData(null)} />}
       {aiAnalysisData && <AIAnalysis {...aiAnalysisData} onClose={() => setAiAnalysisData(null)} />}
@@ -1182,6 +1177,7 @@ export default function Home() {
           fieldKey={correctionData.fieldKey}
           fieldLabel={correctionData.fieldLabel}
           currentValue={correctionData.currentValue}
+          email={userEmail || undefined}
           onClose={() => setCorrectionData(null)}
           onSubmit={() => setCorrectionData(null)}
         />

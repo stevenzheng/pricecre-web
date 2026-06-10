@@ -607,24 +607,17 @@ export default function PropertyCard({
                             {displayValue}
                           </span>
                           <button
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              const newVal = window.prompt(`纠错: ${field.label}\n当前值: ${field.value}`, "");
-                              if (!newVal || newVal === String(field.value)) return;
-                              try {
-                                const ue = (() => { try { return JSON.parse(localStorage.getItem("pricecre_user")||"{}").email||""; } catch { return ""; } })();
-                                const res = await fetch("/api/data/correct", {
-                                  method: "POST", headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    propertyId: property.id, fieldKey: field.key,
-                                    fieldLabel: field.label, newValue: newVal, email: ue,
-                                  }),
-                                });
-                                const json = await res.json();
-                                if (json.success) showModal("纠错已提交，管理员审核通过后将奖励额度");
-                                else showModal(json.error || "提交失败");
-                              } catch { showModal("提交失败"); }
+                              document.dispatchEvent(new CustomEvent("open-correction", {
+                                detail: {
+                                  propertyId: property.id,
+                                  fieldKey: field.key,
+                                  fieldLabel: field.label,
+                                  currentValue: formatValue(field.value, field.format),
+                                },
+                              }));
                             }}
                             style={{
                               marginLeft: 2, padding: "1px 4px", border: "none", background: "none",

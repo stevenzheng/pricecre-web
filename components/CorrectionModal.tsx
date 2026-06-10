@@ -28,7 +28,7 @@ export default function CorrectionModal({
       const res = await fetch("/api/data/correct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId, fieldKey, fieldLabel, newValue, reason, email }),
+        body: JSON.stringify({ propertyId, fieldKey, fieldLabel, oldValue: currentValue, newValue, reason, email }),
       });
       const d = await res.json();
       if (d.success) {

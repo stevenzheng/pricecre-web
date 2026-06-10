@@ -104,9 +104,7 @@ export default function AIAnalysis({
                 const id = shareId || await saveCacheAndGetId();
                 if (!id) return;
                 setShareId(id);
-                const w = window.open(`/a/${id}`, "_blank");
-                if (w) { w.addEventListener("load", () => setTimeout(() => w.print(), 800)); }
-                else { window.open(`/a/${id}`, "_self"); }
+                window.open(`/a/${id}?print=1`, "_blank");
               }}
               className="text-[11px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors font-medium"
               style={{ background: "#F7F7F7", color: "#525252", border: "1px solid #E5E5E5" }}>

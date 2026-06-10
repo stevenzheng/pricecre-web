@@ -16,6 +16,7 @@
     "axios": "^1.16.1",
     "bcryptjs": "^3.0.3",
     "exa-js": "^1.10.3",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.17.0",
     "nanoid": "^5.1.11",
     "next": "14.2.35",

@@ -20,21 +20,31 @@ export default function ExchangeCodesPage() {
   const [generating, setGenerating] = useState(false);
   const [msg, setMsg] = useState("");
 
-  useEffect(() => { try { setRecords(JSON.parse(localStorage.getItem("pricecre_code_log")||"[]")); } catch {} }, []);
+  // 历史记录从服务端读取（数据库持久化）；服务端不可用时回退 localStorage
+  const loadHistory = async () => {
+    try {
+      const res = await fetch("/api/admin/generate-codes");
+      const d = await res.json();
+      if (Array.isArray(d.records) && d.records.length > 0) { setRecords(d.records); return; }
+    } catch {}
+    try { setRecords(JSON.parse(localStorage.getItem("pricecre_code_log")||"[]")); } catch {}
+  };
+
+  useEffect(() => { loadHistory(); }, []);
 
   const generate = async () => {
     if (!email.trim()) { setMsg("请输入邮箱"); return; }
     const t = TYPES.find(x => x.key === type)!;
     setGenerating(true); setMsg("");
     try {
-      const res = await fetch("/api/admin/generate-codes", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ email: email.trim(), credits: t.credits }) });
+      const res = await fetch("/api/admin/generate-codes", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ email: email.trim(), credits: t.credits, type: t.key, label: t.label }) });
       const d = await res.json();
       if (d.success) {
+        // 本地也留一份，作为服务端不可用时的降级显示
         const rec: CodeRecord = { id: Date.now().toString(36), code: d.code, email: email.trim(), credits: t.credits, type: t.label, createdAt: new Date().toISOString() };
-        const updated = [rec, ...records];
-        localStorage.setItem("pricecre_code_log", JSON.stringify(updated.slice(0,200)));
-        setRecords(updated.slice(0,200));
+        try { localStorage.setItem("pricecre_code_log", JSON.stringify([rec, ...records].slice(0,200))); } catch {}
         setMsg(`已生成 ${d.code} (${t.label})`); setEmail("");
+        loadHistory();
       } else { setMsg(d.error || "失败"); }
     } catch { setMsg("网络错误"); }
     setGenerating(false);

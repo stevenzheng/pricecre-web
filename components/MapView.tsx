@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { cityList } from "@/lib/property-constants";
+import "leaflet/dist/leaflet.css";
 
 // Leaflet uses [lat, lng] order — all coords stored as [lat, lng]
 const cityCenter: Record<string, [number, number]> = {
@@ -115,9 +116,12 @@ function seedFromName(name: string): number {
 export default function MapView({ properties, onSelectProperty, userCoords }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const leafletRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
   const [activeCity, setActiveCity] = useState<string>("上海");
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
   // Mock dataset lazy-loaded out of the initial bundle (see lib/mock-data.ts)
@@ -133,66 +137,70 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
   // Use provided properties or fallback to mock data
   const displayProperties = properties && properties.length > 0 ? properties : mockProperties;
 
-  // Load Leaflet once
+  // Load Leaflet from the npm bundle (no external CDN — works in China)
   useEffect(() => {
-    if (document.getElementById("leaflet-css")) { setLoaded(true); return; }
-    const link = document.createElement("link");
-    link.id = "leaflet-css";
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => setLoaded(true);
-    script.onerror = () => { setLoaded(true); }; // fallback on CDN failure
-    document.head.appendChild(script);
+    let alive = true;
+    import("leaflet")
+      .then((mod: any) => {
+        if (!alive) return;
+        leafletRef.current = mod.default ?? mod;
+        setLoaded(true);
+      })
+      .catch(() => { if (alive) { setLoadFailed(true); setLoaded(true); } });
+    return () => { alive = false; };
   }, []);
 
   // Create map instance
   useEffect(() => {
-    if (!loaded || !mapRef.current || !(window as any).L) return;
-    const L = (window as any).L;
+    if (!loaded || !mapRef.current || !leafletRef.current || mapInstanceRef.current) return;
+    const L = leafletRef.current;
 
-    if (!mapInstanceRef.current) {
-      const center: [number, number] = userCoords
-        ? [userCoords.lat, userCoords.lng]
-        : cityCenter[activeCity] || [31.23, 121.47];
+    const center: [number, number] = userCoords
+      ? [userCoords.lat, userCoords.lng]
+      : cityCenter[activeCity] || [31.23, 121.47];
 
-      const map = L.map(mapRef.current, {
-        center,
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false,
-      });
+    const map = L.map(mapRef.current, {
+      center,
+      zoom: 13,
+      zoomControl: true,
+      attributionControl: false,
+    });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 18,
-      }).addTo(map);
+    // 高德地图瓦片（国内可直接访问，无需 key）；海外/失败时自动回退 OSM
+    const amap = L.tileLayer(
+      "https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+      { maxZoom: 18, subdomains: ["1", "2", "3", "4"] }
+    );
+    amap.on("tileerror", () => {
+      if ((map as any)._fallbackApplied) return;
+      (map as any)._fallbackApplied = true;
+      map.removeLayer(amap);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+    });
+    amap.addTo(map);
 
-      mapInstanceRef.current = map;
+    markersLayerRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
 
-      // Fix map size on resize / tab switch
-      setTimeout(() => map.invalidateSize(), 100);
-      window.addEventListener("resize", () => map.invalidateSize());
-    }
+    // Fix map size on resize / tab switch
+    setTimeout(() => map.invalidateSize(), 100);
+    window.addEventListener("resize", () => map.invalidateSize());
   }, [loaded]);
 
-  // Update markers when city changes
+  // Update markers when city or data changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !(window as any).L) return;
+    if (!mapInstanceRef.current || !leafletRef.current) return;
     const map = mapInstanceRef.current;
-    const L = (window as any).L;
+    const L = leafletRef.current;
+    const markersLayer = markersLayerRef.current;
+    if (!markersLayer) return;
 
     // Shift center
     const center: [number, number] = cityCenter[activeCity] || [31.23, 121.47];
     map.setView(center, 13);
 
-    // Clear old markers
-    map.eachLayer((layer: any) => {
-      if (layer instanceof L.Marker || (layer._icon && layer._icon.tagName === "DIV")) {
-        map.removeLayer(layer);
-      }
-    });
+    // Clear old markers (LayerGroup — no leaks, circles included)
+    markersLayer.clearLayers();
 
     const cityProps = displayProperties.filter((p) => p.city === activeCity);
     const usedCoords = new Set<string>();
@@ -239,8 +247,8 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         iconAnchor: [70, 14],
       });
 
-      const marker = L.marker([lat, lng], { icon })
-        .addTo(map)
+      L.marker([lat, lng], { icon })
+        .addTo(markersLayer)
         .on("click", () => {
           setSelectedProperty(p.id);
           onSelectProperty?.(p.id);
@@ -253,14 +261,15 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         fillColor: "transparent",
         fillOpacity: 0,
         interactive: true,
-      }).addTo(map).on("click", () => {
+      }).addTo(markersLayer).on("click", () => {
         setSelectedProperty(p.id);
         onSelectProperty?.(p.id);
       });
     });
   }, [activeCity, loaded, displayProperties]);
 
-  const cityProps = mockProperties.filter((p) => p.city === activeCity);
+  // 底部列表与地图标记使用同一数据源（真实数据优先）
+  const cityProps = displayProperties.filter((p) => p.city === activeCity);
 
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--bg)" }}>
@@ -269,10 +278,10 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         className="flex items-center gap-1 px-3 py-2 overflow-x-auto border-b"
         style={{ borderColor: "var(--line)" }}
       >
-        {["全部", ...cityList].map((city) => (
+        {cityList.map((city) => (
           <button
             key={city}
-            onClick={() => city !== "全部" && setActiveCity(city)}
+            onClick={() => setActiveCity(city)}
             className={`chip text-[11px] ${activeCity === city ? "active" : ""}`}
           >
             {city}
@@ -297,6 +306,11 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
               className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
               style={{ borderColor: "var(--accent)", borderTopColor: "transparent" }}
             />
+          </div>
+        )}
+        {loadFailed && (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>地图组件加载失败，请刷新页面重试</span>
           </div>
         )}
       </div>

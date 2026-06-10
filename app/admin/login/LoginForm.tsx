@@ -38,26 +38,26 @@ function LoginFormInner() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#F7F7F7",
+      background: "var(--bw-panel)",
     }}>
       <div style={{
         width: 380,
         maxWidth: "90vw",
         padding: "40px 32px",
         borderRadius: 6,
-        background: "#FFFFFF",
-        border: "1px solid #E5E5E5",
+        background: "var(--bw-surface)",
+        border: "1px solid var(--bw-line)",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <img src="/og-image.png" alt="PriceCRE" style={{ width: 40, height: 40, borderRadius: 8, display: "block", margin: "0 auto 16px", background: "#fff" }} />
           <h2 style={{
-            fontSize: 16, fontWeight: 600, color: "#171717", margin: "0 0 4px",
+            fontSize: 16, fontWeight: 600, color: "var(--bw-text)", margin: "0 0 4px",
             fontFamily: "var(--font-sans)", letterSpacing: "-0.02em",
           }}>
             PriceCRE · 地产价值
           </h2>
-          <p style={{ fontSize: 12, color: "#737373", margin: 0, fontFamily: "var(--font-sans)", letterSpacing: "-0.01em" }}>
+          <p style={{ fontSize: 12, color: "var(--bw-muted)", margin: 0, fontFamily: "var(--font-sans)", letterSpacing: "-0.01em" }}>
             Admin Console · 数据治理中心
           </p>
         </div>
@@ -86,7 +86,7 @@ function LoginFormInner() {
           <div style={{ marginBottom: 16 }}>
             <label style={{
               display: "block", fontSize: 12, fontWeight: 500,
-              color: "#737373", marginBottom: 6,
+              color: "var(--bw-muted)", marginBottom: 6,
               fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
             }}>
               邮箱
@@ -99,8 +99,8 @@ function LoginFormInner() {
               required
               style={{
                 width: "100%", padding: "8px 12px",
-                borderRadius: 6, border: "1px solid #D4D4D4",
-                background: "#FFFFFF", color: "#171717",
+                borderRadius: 6, border: "1px solid var(--bw-line-strong)",
+                background: "var(--bw-surface)", color: "var(--bw-text)",
                 fontSize: 14, outline: "none", boxSizing: "border-box",
                 fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
               }}
@@ -110,7 +110,7 @@ function LoginFormInner() {
           <div style={{ marginBottom: 24 }}>
             <label style={{
               display: "block", fontSize: 12, fontWeight: 500,
-              color: "#737373", marginBottom: 6,
+              color: "var(--bw-muted)", marginBottom: 6,
               fontFamily: "var(--font-sans)", letterSpacing: "-0.01em"
             }}>
               密码
@@ -123,8 +123,8 @@ function LoginFormInner() {
               required
               style={{
                 width: "100%", padding: "8px 12px",
-                borderRadius: 6, border: "1px solid #D4D4D4",
-                background: "#FFFFFF", color: "#171717",
+                borderRadius: 6, border: "1px solid var(--bw-line-strong)",
+                background: "var(--bw-surface)", color: "var(--bw-text)",
                 fontSize: 14, outline: "none", boxSizing: "border-box",
                 fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
               }}
@@ -137,7 +137,7 @@ function LoginFormInner() {
             style={{
               width: "100%", padding: "8px 16px",
               borderRadius: 6, border: "none",
-              background: loading ? "#A3A3A3" : "#0070F3",
+              background: loading ? "var(--bw-hint)" : "#0070F3",
               color: "#FFFFFF", fontSize: 14, fontWeight: 500,
               cursor: loading ? "not-allowed" : "pointer",
               fontFamily: "var(--font-sans)", letterSpacing: "-0.01em",
@@ -155,8 +155,8 @@ function LoginFormInner() {
 export function LoginForm() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F7F7" }}>
-        <div style={{ color: "#737373", fontSize: 14, fontFamily: "var(--font-sans)" }}>加载中...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bw-panel)" }}>
+        <div style={{ color: "var(--bw-muted)", fontSize: 14, fontFamily: "var(--font-sans)" }}>加载中...</div>
       </div>
     }>
       <LoginFormInner />

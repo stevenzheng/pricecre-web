@@ -1580,3 +1580,123 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* =============================================
+   ADMIN — Burrow 双主题（方案B：全后台）
+   变量由 app/admin/layout.tsx 通过 html[data-bw-admin] 切换
+   ============================================= */
+:root {
+  --bw-surface: #FFFFFF;
+  --bw-panel: #FAFAFA;
+  --bw-line: #E5E5E5;
+  --bw-line-soft: #F0F0F0;
+  --bw-line-strong: #D4D4D4;
+  --bw-text: #171717;
+  --bw-text-2: #404040;
+  --bw-muted: #737373;
+  --bw-hint: #A3A3A3;
+  --bw-tint-pos: #F0FDF4;
+  --bw-tint-warn: #FFFBF0;
+  --bw-tint-neg: #FEF2F2;
+  --bw-tint-info: #EFF6FF;
+}
+html[data-bw-admin="dark"] {
+  --bw-surface: #15181E;
+  --bw-panel: #1B1F26;
+  --bw-line: rgba(255,255,255,0.10);
+  --bw-line-soft: rgba(255,255,255,0.06);
+  --bw-line-strong: rgba(255,255,255,0.18);
+  --bw-text: #F4F4F5;
+  --bw-text-2: #C9CACF;
+  --bw-muted: #A1A1AA;
+  --bw-hint: #6F727B;
+  --bw-tint-pos: rgba(45,212,168,0.10);
+  --bw-tint-warn: rgba(245,166,35,0.10);
+  --bw-tint-neg: rgba(248,113,113,0.12);
+  --bw-tint-info: rgba(59,157,255,0.10);
+}
+
+/* ---- 暗色模式：vl-* 组件层覆盖 ---- */
+html[data-bw-admin="dark"] .vl-content { background: #0C0E12; }
+html[data-bw-admin="dark"] .vl-sidebar { background: #0F1116; border-right-color: rgba(255,255,255,0.08); }
+html[data-bw-admin="dark"] .vl-sidebar-logo { color: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-sidebar-title { color: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-sidebar-subtitle { color: #6F727B; }
+html[data-bw-admin="dark"] .vl-nav-label { color: #6F727B; }
+html[data-bw-admin="dark"] .vl-nav-item { color: #A1A1AA; }
+html[data-bw-admin="dark"] .vl-nav-item svg { color: #6F727B; }
+html[data-bw-admin="dark"] .vl-nav-item:hover { background: rgba(255,255,255,0.06); color: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-nav-item.active { background: rgba(59,157,255,0.14); color: #3B9DFF; }
+html[data-bw-admin="dark"] .vl-nav-item.active svg { color: #3B9DFF; }
+html[data-bw-admin="dark"] .vl-sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+html[data-bw-admin="dark"] .vl-sidebar-footer-link { color: #A1A1AA; }
+html[data-bw-admin="dark"] .vl-sidebar-footer-link:hover { color: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-mobile-topbar { background: #0F1116; border-bottom-color: rgba(255,255,255,0.08); }
+html[data-bw-admin="dark"] .vl-mobile-brand { color: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-page-title { color: var(--bw-text); }
+html[data-bw-admin="dark"] .vl-page-desc { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-card,
+html[data-bw-admin="dark"] .vl-card-static,
+html[data-bw-admin="dark"] .vl-stat-card,
+html[data-bw-admin="dark"] .vl-form-card,
+html[data-bw-admin="dark"] .vl-quick-card {
+  background: rgba(255,255,255,0.045);
+  border-color: var(--bw-line);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+html[data-bw-admin="dark"] .vl-card:hover,
+html[data-bw-admin="dark"] .vl-quick-card:hover { border-color: rgba(255,255,255,0.22); }
+html[data-bw-admin="dark"] .vl-stat-label { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-stat-value { color: var(--bw-text); }
+html[data-bw-admin="dark"] .vl-quick-card h3 { color: var(--bw-text); }
+html[data-bw-admin="dark"] .vl-quick-card p { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-btn-secondary,
+html[data-bw-admin="dark"] .vl-btn-ghost,
+html[data-bw-admin="dark"] .vl-btn-outline {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--bw-line);
+  color: var(--bw-text-2);
+}
+html[data-bw-admin="dark"] .vl-btn-secondary:hover,
+html[data-bw-admin="dark"] .vl-btn-ghost:hover,
+html[data-bw-admin="dark"] .vl-btn-outline:hover { background: rgba(255,255,255,0.10); color: var(--bw-text); }
+html[data-bw-admin="dark"] .vl-input,
+html[data-bw-admin="dark"] .vl-select {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--bw-line);
+  color: var(--bw-text);
+}
+html[data-bw-admin="dark"] .vl-input::placeholder { color: var(--bw-hint); }
+html[data-bw-admin="dark"] .vl-label { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-badge-neutral { background: rgba(255,255,255,0.08); color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-badge-success { background: rgba(45,212,168,0.14); color: #2DD4A8; }
+html[data-bw-admin="dark"] .vl-badge-accent { background: rgba(59,157,255,0.14); color: #3B9DFF; }
+html[data-bw-admin="dark"] .vl-badge-danger,
+html[data-bw-admin="dark"] .vl-badge-error { background: rgba(248,113,113,0.14); color: #F87171; }
+html[data-bw-admin="dark"] .vl-badge-warning { background: rgba(245,166,35,0.14); color: #F5A623; }
+html[data-bw-admin="dark"] .vl-table-wrap { background: rgba(255,255,255,0.03); border-color: var(--bw-line); }
+html[data-bw-admin="dark"] .vl-table thead th { background: rgba(255,255,255,0.04); color: var(--bw-muted); border-bottom-color: var(--bw-line); }
+html[data-bw-admin="dark"] .vl-table tbody td { color: var(--bw-text-2); border-bottom-color: var(--bw-line-soft); }
+html[data-bw-admin="dark"] .vl-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+html[data-bw-admin="dark"] .vl-table .vl-td-muted { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-table .vl-td-hint { color: var(--bw-hint); }
+html[data-bw-admin="dark"] .vl-empty-title { color: var(--bw-text); }
+html[data-bw-admin="dark"] .vl-empty-desc { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-filter-tabs { background: rgba(255,255,255,0.06); }
+html[data-bw-admin="dark"] .vl-filter-tab { color: var(--bw-muted); }
+html[data-bw-admin="dark"] .vl-filter-tab.active { background: rgba(255,255,255,0.12); color: var(--bw-text); box-shadow: none; }
+html[data-bw-admin="dark"] .vl-pagination-btn { background: rgba(255,255,255,0.05); border-color: var(--bw-line); color: var(--bw-text-2); }
+html[data-bw-admin="dark"] .vl-mobile-toggle svg { stroke: #F4F4F5; }
+html[data-bw-admin="dark"] .vl-skeleton { background: rgba(255,255,255,0.06); }
+
+/* 主题切换按钮（侧边栏底部） */
+.bw-theme-switch {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 8px 12px; border-radius: 8px;
+  border: 1px solid var(--bw-line); background: transparent;
+  color: var(--bw-muted); font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: var(--font-sans);
+  transition: all 0.15s ease; margin-bottom: 8px;
+}
+.bw-theme-switch:hover { background: var(--bw-line-soft); color: var(--bw-text); }
+html[data-bw-admin="dark"] .bw-theme-switch:hover { background: rgba(255,255,255,0.08); }

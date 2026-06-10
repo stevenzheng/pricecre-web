@@ -53,22 +53,22 @@ export default function ExchangeCodesPage() {
   return (
     <div style={{ padding: 24, maxWidth: 960 }}>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>兑换码管理</h2>
-        <p style={{ fontSize: 13, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>{records.length} 条记录</p>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>兑换码管理</h2>
+        <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>{records.length} 条记录</p>
       </div>
 
       <div className="vl-card-static" style={{ padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 10 }}>兑换码类型</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", marginBottom: 10 }}>兑换码类型</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
           {TYPES.map(t => (
-            <div key={t.key} onClick={() => setType(t.key)} style={{ padding: "12px 8px", borderRadius: 8, border: type===t.key?"2px solid #0070F3":"1px solid #E5E5E5", background: type===t.key?"rgba(0,112,243,0.04)":"#FFF", cursor:"pointer", textAlign:"center" }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{t.label}</div>
-              <div style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", marginTop: 2 }}>{t.desc}</div>
+            <div key={t.key} onClick={() => setType(t.key)} style={{ padding: "12px 8px", borderRadius: 8, border: type===t.key?"2px solid #0070F3":"1px solid var(--bw-line)", background: type===t.key?"rgba(0,112,243,0.04)":"var(--bw-surface)", cursor:"pointer", textAlign:"center" }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)" }}>{t.label}</div>
+              <div style={{ fontSize: 10, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", marginTop: 2 }}>{t.desc}</div>
             </div>
           ))}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <input value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key==="Enter"&&generate()} placeholder="用户邮箱" style={{ flex:1, padding:"10px 14px", border:"1px solid #D4D4D4", borderRadius:8, fontSize:13, fontFamily:"var(--font-sans)", outline:"none" }} />
+          <input value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key==="Enter"&&generate()} placeholder="用户邮箱" style={{ flex:1, padding:"10px 14px", border:"1px solid var(--bw-line-strong)", borderRadius:8, fontSize:13, fontFamily:"var(--font-sans)", outline:"none" }} />
           <button onClick={generate} disabled={generating} style={{ padding:"10px 24px", borderRadius:8, border:"none", background:"#0070F3", color:"#FFF", fontSize:13, fontWeight:500, fontFamily:"var(--font-sans)", cursor:"pointer", whiteSpace:"nowrap" }}>{generating?"生成中...":"生成"}</button>
         </div>
         {msg&&<div style={{ marginTop:10, padding:"8px 12px", borderRadius:6, fontSize:12, fontFamily:"var(--font-sans)", background:msg.includes("已生成")?"rgba(16,185,129,0.06)":"rgba(238,0,0,0.06)", color:msg.includes("已生成")?"#10B981":"#EE0000" }}>{msg}</div>}
@@ -78,20 +78,20 @@ export default function ExchangeCodesPage() {
         <div className="vl-card-static" style={{ overflow:"hidden" }}>
           <div style={{ overflowX:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-              <thead><tr style={{ borderBottom:"1px solid #E5E5E5", background:"#FAFAFA" }}>
-                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"#737373", fontFamily:"var(--font-sans)" }}>兑换码</th>
-                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"#737373", fontFamily:"var(--font-sans)" }}>邮箱</th>
-                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"#737373", fontFamily:"var(--font-sans)" }}>类型</th>
-                <th style={{ padding:"8px 14px", textAlign:"right", fontSize:11, fontWeight:500, color:"#737373", fontFamily:"var(--font-sans)" }}>额度</th>
-                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"#737373", fontFamily:"var(--font-sans)" }}>时间</th>
+              <thead><tr style={{ borderBottom:"1px solid var(--bw-line)", background:"var(--bw-panel)" }}>
+                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"var(--bw-muted)", fontFamily:"var(--font-sans)" }}>兑换码</th>
+                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"var(--bw-muted)", fontFamily:"var(--font-sans)" }}>邮箱</th>
+                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"var(--bw-muted)", fontFamily:"var(--font-sans)" }}>类型</th>
+                <th style={{ padding:"8px 14px", textAlign:"right", fontSize:11, fontWeight:500, color:"var(--bw-muted)", fontFamily:"var(--font-sans)" }}>额度</th>
+                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:11, fontWeight:500, color:"var(--bw-muted)", fontFamily:"var(--font-sans)" }}>时间</th>
               </tr></thead>
               <tbody>{records.map(r => (
-                <tr key={r.id} style={{ borderBottom:"1px solid #F0F0F0" }}>
+                <tr key={r.id} style={{ borderBottom:"1px solid var(--bw-line-soft)" }}>
                   <td style={{ padding:"8px 14px", fontFamily:"var(--font-mono)", fontWeight:600, color:"#0070F3" }}>{r.code}</td>
-                  <td style={{ padding:"8px 14px", color:"#404040", fontFamily:"var(--font-sans)" }}>{r.email}</td>
-                  <td style={{ padding:"8px 14px", color:"#404040", fontFamily:"var(--font-sans)", fontSize:12 }}>{r.type}</td>
+                  <td style={{ padding:"8px 14px", color:"var(--bw-text-2)", fontFamily:"var(--font-sans)" }}>{r.email}</td>
+                  <td style={{ padding:"8px 14px", color:"var(--bw-text-2)", fontFamily:"var(--font-sans)", fontSize:12 }}>{r.type}</td>
                   <td style={{ padding:"8px 14px", textAlign:"right", fontFamily:"var(--font-mono)", color:"#10B981" }}>{r.credits}次</td>
-                  <td style={{ padding:"8px 14px", color:"#A3A3A3", fontSize:12, fontFamily:"var(--font-sans)" }}>{new Date(r.createdAt).toLocaleString("zh-CN")}</td>
+                  <td style={{ padding:"8px 14px", color:"var(--bw-hint)", fontSize:12, fontFamily:"var(--font-sans)" }}>{new Date(r.createdAt).toLocaleString("zh-CN")}</td>
                 </tr>
               ))}</tbody>
             </table>

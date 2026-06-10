@@ -105,8 +105,8 @@ export default function DataSourcesPage() {
     fetchSources();
   };
 
-  const inputStyle = { width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box" as const };
-  const labelStyle = { fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" };
+  const inputStyle = { width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box" as const };
+  const labelStyle = { fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" };
 
   return (
     <div className="vl-content-inner">
@@ -119,7 +119,7 @@ export default function DataSourcesPage() {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <select value={discoverCity} onChange={e => setDiscoverCity(e.target.value)}
-            style={{ padding: "7px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", outline: "none", background: "#FFF" }}>
+            style={{ padding: "7px 10px", border: "1px solid var(--bw-line)", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", outline: "none", background: "var(--bw-surface)" }}>
             {Object.entries(CITY_ZH).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
           <button onClick={handleDiscover} disabled={discovering} className="vl-btn-secondary" style={{ fontSize: 12 }}>
@@ -132,19 +132,19 @@ export default function DataSourcesPage() {
       {msg && <div style={{ marginBottom: 12, padding: "8px 14px", borderRadius: 8, fontSize: 13, background: "rgba(0,112,243,0.06)", color: "#0070F3", fontFamily: "var(--font-sans)" }}>{msg}</div>}
 
       {showForm && (
-        <form onSubmit={handleSave} style={{ marginBottom: 16, padding: 16, background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+        <form onSubmit={handleSave} style={{ marginBottom: 16, padding: 16, background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
           <div><label style={labelStyle}>站点名称 *</label><input value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} style={inputStyle} /></div>
           <div style={{ gridColumn: "span 2" }}><label style={labelStyle}>URL *</label><input value={form.targetUrl} onChange={e => setForm({ ...form, targetUrl: e.target.value })} placeholder="https://..." style={inputStyle} /></div>
           <div>
             <label style={labelStyle}>城市</label>
-            <select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} style={{ ...inputStyle, background: "#FFF" }}>
+            <select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} style={{ ...inputStyle, background: "var(--bw-surface)" }}>
               {Object.entries(CITY_ZH).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
           <div><label style={labelStyle}>区域</label><input value={form.district} onChange={e => setForm({ ...form, district: e.target.value })} placeholder="all" style={inputStyle} /></div>
           <div>
             <label style={labelStyle}>业态</label>
-            <select value={form.propertyType} onChange={e => setForm({ ...form, propertyType: e.target.value })} style={{ ...inputStyle, background: "#FFF" }}>
+            <select value={form.propertyType} onChange={e => setForm({ ...form, propertyType: e.target.value })} style={{ ...inputStyle, background: "var(--bw-surface)" }}>
               {Object.entries(typeLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>

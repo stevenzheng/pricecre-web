@@ -124,18 +124,18 @@ export default function FieldSettingsPage() {
       </div>
 
       {/* Property Type Tabs */}
-      <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #E5E5E5", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--bw-line)", marginBottom: 20 }}>
         {(["OFFICE", "SHOPS", "INDUSTRIAL"] as const).map(t => (
           <button key={t} onClick={() => { setActiveType(t); setFilter("all"); }}
             style={{
-              padding: "8px 20px", border: "none", borderBottom: `2px solid ${activeType === t ? "#171717" : "transparent"}`,
+              padding: "8px 20px", border: "none", borderBottom: `2px solid ${activeType === t ? "var(--bw-text)" : "transparent"}`,
               borderRadius: 0, background: "transparent",
               fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: activeType === t ? 600 : 500,
-              color: activeType === t ? "#171717" : "#737373", letterSpacing: "-0.01em",
+              color: activeType === t ? "var(--bw-text)" : "var(--bw-muted)", letterSpacing: "-0.01em",
               cursor: "pointer", marginBottom: -1, transition: "all 0.12s",
             }}
-            onMouseEnter={e => { if (activeType !== t) e.currentTarget.style.color = "#171717"; }}
-            onMouseLeave={e => { if (activeType !== t) e.currentTarget.style.color = "#737373"; }}
+            onMouseEnter={e => { if (activeType !== t) e.currentTarget.style.color = "var(--bw-text)"; }}
+            onMouseLeave={e => { if (activeType !== t) e.currentTarget.style.color = "var(--bw-muted)"; }}
           >
             {TYPE_LABELS[t]}
           </button>
@@ -147,7 +147,7 @@ export default function FieldSettingsPage() {
         <div className="vl-filter-tabs" style={{ borderBottom: "none" }}>
           {(["all", "active", "inactive"] as const).map(s => (
             <button key={s} className={`vl-filter-tab${filter === s ? " active" : ""}`} onClick={() => setFilter(s)}
-              style={{ borderBottom: filter === s ? "2px solid #171717" : "2px solid transparent", padding: "6px 14px" }}>
+              style={{ borderBottom: filter === s ? "2px solid var(--bw-text)" : "2px solid transparent", padding: "6px 14px" }}>
               {s === "all" ? "全部" : s === "active" ? "已启用" : "已隐藏"}
             </button>
           ))}
@@ -161,7 +161,7 @@ export default function FieldSettingsPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {Array.from(catMap.entries()).map(([catName, catFields], ci) => {
             if (catFields.length === 0) return null;
-            const bgColors = ["#F8FAFC", "#F5F7FA", "transparent"];
+            const bgColors = ["var(--bw-panel)", "var(--bw-panel)", "transparent"];
             const bg = bgColors[ci % 3];
             return (
               <div key={catName} style={{
@@ -176,7 +176,7 @@ export default function FieldSettingsPage() {
                   {catFields.map(f => (
                     <div key={f.key} style={{
                       display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6,
-                      background: "#FFFFFF", border: "1px solid #E5E5E5",
+                      background: "var(--bw-surface)", border: "1px solid var(--bw-line)",
                       opacity: f.isActive ? 1 : 0.45, transition: "opacity 0.15s",
                     }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -187,14 +187,14 @@ export default function FieldSettingsPage() {
                             onBlur={saveEdit} style={{ padding: "3px 6px", fontSize: 12 }} />
                         ) : (
                           <span onClick={() => startEdit(f)}
-                            style={{ fontSize: 12, fontWeight: 600, color: f.isActive ? "#171717" : "#A3A3A3", fontFamily: "var(--font-sans)", cursor: "pointer", borderBottom: "1px dashed transparent", textDecoration: f.isActive ? "none" : "line-through" }}
-                            onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "#D4D4D4")}
+                            style={{ fontSize: 12, fontWeight: 600, color: f.isActive ? "var(--bw-text)" : "var(--bw-hint)", fontFamily: "var(--font-sans)", cursor: "pointer", borderBottom: "1px dashed transparent", textDecoration: f.isActive ? "none" : "line-through" }}
+                            onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "var(--bw-line-strong)")}
                             onMouseLeave={e => (e.currentTarget.style.borderBottomColor = "transparent")}>{f.label}</span>
                         )}
                       </div>
                       <button onClick={() => toggleField(f.key, f.isActive)}
-                        style={{ flexShrink: 0, width: 36, height: 20, borderRadius: 9999, border: "none", cursor: "pointer", background: f.isActive ? "#171717" : "#D4D4D4", position: "relative", transition: "background 0.15s" }}>
-                        <span style={{ position: "absolute", top: "50%", left: f.isActive ? "auto" : 2, right: f.isActive ? 2 : "auto", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: "#FFFFFF", transition: "all 0.15s" }} />
+                        style={{ flexShrink: 0, width: 36, height: 20, borderRadius: 9999, border: "none", cursor: "pointer", background: f.isActive ? "var(--bw-text)" : "var(--bw-line-strong)", position: "relative", transition: "background 0.15s" }}>
+                        <span style={{ position: "absolute", top: "50%", left: f.isActive ? "auto" : 2, right: f.isActive ? 2 : "auto", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: "var(--bw-surface)", transition: "all 0.15s" }} />
                       </button>
                     </div>
                   ))}

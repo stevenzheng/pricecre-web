@@ -147,8 +147,8 @@ export default function CrawlSchedulePage() {
             background: isRunning
               ? "linear-gradient(135deg, rgba(0,112,243,0.08), rgba(0,112,243,0.02))"
               : hasData
-                ? isRecent ? "#F0FDF4" : "#FAFAFA"
-                : "#FFFBF0",
+                ? isRecent ? "var(--bw-tint-pos)" : "var(--bw-panel)"
+                : "var(--bw-tint-warn)",
             cursor: isRunning ? "default" : "pointer",
             transition: "all 0.2s ease",
             textAlign: "left" as const,
@@ -158,7 +158,7 @@ export default function CrawlSchedulePage() {
           }}
           onMouseEnter={(e) => {
             if (!isRunning) {
-              (e.currentTarget as HTMLElement).style.borderColor = "#D4D4D4";
+              (e.currentTarget as HTMLElement).style.borderColor = "var(--bw-line-strong)";
               (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
               (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
             }
@@ -179,18 +179,18 @@ export default function CrawlSchedulePage() {
           ) : hasData ? (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                <span style={{ fontSize: 11, color: isRecent ? "#16A34A" : "#A3A3A3" }}>
+                <span style={{ fontSize: 11, color: isRecent ? "#16A34A" : "var(--bw-hint)" }}>
                   {isRecent ? "●" : "○"}
                 </span>
-                <span style={{ fontSize: 11, color: "#737373" }}>{timeAgo(cell!.lastRunAt!)}</span>
+                <span style={{ fontSize: 11, color: "var(--bw-muted)" }}>{timeAgo(cell!.lastRunAt!)}</span>
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 18, fontWeight: 600, color: "#171717", lineHeight: 1 }}>
+                <span style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", lineHeight: 1 }}>
                   {cell?.lastCount || 0}
                 </span>
-                <span style={{ fontSize: 10, color: "#A3A3A3" }}>条</span>
+                <span style={{ fontSize: 10, color: "var(--bw-hint)" }}>条</span>
               </div>
-              <div style={{ marginTop: 4, borderTop: "1px solid #E5E5E5", paddingTop: 4 }}>
+              <div style={{ marginTop: 4, borderTop: "1px solid var(--bw-line)", paddingTop: 4 }}>
                 <span
                   onClick={(e) => { e.stopPropagation(); router.push(`/admin/crawl-schedule/results?city=${encodeURIComponent(city)}&type=${encodeURIComponent(type)}`); }}
                   style={{ fontSize: 10, color: "#0070F3", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500 }}>
@@ -201,7 +201,7 @@ export default function CrawlSchedulePage() {
           ) : (
             <div style={{ textAlign: "center", padding: "6px 0" }}>
               <div style={{ fontSize: 20, marginBottom: 2, opacity: 0.5 }}>+</div>
-              <div style={{ fontSize: 10, color: "#A3A3A3" }}>点击抓取</div>
+              <div style={{ fontSize: 10, color: "var(--bw-hint)" }}>点击抓取</div>
             </div>
           )}
         </button>
@@ -212,7 +212,7 @@ export default function CrawlSchedulePage() {
   if (loading) {
     return (
       <div className="vl-content-inner">
-        <div style={{ textAlign: "center", padding: "60px 0", color: "#A3A3A3" }}>加载中...</div>
+        <div style={{ textAlign: "center", padding: "60px 0", color: "var(--bw-hint)" }}>加载中...</div>
       </div>
     );
   }
@@ -229,7 +229,7 @@ export default function CrawlSchedulePage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
         <div>
           <h1 className="vl-page-title" style={{ margin: "0 0 4px" }}>数据抓取看板</h1>
-          <p style={{ fontSize: 13, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>
             {summary.total} 个目标 · 最近 7 天运行 {summary.recentlyRun} 个 · 累计入库 {summary.totalCrawled.toLocaleString()} 条
           </p>
         </div>
@@ -249,14 +249,14 @@ export default function CrawlSchedulePage() {
       {msg && (
         <div style={{
           marginBottom: 16, padding: "10px 16px", borderRadius: 8,
-          background: "linear-gradient(135deg, #F0F7FF, #EBF5FF)",
+          background: "linear-gradient(135deg, var(--bw-tint-info), var(--bw-tint-info))",
           border: "1px solid #B8D8FF", color: "#0070F3",
           fontSize: 13, fontFamily: "var(--font-sans)",
           animation: "fadeIn 0.3s ease",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <span>{msg}</span>
-          <button onClick={() => setMsg("")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#A3A3A3", padding: "0 0 0 8px" }}>✕</button>
+          <button onClick={() => setMsg("")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "var(--bw-hint)", padding: "0 0 0 8px" }}>✕</button>
         </div>
       )}
 
@@ -267,13 +267,13 @@ export default function CrawlSchedulePage() {
             <tr>
               <th style={{
                 padding: "12px 16px", textAlign: "left", fontSize: 10, fontWeight: 500,
-                color: "#A3A3A3", textTransform: "uppercase", letterSpacing: "0.05em",
-                borderBottom: "1px solid #F5F5F5", whiteSpace: "nowrap",
+                color: "var(--bw-hint)", textTransform: "uppercase", letterSpacing: "0.05em",
+                borderBottom: "1px solid var(--bw-panel)", whiteSpace: "nowrap",
               }}>城市</th>
               {TYPES.map((t) => (
                 <th key={t.key} style={{
                   padding: "12px 8px", textAlign: "center", fontSize: 12, fontWeight: 600,
-                  color: "#171717", borderBottom: "1px solid #F5F5F5", whiteSpace: "nowrap",
+                  color: "var(--bw-text)", borderBottom: "1px solid var(--bw-panel)", whiteSpace: "nowrap",
                 }}>
                   {t.icon} {t.zh}
                 </th>
@@ -286,8 +286,8 @@ export default function CrawlSchedulePage() {
                 background: i % 2 === 0 ? "transparent" : "rgba(0,0,0,0.01)",
               }}>
                 <td style={{
-                  padding: "0 16px", fontSize: 14, fontWeight: 600, color: "#171717",
-                  whiteSpace: "nowrap", borderRight: "1px solid #F5F5F5",
+                  padding: "0 16px", fontSize: 14, fontWeight: 600, color: "var(--bw-text)",
+                  whiteSpace: "nowrap", borderRight: "1px solid var(--bw-panel)",
                 }}>
                   {city.zh}
                 </td>
@@ -299,7 +299,7 @@ export default function CrawlSchedulePage() {
       </div>
 
       {/* ── 图例 ────────────────────────────────────── */}
-      <div style={{ marginTop: 12, display: "flex", gap: 20, fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>
+      <div style={{ marginTop: 12, display: "flex", gap: 20, fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-sans)" }}>
         <span>● 7天内运行过</span>
         <span>○ 超过7天未更新</span>
         <span style={{ color: "#D4A800" }}>+ 从未运行</span>

@@ -22,6 +22,18 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // 主题：localStorage 持久化，html[data-bw-admin] 驱动全部后台页面（globals.css 暗色覆盖）
+  useEffect(() => {
+    try { const t = localStorage.getItem("pricecre_admin_theme"); if (t === "dark" || t === "light") setTheme(t); } catch {}
+  }, []);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-bw-admin", theme);
+    try { localStorage.setItem("pricecre_admin_theme", theme); } catch {}
+    return () => { document.documentElement.removeAttribute("data-bw-admin"); };
+  }, [theme]);
+  const toggleTheme = useCallback(() => setTheme(t => (t === "dark" ? "light" : "dark")), []);
 
   // Close sidebar on route change (mobile)
   const handleNav = useCallback(() => setSidebarOpen(false), []);
@@ -36,11 +48,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname === "/admin/login") return <>{children}</>;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#FFFFFF", overflowX: "hidden", position: "relative" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bw-surface)", overflowX: "hidden", position: "relative" }}>
       {/* Mobile top bar */}
       <div className="vl-mobile-topbar">
         <button className="vl-mobile-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="菜单">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bw-text)" strokeWidth="2" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
         </button>
@@ -94,6 +106,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
 
         <div className="vl-sidebar-footer">
+          <button className="bw-theme-switch" onClick={toggleTheme} type="button">
+            {theme === "dark" ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            )}
+            <span>{theme === "dark" ? "切换白天模式" : "切换夜间模式"}</span>
+          </button>
           <Link href="/" className="vl-sidebar-footer-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M19 12H5M12 19l-7-7 7-7"/>

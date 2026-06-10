@@ -110,12 +110,12 @@ export default function PropertyEditorPage() {
     setSaving(false);
   };
 
-  if (loading) return <div style={{ padding: 24, color: "#737373", fontFamily: "var(--font-sans)" }}>加载中...</div>;
+  if (loading) return <div style={{ padding: 24, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>加载中...</div>;
 
   if (loadError) return (
     <div style={{ padding: 24 }}>
       <p style={{ fontSize: 14, color: "#EE0000", fontFamily: "var(--font-sans)" }}>{loadError}</p>
-      <button onClick={() => router.push("/admin/data-review")} style={{ marginTop: 12, padding: "8px 16px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 13, cursor: "pointer", fontFamily: "var(--font-sans)" }}>← 返回资产列表</button>
+      <button onClick={() => router.push("/admin/data-review")} style={{ marginTop: 12, padding: "8px 16px", borderRadius: 6, border: "1px solid var(--bw-line)", background: "var(--bw-surface)", fontSize: 13, cursor: "pointer", fontFamily: "var(--font-sans)" }}>← 返回资产列表</button>
     </div>
   );
 
@@ -125,17 +125,17 @@ export default function PropertyEditorPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <button onClick={() => router.push("/admin/data-review")} style={{ border: "none", background: "none", cursor: "pointer", padding: 0, color: "#737373" }}>
+            <button onClick={() => router.push("/admin/data-review")} style={{ border: "none", background: "none", cursor: "pointer", padding: 0, color: "var(--bw-muted)" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
-            <p style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: 0 }}>{meta.projectName || "编辑资产"}</p>
+            <p style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: 0 }}>{meta.projectName || "编辑资产"}</p>
             {source === "mock" && <span style={{ fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(245,166,35,0.1)", color: "#F5A623" }}>演示数据 · 保存后转为正式数据</span>}
           </div>
-          <p style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>{meta.city} · {meta.district} · ID: {id}</p>
+          <p style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>{meta.city} · {meta.district} · ID: {id}</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {msg && <span style={{ fontSize: 12, alignSelf: "center", color: msg.includes("成功") ? "#10B981" : "#EE0000", fontFamily: "var(--font-sans)" }}>{msg}</span>}
-          <button onClick={() => router.push("/admin/data-review")} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", color: "#404040", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>返回</button>
+          <button onClick={() => router.push("/admin/data-review")} style={{ padding: "8px 16px", borderRadius: 6, border: "1px solid var(--bw-line)", background: "var(--bw-surface)", color: "var(--bw-text-2)", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>返回</button>
           <button onClick={handleSave} disabled={saving} style={{ padding: "8px 20px", borderRadius: 6, border: "none", background: "#0070F3", color: "#FFF", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>
             {saving ? "保存中..." : "保存修改"}
           </button>
@@ -143,16 +143,16 @@ export default function PropertyEditorPage() {
       </div>
 
       {/* Meta Section — 与前台展示字段一致 */}
-      <div style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 12px" }}>基本信息</p>
+      <div style={{ background: "var(--bw-surface)", borderRadius: 10, border: "1px solid var(--bw-line)", padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 12px" }}>基本信息</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
           <Field label="项目名称" value={meta.projectName} onChange={v => setMeta({...meta, projectName: v})} />
           <Field label="城市" value={meta.city} onChange={v => setMeta({...meta, city: v})} />
           <Field label="区域" value={meta.district} onChange={v => setMeta({...meta, district: v})} />
           <div>
-            <label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>业态</label>
+            <label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>业态</label>
             <select value={meta.propertyType} onChange={e => setMeta({...meta, propertyType: e.target.value})}
-              style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box", background: "#FFF" }}>
+              style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box", background: "var(--bw-surface)" }}>
               {TYPE_OPTIONS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
@@ -164,15 +164,15 @@ export default function PropertyEditorPage() {
 
       {/* Indicators — 键名与前台 PropertyCard 一致，留空表示前台不展示该项 */}
       {SECTIONS.map(section => (
-        <div key={section.key} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16, marginBottom: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 12px" }}>{section.label}</p>
+        <div key={section.key} style={{ background: "var(--bw-surface)", borderRadius: 10, border: "1px solid var(--bw-line)", padding: 16, marginBottom: 12 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 12px" }}>{section.label}</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {section.fields.map(f => {
               const raw = indicators[f.key];
               const displayVal = raw === undefined || raw === null ? "" : String(raw);
               return (
                 <div key={f.key}>
-                  <label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>
+                  <label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>
                     {f.label} {f.unit ? `(${f.unit})` : ""}
                   </label>
                   <input
@@ -189,7 +189,7 @@ export default function PropertyEditorPage() {
                       });
                     }}
                     placeholder="— 留空则前台不展示"
-                    style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: f.text ? "var(--font-sans)" : "var(--font-mono)", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: f.text ? "var(--font-sans)" : "var(--font-mono)", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
               );
@@ -212,8 +212,8 @@ export default function PropertyEditorPage() {
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>{label}</label>
-      <input value={value} onChange={e => onChange(e.target.value)} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box" }} />
+      <label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>{label}</label>
+      <input value={value} onChange={e => onChange(e.target.value)} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none", boxSizing: "border-box" }} />
     </div>
   );
 }

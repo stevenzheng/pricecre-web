@@ -98,7 +98,7 @@ export default function DataReviewPage() {
 
   if (loading) return (
     <div style={{ padding: 24 }}>
-      <p style={{ fontSize: 13, color: "#737373", fontFamily: "var(--font-sans)" }}>加载中...</p>
+      <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>加载中...</p>
     </div>
   );
 
@@ -107,15 +107,15 @@ export default function DataReviewPage() {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <p style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>资产数据管理</p>
-          <p style={{ fontSize: 13, fontWeight: 400, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>资产数据管理</p>
+          <p style={{ fontSize: 13, fontWeight: 400, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>
             {filterCity === "全部" && filterType === "全部" && !search ? `共 ${properties.length} 条资产` : `筛选结果 ${filtered.length} 条 / 共 ${properties.length} 条`}
           </p>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
-          <div style={{ display: "inline-flex", borderRadius: 6, border: "1px solid #E5E5E5", overflow: "hidden" }}>
-            <button onClick={() => setViewMode("list")} style={{ padding: "5px 10px", border: "none", background: viewMode === "list" ? "#0070F3" : "#FFF", color: viewMode === "list" ? "#FFF" : "#737373", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>列表</button>
-            <button onClick={() => setViewMode("card")} style={{ padding: "5px 10px", border: "none", borderLeft: "1px solid #E5E5E5", background: viewMode === "card" ? "#0070F3" : "#FFF", color: viewMode === "card" ? "#FFF" : "#737373", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>卡片</button>
+          <div style={{ display: "inline-flex", borderRadius: 6, border: "1px solid var(--bw-line)", overflow: "hidden" }}>
+            <button onClick={() => setViewMode("list")} style={{ padding: "5px 10px", border: "none", background: viewMode === "list" ? "#0070F3" : "var(--bw-surface)", color: viewMode === "list" ? "#FFF" : "var(--bw-muted)", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>列表</button>
+            <button onClick={() => setViewMode("card")} style={{ padding: "5px 10px", border: "none", borderLeft: "1px solid var(--bw-line)", background: viewMode === "card" ? "#0070F3" : "var(--bw-surface)", color: viewMode === "card" ? "#FFF" : "var(--bw-muted)", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>卡片</button>
           </div>
           <button onClick={fetchData} className="vl-btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }}>刷新</button>
           <button onClick={() => setShowAddForm(!showAddForm)} className="vl-btn-primary" style={{ fontSize: 12, padding: "6px 14px" }}>
@@ -126,37 +126,37 @@ export default function DataReviewPage() {
       </div>
 
       {/* 筛选栏：分城市 / 分业态 / 搜索 */}
-      <div style={{ marginBottom: 16, padding: "12px 16px", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ marginBottom: 16, padding: "12px 16px", background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>城市</span>
+          <span style={{ fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>城市</span>
           {["全部", ...cities].map(c => {
             const active = filterCity === c;
             const count = c === "全部" ? properties.length : properties.filter(p => p.city === c).length;
             return (
               <button key={c} onClick={() => setFilterCity(c)}
-                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid #E5E5E5", background: active ? "rgba(0,112,243,0.06)" : "#FFF", color: active ? "#0070F3" : "#404040", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
-                {c} <span style={{ fontSize: 10, color: active ? "#0070F3" : "#A3A3A3" }}>{count}</span>
+                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid var(--bw-line)", background: active ? "rgba(0,112,243,0.06)" : "var(--bw-surface)", color: active ? "#0070F3" : "var(--bw-text-2)", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
+                {c} <span style={{ fontSize: 10, color: active ? "#0070F3" : "var(--bw-hint)" }}>{count}</span>
               </button>
             );
           })}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>业态</span>
+          <span style={{ fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>业态</span>
           {[["全部","全部"], ...Object.entries(typeLabels)].map(([k, v]) => {
             const active = filterType === k;
             const count = k === "全部" ? properties.length : properties.filter(p => p.propertyType === k).length;
             return (
               <button key={k} onClick={() => setFilterType(k)}
-                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid #E5E5E5", background: active ? "rgba(0,112,243,0.06)" : "#FFF", color: active ? "#0070F3" : "#404040", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
-                {v} <span style={{ fontSize: 10, color: active ? "#0070F3" : "#A3A3A3" }}>{count}</span>
+                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0070F3" : "1px solid var(--bw-line)", background: active ? "rgba(0,112,243,0.06)" : "var(--bw-surface)", color: active ? "#0070F3" : "var(--bw-text-2)", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap" }}>
+                {v} <span style={{ fontSize: 10, color: active ? "#0070F3" : "var(--bw-hint)" }}>{count}</span>
               </button>
             );
           })}
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="搜索项目名称 / 区域..."
-            style={{ marginLeft: "auto", width: 200, padding: "5px 10px", border: "1px solid #E5E5E5", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", outline: "none" }} />
+            style={{ marginLeft: "auto", width: 200, padding: "5px 10px", border: "1px solid var(--bw-line)", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-sans)", outline: "none" }} />
           {(filterCity !== "全部" || filterType !== "全部" || search) && (
             <button onClick={() => { setFilterCity("全部"); setFilterType("全部"); setSearch(""); }}
-              style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "none", color: "#737373", fontSize: 12, fontFamily: "var(--font-sans)", cursor: "pointer", textDecoration: "underline" }}>清除筛选</button>
+              style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "none", color: "var(--bw-muted)", fontSize: 12, fontFamily: "var(--font-sans)", cursor: "pointer", textDecoration: "underline" }}>清除筛选</button>
           )}
         </div>
       </div>
@@ -166,14 +166,14 @@ export default function DataReviewPage() {
 
       {/* Add Form */}
       {showAddForm && (
-        <form onSubmit={handleAdd} style={{ marginBottom: 16, padding: 16, background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>项目名称 *</label><input value={form.projectName} onChange={e => setForm({...form, projectName: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} required /></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>城市</label><select value={form.city} onChange={e => setForm({...form, city: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }}>{cities.map(c=><option key={c}>{c}</option>)}</select></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>区域</label><input value={form.district} onChange={e => setForm({...form, district: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>业态</label><select value={form.propertyType} onChange={e => setForm({...form, propertyType: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }}>{Object.entries(typeLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>面价 (元/㎡/天)</label><input type="number" step="0.1" value={form.faceRent} onChange={e => setForm({...form, faceRent: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>可信度 (0~1)</label><input type="number" step="0.05" min="0" max="1" value={form.confidenceScore} onChange={e => setForm({...form, confidenceScore: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
-          <div><label style={{ fontSize: 11, color: "#737373", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>数据来源</label><input value={form.dataSource} onChange={e => setForm({...form, dataSource: e.target.value})} placeholder="如：manual / 点点租" style={{ width: "100%", padding: "8px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+        <form onSubmit={handleAdd} style={{ marginBottom: 16, padding: 16, background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>项目名称 *</label><input value={form.projectName} onChange={e => setForm({...form, projectName: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} required /></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>城市</label><select value={form.city} onChange={e => setForm({...form, city: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }}>{cities.map(c=><option key={c}>{c}</option>)}</select></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>区域</label><input value={form.district} onChange={e => setForm({...form, district: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>业态</label><select value={form.propertyType} onChange={e => setForm({...form, propertyType: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }}>{Object.entries(typeLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>面价 (元/㎡/天)</label><input type="number" step="0.1" value={form.faceRent} onChange={e => setForm({...form, faceRent: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>可信度 (0~1)</label><input type="number" step="0.05" min="0" max="1" value={form.confidenceScore} onChange={e => setForm({...form, confidenceScore: e.target.value})} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
+          <div><label style={{ fontSize: 11, color: "var(--bw-muted)", display: "block", marginBottom: 4, fontFamily: "var(--font-sans)" }}>数据来源</label><input value={form.dataSource} onChange={e => setForm({...form, dataSource: e.target.value})} placeholder="如：manual / 点点租" style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, fontFamily: "var(--font-sans)", outline: "none" }} /></div>
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <button type="submit" disabled={adding} style={{ width: "100%", padding: "8px", borderRadius: 6, border: "none", background: "#10B981", color: "#FFF", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>
               {adding ? "添加中..." : "确认添加"}
@@ -184,11 +184,11 @@ export default function DataReviewPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && !loading && !error && (
-        <div style={{ padding: 40, textAlign: "center", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
-          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>
+        <div style={{ padding: 40, textAlign: "center", background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)" }}>
+          <p style={{ fontSize: 15, fontWeight: 500, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>
             {properties.length === 0 ? "暂无资产数据" : "当前筛选条件下无资产"}
           </p>
-          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+          <p style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>
             {properties.length === 0 ? "数据库中没有资产记录，点击\"+ 手动添加\"开始录入" : "调整城市/业态筛选或清除筛选条件"}
           </p>
         </div>
@@ -196,33 +196,33 @@ export default function DataReviewPage() {
 
       {/* List View */}
       {viewMode === "list" && filtered.length > 0 && (
-        <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+        <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid #E5E5E5", background: "#FAFAFA" }}>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>项目名称</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>城市</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>区域</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>业态</th>
-                  <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>面价</th>
-                  <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>可信度</th>
-                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)" }}>数据源</th>
+                <tr style={{ borderBottom: "1px solid var(--bw-line)", background: "var(--bw-panel)" }}>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>项目名称</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>城市</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>区域</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>业态</th>
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>面价</th>
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>可信度</th>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>数据源</th>
                   <th style={{ padding: "10px 14px", width: 60 }}></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.id} style={{ borderBottom: "1px solid #F0F0F0" }}>
-                    <td style={{ padding: "10px 14px", fontWeight: 500, color: "#171717", fontFamily: "var(--font-sans)" }}>{p.projectName}</td>
-                    <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{p.city}</td>
-                    <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{p.district}</td>
-                    <td style={{ padding: "10px 14px", color: "#404040", fontFamily: "var(--font-sans)" }}>{typeLabels[p.propertyType]||p.propertyType}</td>
-                    <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: "#171717" }}>¥{Number(p.faceRent||0).toFixed(1)}</td>
+                  <tr key={p.id} style={{ borderBottom: "1px solid var(--bw-line-soft)" }}>
+                    <td style={{ padding: "10px 14px", fontWeight: 500, color: "var(--bw-text)", fontFamily: "var(--font-sans)" }}>{p.projectName}</td>
+                    <td style={{ padding: "10px 14px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.city}</td>
+                    <td style={{ padding: "10px 14px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.district}</td>
+                    <td style={{ padding: "10px 14px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{typeLabels[p.propertyType]||p.propertyType}</td>
+                    <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--bw-text)" }}>¥{Number(p.faceRent||0).toFixed(1)}</td>
                     <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "var(--font-mono)", color: (p.confidenceScore||0) >= 0.8 ? "#0070F3" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EE0000" }}>
                       {((p.confidenceScore||0)*100).toFixed(0)}%
                     </td>
-                    <td style={{ padding: "10px 14px", color: "#737373", fontSize: 12, fontFamily: "var(--font-sans)" }}>{p.dataSource}</td>
+                    <td style={{ padding: "10px 14px", color: "var(--bw-muted)", fontSize: 12, fontFamily: "var(--font-sans)" }}>{p.dataSource}</td>
                     <td style={{ padding: "10px 14px", display: "flex", gap: 6 }}>
                       <button onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "3px 8px", borderRadius: 4, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", color: "#0070F3", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>编辑</button>
                       <button onClick={()=>handleDelete(p.id)} style={{ padding: "3px 8px", borderRadius: 4, border: "1px solid #EE0000", background: "rgba(238,0,0,0.04)", color: "#EE0000", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>删除</button>
@@ -239,12 +239,12 @@ export default function DataReviewPage() {
       {viewMode === "card" && filtered.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
           {filtered.map(p => (
-            <div key={p.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+            <div key={p.id} style={{ background: "var(--bw-surface)", borderRadius: 10, border: "1px solid var(--bw-line)", overflow: "hidden" }}>
               {/* Card Header */}
-              <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0F0F0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--bw-line-soft)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.projectName}</p>
-                  <p style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)", margin: 0 }}>{p.city} · {p.district}</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.projectName}</p>
+                  <p style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>{p.city} · {p.district}</p>
                 </div>
                 <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
                   {p.isMock && <span style={{ fontSize: 10, fontWeight: 500, fontFamily: "var(--font-sans)", padding: "2px 6px", borderRadius: 4, background: "rgba(245,166,35,0.1)", color: "#F5A623", whiteSpace: "nowrap" }}>演示</span>}
@@ -257,17 +257,17 @@ export default function DataReviewPage() {
               {/* Card Body */}
               <div onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>挂牌面价</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 600, color: "#171717" }}>
+                  <span style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>挂牌面价</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 600, color: "var(--bw-text)" }}>
                     ¥{Number(p.faceRent||0).toFixed(1)}
-                    <span style={{ fontSize: 11, fontWeight: 400, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>/㎡/天</span>
+                    <span style={{ fontSize: 11, fontWeight: 400, color: "var(--bw-hint)", fontFamily: "var(--font-sans)" }}>/㎡/天</span>
                   </span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>可信度</span>
+                  <span style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>可信度</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 80, height: 6, borderRadius: 3, background: "#F0F0F0", overflow: "hidden" }}>
+                    <div style={{ width: 80, height: 6, borderRadius: 3, background: "var(--bw-line-soft)", overflow: "hidden" }}>
                       <div style={{ width: `${Math.min((p.confidenceScore||0)*100, 100)}%`, height: "100%", borderRadius: 3, background: (p.confidenceScore||0) >= 0.8 ? "#10B981" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EE0000" }} />
                     </div>
                     <span style={{ fontSize: 11, fontWeight: 500, fontFamily: "var(--font-mono)", color: (p.confidenceScore||0) >= 0.8 ? "#10B981" : (p.confidenceScore||0) >= 0.6 ? "#F5A623" : "#EE0000" }}>
@@ -277,13 +277,13 @@ export default function DataReviewPage() {
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>数据来源</span>
-                  <span style={{ fontSize: 12, color: "#404040", fontFamily: "var(--font-sans)" }}>{p.dataSource}</span>
+                  <span style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>数据来源</span>
+                  <span style={{ fontSize: 12, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.dataSource}</span>
                 </div>
               </div>
 
               {/* Card Footer */}
-              <div style={{ padding: "10px 16px", borderTop: "1px solid #F0F0F0", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <div style={{ padding: "10px 16px", borderTop: "1px solid var(--bw-line-soft)", display: "flex", justifyContent: "flex-end", gap: 8 }}>
                 <button onClick={() => router.push(`/admin/data-review/${p.id}`)} style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #0070F3", background: "rgba(0,112,243,0.04)", color: "#0070F3", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>编辑</button>
                 <button onClick={()=>handleDelete(p.id)} style={{ padding: "4px 12px", borderRadius: 5, border: "1px solid #EE0000", background: "rgba(238,0,0,0.04)", color: "#EE0000", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>删除</button>
               </div>

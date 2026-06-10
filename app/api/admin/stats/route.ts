@@ -65,15 +65,44 @@ export async function GET(request: NextRequest) {
       groups.forEach(g => { byType[g.propertyType] = g._count; });
     } catch {}
 
-    // Daily views trend (last 7 days)
-    const dailyViews: { date: string; count: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 86400000);
-      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const end = new Date(start.getTime() + 86400000);
-      const count = await safe(() => prisma.userViewLog.count({ where: { viewedAt: { gte: start, lt: end } } }), 0);
-      dailyViews.push({ date: `${start.getMonth() + 1}/${start.getDate()}`, count });
-    }
+    // ── 7 天趋势序列（一次取时间戳，内存分桶；替代原 7 次串行 count） ──
+    const dayStart = (offset: number) => {
+      const d = new Date(now.getTime() - offset * 86400000);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    };
+    const buckets: Date[] = [];
+    for (let i = 6; i >= 0; i--) buckets.push(dayStart(i));
+    const bucketize = (dates: Date[]): number[] => {
+      const counts = new Array(7).fill(0);
+      for (const dt of dates) {
+        const t = dt.getTime();
+        for (let i = 6; i >= 0; i--) {
+          if (t >= buckets[i].getTime()) { counts[i]++; break; }
+        }
+      }
+      return counts;
+    };
+    const since = buckets[0];
+
+    const [viewDates, assetDates, userDates, orderDates, reportDates, chatDates] = await Promise.all([
+      safe(() => prisma.userViewLog.findMany({ where: { viewedAt: { gte: since } }, select: { viewedAt: true } }).then(r => r.map(x => x.viewedAt)), [] as Date[]),
+      safe(() => prisma.commercialProperty.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }).then(r => r.map(x => x.createdAt)), [] as Date[]),
+      safe(() => prisma.user.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }).then(r => r.map(x => x.createdAt)), [] as Date[]),
+      safe(() => prisma.order.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }).then(r => r.map(x => x.createdAt)), [] as Date[]),
+      safe(() => prisma.aiAnalysisCache.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }).then(r => r.map(x => x.createdAt)), [] as Date[]),
+      safe(() => prisma.creditAuditLog.findMany({ where: { type: "consume_chat", createdAt: { gte: since } }, select: { createdAt: true } }).then(r => r.map(x => x.createdAt)), [] as Date[]),
+    ]);
+
+    const trends = {
+      views: bucketize(viewDates),
+      assets: bucketize(assetDates),
+      users: bucketize(userDates),
+      orders: bucketize(orderDates),
+      reports: bucketize(reportDates),
+      conversations: bucketize(chatDates),
+    };
+
+    const dailyViews = buckets.map((b, i) => ({ date: `${b.getMonth() + 1}/${b.getDate()}`, count: trends.views[i] }));
 
     return NextResponse.json({
       summary: { totalAssets, cities: cities.length, totalUsers, totalViews, newAssetsThisWeek, newUsersThisWeek, viewsThisWeek },
@@ -98,6 +127,7 @@ export async function GET(request: NextRequest) {
       },
       reports: { total: totalReports, thisWeek: reportsThisWeek },
       codes: { generated: codesGenerated, redeemed: codesRedeemed, byType: codesByType },
+      trends,
       byType, dailyViews,
     });
   } catch (err: any) {

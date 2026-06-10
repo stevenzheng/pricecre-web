@@ -6,7 +6,7 @@ import Link from "next/link";
 const statusColors: Record<number, { bg: string; text: string; label: string }> = {
   0: { bg: "rgba(245,166,35,0.08)", text: "#B5791A", label: "待支付" },
   1: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已支付" },
-  2: { bg: "#F7F7F7", text: "#737373", label: "已取消" },
+  2: { bg: "var(--bw-panel)", text: "var(--bw-muted)", label: "已取消" },
   3: { bg: "rgba(238,0,0,0.06)", text: "#EE0000", label: "已退款" },
   4: { bg: "rgba(245,166,35,0.08)", text: "#B5791A", label: "退款中" },
   5: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已完成" },
@@ -123,9 +123,9 @@ export default function OrdersPage() {
             key={f.key}
             onClick={() => handleStatusFilter(f.key)}
             style={{
-              padding: "4px 12px", borderRadius: 6, border: "1px solid #E5E5E5",
-              background: statusFilter === f.key ? "#171717" : "#FFFFFF",
-              color: statusFilter === f.key ? "#FFFFFF" : "#525252",
+              padding: "4px 12px", borderRadius: 6, border: "1px solid var(--bw-line)",
+              background: statusFilter === f.key ? "#0070F3" : "var(--bw-surface)",
+              color: statusFilter === f.key ? "#FFFFFF" : "var(--bw-text-2)",
               fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)",
             }}
           >
@@ -137,9 +137,9 @@ export default function OrdersPage() {
             value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") handleSearch(); }}
             placeholder="搜索订单号/邮箱/交易号..."
-            style={{ padding: "4px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 12, outline: "none", width: 220 }}
+            style={{ padding: "4px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 12, outline: "none", width: 220 }}
           />
-          <button onClick={handleSearch} style={{ padding: "4px 12px", borderRadius: 6, border: "1px solid #D4D4D4", background: "#FFFFFF", fontSize: 12, cursor: "pointer" }}>
+          <button onClick={handleSearch} style={{ padding: "4px 12px", borderRadius: 6, border: "1px solid var(--bw-line-strong)", background: "var(--bw-surface)", fontSize: 12, cursor: "pointer" }}>
             搜索
           </button>
         </div>
@@ -154,40 +154,40 @@ export default function OrdersPage() {
         </div>
       ) : (
         <>
-          <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", overflow: "hidden" }}>
+          <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", overflow: "hidden" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid #E5E5E5" }}>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>订单号</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>用户</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>类型</th>
-                  <th style={{ padding: "10px 16px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>金额</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>状态</th>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>时间</th>
-                  <th style={{ padding: "10px 16px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", fontFamily: "var(--font-sans)" }}>操作</th>
+                <tr style={{ borderBottom: "1px solid var(--bw-line)" }}>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>订单号</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>用户</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>类型</th>
+                  <th style={{ padding: "10px 16px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>金额</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>状态</th>
+                  <th style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>时间</th>
+                  <th style={{ padding: "10px 16px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>操作</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((o, i) => {
                   const sc = statusColors[o.status] || statusColors[0];
                   return (
-                    <tr key={o.id} style={{ borderBottom: i < orders.length - 1 ? "1px solid #F7F7F7" : "none" }}>
-                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-geist-mono)", fontSize: 12, color: "#171717" }}>
+                    <tr key={o.id} style={{ borderBottom: i < orders.length - 1 ? "1px solid var(--bw-panel)" : "none" }}>
+                      <td style={{ padding: "10px 16px", fontFamily: "var(--font-geist-mono)", fontSize: 12, color: "var(--bw-text)" }}>
                         <Link href={`/admin/orders/${o.id}`} style={{ color: "#0070F3", textDecoration: "none", fontWeight: 500 }}>
                           {o.orderNo}
                         </Link>
                       </td>
-                      <td style={{ padding: "10px 16px", color: "#404040", fontFamily: "var(--font-sans)" }}>{o.userEmail || "—"}</td>
-                      <td style={{ padding: "10px 16px", color: "#404040", fontFamily: "var(--font-sans)", fontSize: 12 }}>{o.productTypeLabel}</td>
-                      <td style={{ padding: "10px 16px", textAlign: "right", fontFamily: "var(--font-geist-mono)", fontWeight: 600, color: "#171717" }}>¥{o.amount.toFixed(2)}</td>
+                      <td style={{ padding: "10px 16px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{o.userEmail || "—"}</td>
+                      <td style={{ padding: "10px 16px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)", fontSize: 12 }}>{o.productTypeLabel}</td>
+                      <td style={{ padding: "10px 16px", textAlign: "right", fontFamily: "var(--font-geist-mono)", fontWeight: 600, color: "var(--bw-text)" }}>¥{o.amount.toFixed(2)}</td>
                       <td style={{ padding: "10px 16px" }}>
                         <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500, background: sc.bg, color: sc.text, fontFamily: "var(--font-sans)" }}>
                           {sc.label}
                         </span>
                       </td>
-                      <td style={{ padding: "10px 16px", color: "#737373", fontSize: 11, fontFamily: "var(--font-sans)", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
+                      <td style={{ padding: "10px 16px", color: "var(--bw-muted)", fontSize: 11, fontFamily: "var(--font-sans)", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
                       <td style={{ padding: "10px 16px", textAlign: "right" }}>
-                        <Link href={`/admin/orders/${o.id}`} style={{ padding: "3px 10px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", color: "#525252", fontSize: 11, fontWeight: 500, cursor: "pointer", textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+                        <Link href={`/admin/orders/${o.id}`} style={{ padding: "3px 10px", borderRadius: 6, border: "1px solid var(--bw-line)", background: "var(--bw-surface)", color: "var(--bw-text-2)", fontSize: 11, fontWeight: 500, cursor: "pointer", textDecoration: "none", fontFamily: "var(--font-sans)" }}>
                           详情
                         </Link>
                       </td>
@@ -204,15 +204,15 @@ export default function OrdersPage() {
               <button
                 onClick={() => { const np = Math.max(1, page - 1); setPage(np); fetchOrders(np, statusFilter, search); }}
                 disabled={page <= 1}
-                style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 12, cursor: page <= 1 ? "default" : "pointer", opacity: page <= 1 ? 0.4 : 1 }}
+                style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid var(--bw-line)", background: "var(--bw-surface)", fontSize: 12, cursor: page <= 1 ? "default" : "pointer", opacity: page <= 1 ? 0.4 : 1 }}
               >
                 上一页
               </button>
-              <span style={{ fontSize: 12, color: "#525252", fontFamily: "var(--font-sans)" }}>{page} / {totalPages}</span>
+              <span style={{ fontSize: 12, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{page} / {totalPages}</span>
               <button
                 onClick={() => { const np = Math.min(totalPages, page + 1); setPage(np); fetchOrders(np, statusFilter, search); }}
                 disabled={page >= totalPages}
-                style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #E5E5E5", background: "#FFF", fontSize: 12, cursor: page >= totalPages ? "default" : "pointer", opacity: page >= totalPages ? 0.4 : 1 }}
+                style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid var(--bw-line)", background: "var(--bw-surface)", fontSize: 12, cursor: page >= totalPages ? "default" : "pointer", opacity: page >= totalPages ? 0.4 : 1 }}
               >
                 下一页
               </button>
@@ -225,31 +225,31 @@ export default function OrdersPage() {
       {showNewOrder && (
         <>
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 100 }} onClick={() => setShowNewOrder(false)} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "#FFF", borderRadius: 12, padding: 24, width: 400, maxWidth: "92vw", zIndex: 101, border: "1px solid #E5E5E5" }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 16px" }}>新建订单</h2>
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "var(--bw-surface)", borderRadius: 12, padding: 24, width: 400, maxWidth: "92vw", zIndex: 101, border: "1px solid var(--bw-line)" }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 16px" }}>新建订单</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>用户邮箱</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", marginBottom: 4 }}>用户邮箱</label>
                 <input value={newOrder.email} onChange={e => setNewOrder({ ...newOrder, email: e.target.value })} placeholder="user@example.com"
-                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>商品类型</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", marginBottom: 4 }}>商品类型</label>
                 <select value={newOrder.productType} onChange={e => setNewOrder({ ...newOrder, productType: e.target.value })}
-                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }}>
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }}>
                   <option value="view_quota">查看额度</option>
                   <option value="chat_quota">AI 对话额度</option>
                 </select>
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>赠送额度</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", marginBottom: 4 }}>赠送额度</label>
                 <input type="number" min={1} value={newOrder.credits} onChange={e => setNewOrder({ ...newOrder, credits: Number(e.target.value) })}
-                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 14, outline: "none", fontFamily: "var(--font-geist-mono)" }} />
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 14, outline: "none", fontFamily: "var(--font-geist-mono)" }} />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", marginBottom: 4 }}>备注</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", marginBottom: 4 }}>备注</label>
                 <input value={newOrder.note} onChange={e => setNewOrder({ ...newOrder, note: e.target.value })} placeholder="管理员赠送"
-                  style={{ width: "100%", padding: "7px 10px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
+                  style={{ width: "100%", padding: "7px 10px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)" }} />
               </div>
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>

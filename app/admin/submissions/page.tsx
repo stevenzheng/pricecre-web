@@ -104,7 +104,7 @@ export default function SubmissionsPage() {
                         <button onClick={() => handleAction(s.id, "REJECTED")} className="vl-btn-danger vl-btn-sm">驳回</button>
                       </div>
                     ) : (
-                      <span style={{ fontSize: 12, color: "#A3A3A3" }}>{s.status === "APPROVED" ? (s.isUserSubmission ? "已发码" : "已并入主表") : "已驳回"}</span>
+                      <span style={{ fontSize: 12, color: "var(--bw-hint)" }}>{s.status === "APPROVED" ? (s.isUserSubmission ? "已发码" : "已并入主表") : "已驳回"}</span>
                     )}
                   </td>
                 </tr>

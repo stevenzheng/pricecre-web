@@ -7,7 +7,7 @@ import Link from "next/link";
 const statusColors: Record<number, { bg: string; text: string; label: string }> = {
   0: { bg: "rgba(245,166,35,0.08)", text: "#B5791A", label: "待支付" },
   1: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已支付" },
-  2: { bg: "#F7F7F7", text: "#737373", label: "已取消" },
+  2: { bg: "var(--bw-panel)", text: "var(--bw-muted)", label: "已取消" },
   3: { bg: "rgba(238,0,0,0.06)", text: "#EE0000", label: "已退款" },
   4: { bg: "rgba(245,166,35,0.08)", text: "#B5791A", label: "退款中" },
   5: { bg: "rgba(0,112,243,0.06)", text: "#0070F3", label: "已完成" },
@@ -82,7 +82,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   return (
     <div className="vl-content-inner">
       <div style={{ marginBottom: 20 }}>
-        <Link href="/admin/orders" style={{ fontSize: 12, color: "#737373", textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+        <Link href="/admin/orders" style={{ fontSize: 12, color: "var(--bw-muted)", textDecoration: "none", fontFamily: "var(--font-sans)" }}>
           ← 返回订单列表
         </Link>
       </div>
@@ -94,10 +94,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
       )}
 
       {/* Order header */}
-      <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", padding: "20px 24px", marginBottom: 12 }}>
+      <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", padding: "20px 24px", marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>
+            <h1 style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>
               订单 {order.orderNo}
             </h1>
             <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500, background: sc.bg, color: sc.text, fontFamily: "var(--font-sans)" }}>
@@ -126,8 +126,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {/* Order info */}
-        <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", padding: "18px 20px" }}>
-          <h3 style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 14px" }}>订单信息</h3>
+        <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", padding: "18px 20px" }}>
+          <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 14px" }}>订单信息</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { l: "订单编号", v: order.orderNo },
@@ -140,30 +140,30 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               { l: "创建时间", v: new Date(order.createdAt).toLocaleString("zh-CN") },
             ].map((r, i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 12, color: "#737373", fontFamily: "var(--font-sans)" }}>{r.l}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)" }}>{r.v}</span>
+                <span style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>{r.l}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-geist-mono)" }}>{r.v}</span>
               </div>
             ))}
           </div>
           {order.note && (
-            <div style={{ marginTop: 12, padding: "8px 12px", background: "#FAFAFA", borderRadius: 6, fontSize: 12, color: "#525252", fontFamily: "var(--font-sans)" }}>
+            <div style={{ marginTop: 12, padding: "8px 12px", background: "var(--bw-panel)", borderRadius: 6, fontSize: 12, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>
               备注：{order.note}
             </div>
           )}
         </div>
 
         {/* Order items */}
-        <div style={{ background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5", padding: "18px 20px" }}>
-          <h3 style={{ fontSize: 12, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 14px" }}>商品明细</h3>
+        <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", padding: "18px 20px" }}>
+          <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 14px" }}>商品明细</h3>
           {order.items && order.items.length > 0 ? (
             <div>
               {order.items.map((item: any, i: number) => (
-                <div key={item.id || i} style={{ padding: "10px 0", borderBottom: i < order.items.length - 1 ? "1px solid #F7F7F7" : "none" }}>
+                <div key={item.id || i} style={{ padding: "10px 0", borderBottom: i < order.items.length - 1 ? "1px solid var(--bw-panel)" : "none" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)" }}>{item.productName}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717", fontFamily: "var(--font-geist-mono)" }}>¥{item.totalPrice.toFixed(2)}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)" }}>{item.productName}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-geist-mono)" }}>¥{item.totalPrice.toFixed(2)}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: "#737373", fontFamily: "var(--font-sans)" }}>
+                  <div style={{ fontSize: 11, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>
                     {item.productType === "view_quota" ? "查看额度" : item.productType === "chat_quota" ? "AI 对话额度" : "VIP"}
                     {item.creditsAdded && item.creditsAdded > 0 ? ` · +${item.creditsAdded} 次` : ""}
                     {item.quantity > 1 ? ` · x${item.quantity}` : ""}
@@ -172,16 +172,16 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               ))}
             </div>
           ) : (
-            <div style={{ fontSize: 12, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>无商品明细</div>
+            <div style={{ fontSize: 12, color: "var(--bw-hint)", fontFamily: "var(--font-sans)" }}>无商品明细</div>
           )}
 
           {/* Refund info */}
           {order.status === 3 && (
             <div style={{ marginTop: 14, padding: "10px 12px", background: "rgba(238,0,0,0.04)", borderRadius: 6 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: "#EE0000", marginBottom: 4, fontFamily: "var(--font-sans)" }}>退款信息</div>
-              <div style={{ fontSize: 11, color: "#404040", fontFamily: "var(--font-sans)" }}>原因：{order.refundReason || "—"}</div>
-              <div style={{ fontSize: 11, color: "#404040", fontFamily: "var(--font-sans)" }}>金额：¥{order.refundAmount ? order.refundAmount.toFixed(2) : order.amount.toFixed(2)}</div>
-              <div style={{ fontSize: 11, color: "#404040", fontFamily: "var(--font-sans)" }}>时间：{order.refundedAt ? new Date(order.refundedAt).toLocaleString("zh-CN") : "—"}</div>
+              <div style={{ fontSize: 11, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>原因：{order.refundReason || "—"}</div>
+              <div style={{ fontSize: 11, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>金额：¥{order.refundAmount ? order.refundAmount.toFixed(2) : order.amount.toFixed(2)}</div>
+              <div style={{ fontSize: 11, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>时间：{order.refundedAt ? new Date(order.refundedAt).toLocaleString("zh-CN") : "—"}</div>
             </div>
           )}
         </div>
@@ -196,25 +196,25 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
           }} onClick={() => setShowRefundModal(false)} />
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-            background: "#FFF", borderRadius: 12, padding: 24, width: 400, maxWidth: "90vw",
-            zIndex: 101, border: "1px solid #E5E5E5",
+            background: "var(--bw-surface)", borderRadius: 12, padding: 24, width: 400, maxWidth: "90vw",
+            zIndex: 101, border: "1px solid var(--bw-line)",
           }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 16px" }}>退款操作</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 16px" }}>退款操作</h2>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "block", marginBottom: 4 }}>退款金额</label>
+              <label style={{ fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", display: "block", marginBottom: 4 }}>退款金额</label>
               <input
                 type="number" value={refundAmount}
                 onChange={e => setRefundAmount(e.target.value)}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 14, outline: "none", fontFamily: "var(--font-geist-mono)" }}
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 14, outline: "none", fontFamily: "var(--font-geist-mono)" }}
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: "#737373", fontFamily: "var(--font-sans)", display: "block", marginBottom: 4 }}>退款原因</label>
+              <label style={{ fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", display: "block", marginBottom: 4 }}>退款原因</label>
               <textarea
                 value={refundReason} onChange={e => setRefundReason(e.target.value)}
                 rows={3}
                 placeholder="请输入退款原因..."
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #D4D4D4", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)", resize: "vertical" }}
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid var(--bw-line-strong)", borderRadius: 6, fontSize: 13, outline: "none", fontFamily: "var(--font-sans)", resize: "vertical" }}
               />
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>

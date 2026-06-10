@@ -65,37 +65,37 @@ export default function CorrectionsAdminPage() {
     <div style={{ padding: 24, maxWidth: 1100 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <p style={{ fontSize: 18, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>精算纠错审核</p>
-          <p style={{ fontSize: 13, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>
+          <p style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>精算纠错审核</p>
+          <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>
             {corrections.length} 条 · {corrections.filter(c => c.status === "PENDING").length} 条待审
           </p>
         </div>
-        <div style={{ display: "flex", gap: 4, background: "#F0F0F0", borderRadius: 6, padding: 2 }}>
+        <div style={{ display: "flex", gap: 4, background: "var(--bw-line-soft)", borderRadius: 6, padding: 2 }}>
           {(["PENDING","APPROVED","REJECTED"] as const).map(s => (
             <button key={s} onClick={() => setFilter(s)}
-              style={{ padding: "5px 14px", borderRadius: 5, border: "none", background: filter === s ? "#FFF" : "transparent", color: filter === s ? "#171717" : "#737373", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", boxShadow: filter === s ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}>
+              style={{ padding: "5px 14px", borderRadius: 5, border: "none", background: filter === s ? "var(--bw-surface)" : "transparent", color: filter === s ? "var(--bw-text)" : "var(--bw-muted)", fontSize: 12, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer", boxShadow: filter === s ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}>
               {statusLabel[s]}
             </button>
           ))}
         </div>
       </div>
 
-      {loading ? <div style={{ padding: 40, textAlign: "center", color: "#737373" }}>加载中...</div> : corrections.length === 0 ? (
-        <div style={{ padding: 40, textAlign: "center", background: "#FFF", borderRadius: 8, border: "1px solid #E5E5E5" }}>
-          <p style={{ fontSize: 15, fontWeight: 500, color: "#171717", margin: "0 0 4px", fontFamily: "var(--font-sans)" }}>暂无纠错记录</p>
-          <p style={{ fontSize: 12, color: "#757575", fontFamily: "var(--font-sans)", margin: 0 }}>用户在资产卡片中提交精算字段纠错后会显示在此处</p>
+      {loading ? <div style={{ padding: 40, textAlign: "center", color: "var(--bw-muted)" }}>加载中...</div> : corrections.length === 0 ? (
+        <div style={{ padding: 40, textAlign: "center", background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)" }}>
+          <p style={{ fontSize: 15, fontWeight: 500, color: "var(--bw-text)", margin: "0 0 4px", fontFamily: "var(--font-sans)" }}>暂无纠错记录</p>
+          <p style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>用户在资产卡片中提交精算字段纠错后会显示在此处</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {corrections.map(c => (
-            <div key={c.id} style={{ background: "#FFF", borderRadius: 10, border: "1px solid #E5E5E5", padding: 16 }}>
+            <div key={c.id} style={{ background: "var(--bw-surface)", borderRadius: 10, border: "1px solid var(--bw-line)", padding: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                 <div>
                   {/* 资产主信息 */}
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#171717", fontFamily: "var(--font-sans)", marginBottom: 2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", marginBottom: 2 }}>
                     {c.asset ? c.asset.projectName : "（未匹配到资产）"}
                     {c.asset && (
-                      <span style={{ fontSize: 11, fontWeight: 400, color: "#737373", marginLeft: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: "var(--bw-muted)", marginLeft: 8 }}>
                         {c.asset.city} · {c.asset.district} · {assetTypeLabels[c.asset.propertyType] || c.asset.propertyType}
                       </span>
                     )}
@@ -106,7 +106,7 @@ export default function CorrectionsAdminPage() {
                       {statusLabel[c.status] || c.status}
                     </span>
                   </div>
-                  <p style={{ fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-mono)", margin: 0 }}>
+                  <p style={{ fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-mono)", margin: 0 }}>
                     {c.propertyId} · {c.fieldKey}
                   </p>
                 </div>
@@ -116,25 +116,25 @@ export default function CorrectionsAdminPage() {
                       <button onClick={() => handleAction(c.id, "approve")}
                         style={{ padding: "5px 14px", borderRadius: 5, border: "none", background: "#10B981", color: "#FFF", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>通过</button>
                       <button onClick={() => handleAction(c.id, "reject")}
-                        style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid #EF4444", background: "#FFF", color: "#EF4444", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>拒绝</button>
+                        style={{ padding: "5px 14px", borderRadius: 5, border: "1px solid #EF4444", background: "var(--bw-surface)", color: "#EF4444", fontSize: 11, fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}>拒绝</button>
                     </>
                   )}
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center", padding: "10px 14px", background: "#FAFAFA", borderRadius: 8, marginBottom: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center", padding: "10px 14px", background: "var(--bw-panel)", borderRadius: 8, marginBottom: 8 }}>
                 <div>
-                  <span style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", display: "block" }}>原值</span>
-                  <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", color: "#737373", textDecoration: "line-through" }}>{c.oldValue}</span>
+                  <span style={{ fontSize: 10, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", display: "block" }}>原值</span>
+                  <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", color: "var(--bw-muted)", textDecoration: "line-through" }}>{c.oldValue}</span>
                 </div>
-                <span style={{ fontSize: 14, color: "#A3A3A3" }}>→</span>
+                <span style={{ fontSize: 14, color: "var(--bw-hint)" }}>→</span>
                 <div>
-                  <span style={{ fontSize: 10, color: "#A3A3A3", fontFamily: "var(--font-sans)", display: "block" }}>新值</span>
+                  <span style={{ fontSize: 10, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", display: "block" }}>新值</span>
                   <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", color: "#0070F3", fontWeight: 600 }}>{c.newValue}</span>
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#A3A3A3", fontFamily: "var(--font-sans)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-sans)" }}>
                 <span>提交人：{c.submittedBy || "匿名"} · {new Date(c.createdAt).toLocaleString("zh-CN")}</span>
                 <span>{c.reason ? `理由：${c.reason}` : ""}</span>
               </div>

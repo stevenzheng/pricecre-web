@@ -47,7 +47,7 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
 .page-header .header-right .lang-row .divider{width:1px;height:12px;background:#cbd5e1}
 .page-header .qr-wrap{display:flex;align-items:center;gap:6px}
 .page-header .qr-wrap img{width:36px;height:36px;border-radius:4px}
-.page-header .qr-wrap .qr-label{font-size:8px;color:#94a3b8;text-align:center;line-height:1.2}
+.page-header .qr-wrap .qr-label{font-size:9px;color:#94a3b8;text-align:center;line-height:1;white-space:nowrap}
 .title-block{text-align:left;margin-bottom:28px;padding-bottom:20px;border-bottom:2px solid #0f172a}
 .title-block .asset-name{font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.03em;margin-bottom:6px}
 .title-block .asset-addr{font-size:13px;color:#64748b;margin-bottom:4px}
@@ -102,7 +102,7 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
           <div className="qr-wrap" style={{ marginLeft: 16, flexShrink: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(shareUrl)}`} alt="QR code" />
-            <div className="qr-label">扫码<br/>查看</div>
+            <div className="qr-label">扫码查看</div>
           </div>
         </div>
 

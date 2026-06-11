@@ -158,6 +158,9 @@ function LoginFormInner() {
           >
             {loading ? "验证中..." : "登录"}
           </button>
+          <div style={{ textAlign: "center", marginTop: 14 }}>
+            <a href="/forgot-password" style={{ fontSize: 11, color: "#0070F3", textDecoration: "none", fontFamily: "var(--font-sans)" }}>忘记密码？</a>
+          </div>
         </form>
       </div>
     </div>

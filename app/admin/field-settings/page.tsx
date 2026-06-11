@@ -156,7 +156,7 @@ export default function FieldSettingsPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {Array.from(catMap.entries()).map(([catName, catFields], ci) => {

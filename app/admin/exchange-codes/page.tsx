@@ -51,7 +51,7 @@ export default function ExchangeCodesPage() {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 960 }}>
+    <div style={{ padding: 24 }}>
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>兑换码管理</h2>
         <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>{records.length} 条记录</p>

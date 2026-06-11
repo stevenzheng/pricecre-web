@@ -21,6 +21,32 @@ export default function SubmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("PENDING_REVIEW");
   const [msg, setMsg] = useState("");
+  // 批量选择（仅待审核条目可选）
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batching, setBatching] = useState(false);
+  const toggleSelect = (id: string) => setSelected(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+
+  const batchAction = async (action: "APPROVED" | "REJECTED") => {
+    if (selected.size === 0) return;
+    if (!confirm(`确认批量${action === "APPROVED" ? "通过" : "驳回"} ${selected.size} 条？`)) return;
+    setBatching(true);
+    let ok = 0, fail = 0;
+    for (const id of Array.from(selected)) {
+      try {
+        const res = await fetch("/api/admin/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ submissionId: id, action }) });
+        const d = await res.json();
+        if (d.success) ok++; else fail++;
+      } catch { fail++; }
+    }
+    setBatching(false);
+    setSelected(new Set());
+    setMsg(`批量${action === "APPROVED" ? "通过" : "驳回"}完成：成功 ${ok} 条${fail > 0 ? ` · 失败 ${fail} 条` : ""}`);
+    fetchData();
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -64,8 +90,19 @@ export default function SubmissionsPage() {
         <button onClick={fetchData} className="vl-btn-ghost">刷新</button>
       </div>
 
+      {/* 批量操作条 */}
+      {selected.size > 0 && (
+        <div style={{ marginBottom: 10, padding: "8px 14px", borderRadius: 8, background: "rgba(0,112,243,0.06)", border: "1px solid rgba(0,112,243,0.25)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-sans)" }}>已选 {selected.size} 条</span>
+          <button onClick={() => batchAction("APPROVED")} disabled={batching} className="vl-btn-primary vl-btn-sm">批量通过</button>
+          <button onClick={() => batchAction("REJECTED")} disabled={batching} className="vl-btn-danger vl-btn-sm">批量驳回</button>
+          <button onClick={() => setSelected(new Set())} className="vl-btn-ghost vl-btn-sm">取消选择</button>
+          {batching && <span style={{ fontSize: 11, color: "var(--bw-hint)" }}>处理中...</span>}
+        </div>
+      )}
+
       {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       ) : filtered.length === 0 ? (
         <div className="vl-empty">
           <p className="vl-empty-title">暂无提交</p>
@@ -76,6 +113,14 @@ export default function SubmissionsPage() {
           <table className="vl-table">
             <thead>
               <tr>
+                <th style={{ width: 36 }}>
+                  <input type="checkbox" style={{ cursor: "pointer" }}
+                    checked={(() => { const p = filtered.filter(s => s.status === "PENDING_REVIEW"); return p.length > 0 && p.every(s => selected.has(s.id)); })()}
+                    onChange={() => {
+                      const pending = filtered.filter(s => s.status === "PENDING_REVIEW");
+                      setSelected(prev => pending.every(s => prev.has(s.id)) ? new Set() : new Set(pending.map(s => s.id)));
+                    }} />
+                </th>
                 <th>来源</th><th>项目名称</th><th>城市</th>
                 <th style={{ textAlign: "right" }}>租金(元/㎡/天)</th><th>业态</th>
                 <th>提交人/数据源</th><th>时间</th><th>状态</th>
@@ -84,7 +129,12 @@ export default function SubmissionsPage() {
             </thead>
             <tbody>
               {filtered.map((s) => (
-                <tr key={s.id}>
+                <tr key={s.id} style={selected.has(s.id) ? { background: "rgba(0,112,243,0.04)" } : undefined}>
+                  <td>
+                    {s.status === "PENDING_REVIEW" ? (
+                      <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggleSelect(s.id)} style={{ cursor: "pointer" }} />
+                    ) : null}
+                  </td>
                   <td>
                     <span className={`vl-badge ${s.isUserSubmission ? "vl-badge-warning" : "vl-badge-neutral"}`}>
                       {s.isUserSubmission ? "用户提报" : "抓取"}

@@ -29,6 +29,35 @@ export default function DataSourcesPage() {
   const [saving, setSaving] = useState(false);
   const [discovering, setDiscovering] = useState(false);
   const [discoverCity, setDiscoverCity] = useState("shanghai");
+  // 批量选择
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batching, setBatching] = useState(false);
+  const toggleSelect = (id: string) => setSelected(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleSelectAll = () => setSelected(prev => prev.size === sources.length ? new Set() : new Set(sources.map(s => s.id)));
+
+  const batchUpdate = async (action: "enable" | "disable" | "delete") => {
+    if (selected.size === 0) return;
+    if (action === "delete" && !confirm(`确认删除选中的 ${selected.size} 个数据源？`)) return;
+    setBatching(true);
+    let ok = 0, fail = 0;
+    for (const id of Array.from(selected)) {
+      try {
+        const res = action === "delete"
+          ? await fetch(`/api/agent/schedule/${id}`, { method: "DELETE" })
+          : await fetch(`/api/agent/schedule/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: action === "enable" }) });
+        const d = await res.json();
+        if (d.error) fail++; else ok++;
+      } catch { fail++; }
+    }
+    setBatching(false);
+    setSelected(new Set());
+    showMsg(`批量${action === "enable" ? "启用" : action === "disable" ? "停用" : "删除"}完成：成功 ${ok} 个${fail > 0 ? ` · 失败 ${fail} 个` : ""}`);
+    fetchSources();
+  };
 
   const fetchSources = async () => {
     setLoading(true);
@@ -156,17 +185,32 @@ export default function DataSourcesPage() {
       )}
 
       {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       ) : sources.length === 0 ? (
         <div className="vl-empty">
           <p className="vl-empty-title">暂无数据源</p>
           <p className="vl-empty-desc">点击「+ 添加数据源」手动录入，或用「AI 发现数据源」自动搜索</p>
         </div>
       ) : (
+        <>
+        {/* 批量操作条 */}
+        {selected.size > 0 && (
+          <div style={{ marginBottom: 10, padding: "8px 14px", borderRadius: 8, background: "rgba(0,112,243,0.06)", border: "1px solid rgba(0,112,243,0.25)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-sans)" }}>已选 {selected.size} 个</span>
+            <button onClick={() => batchUpdate("enable")} disabled={batching} className="vl-btn-primary vl-btn-sm">批量启用</button>
+            <button onClick={() => batchUpdate("disable")} disabled={batching} className="vl-btn-secondary vl-btn-sm">批量停用</button>
+            <button onClick={() => batchUpdate("delete")} disabled={batching} className="vl-btn-danger vl-btn-sm">批量删除</button>
+            <button onClick={() => setSelected(new Set())} className="vl-btn-ghost vl-btn-sm">取消选择</button>
+            {batching && <span style={{ fontSize: 11, color: "var(--bw-hint)" }}>处理中...</span>}
+          </div>
+        )}
         <div className="vl-table-wrap">
           <table className="vl-table">
             <thead>
               <tr>
+                <th style={{ width: 36 }}>
+                  <input type="checkbox" checked={selected.size === sources.length && sources.length > 0} onChange={toggleSelectAll} style={{ cursor: "pointer" }} />
+                </th>
                 <th>站点名称</th>
                 <th>URL</th>
                 <th>业态</th>
@@ -179,7 +223,10 @@ export default function DataSourcesPage() {
             </thead>
             <tbody>
               {sources.map((s) => (
-                <tr key={s.id}>
+                <tr key={s.id} style={selected.has(s.id) ? { background: "rgba(0,112,243,0.04)" } : undefined}>
+                  <td>
+                    <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggleSelect(s.id)} style={{ cursor: "pointer" }} />
+                  </td>
                   <td style={{ fontWeight: 600 }}>{s.label}</td>
                   <td className="vl-td-hint" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {s.targetUrl}
@@ -209,6 +256,7 @@ export default function DataSourcesPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   );

@@ -62,7 +62,7 @@ export default function CorrectionsAdminPage() {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1100 }}>
+    <div style={{ padding: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <p style={{ fontSize: 18, fontWeight: 600, color: "var(--bw-text)", fontFamily: "var(--font-sans)", margin: "0 0 4px" }}>精算纠错审核</p>
@@ -80,7 +80,7 @@ export default function CorrectionsAdminPage() {
         </div>
       </div>
 
-      {loading ? <div style={{ padding: 40, textAlign: "center", color: "var(--bw-muted)" }}>加载中...</div> : corrections.length === 0 ? (
+      {loading ? <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div> : corrections.length === 0 ? (
         <div style={{ padding: 40, textAlign: "center", background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)" }}>
           <p style={{ fontSize: 15, fontWeight: 500, color: "var(--bw-text)", margin: "0 0 4px", fontFamily: "var(--font-sans)" }}>暂无纠错记录</p>
           <p style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)", margin: 0 }}>用户在资产卡片中提交精算字段纠错后会显示在此处</p>

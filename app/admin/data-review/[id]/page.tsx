@@ -110,7 +110,7 @@ export default function PropertyEditorPage() {
     setSaving(false);
   };
 
-  if (loading) return <div style={{ padding: 24, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>加载中...</div>;
+  if (loading) return <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>;
 
   if (loadError) return (
     <div style={{ padding: 24 }}>
@@ -120,7 +120,7 @@ export default function PropertyEditorPage() {
   );
 
   return (
-    <div style={{ padding: 24, maxWidth: 1000 }}>
+    <div style={{ padding: 24 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>

@@ -41,11 +41,11 @@ function ResultsContent() {
       .catch(() => setLoading(false));
   }, [city, type]);
 
-  if (loading) return <div style={{ padding: 24, color: "var(--bw-muted)" }}>加载中...</div>;
+  if (loading) return <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>;
   if (!city || !type) return <div style={{ padding: 24, color: "var(--bw-muted)" }}>缺少城市或业态参数</div>;
 
   return (
-    <div style={{ padding: 24, maxWidth: 1100 }}>
+    <div style={{ padding: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>

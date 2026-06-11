@@ -70,6 +70,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "注册失败，请稍后重试" }, { status: 500 });
     }
 
+    // 注册福利落库：3 次解锁资产额度 + 20 次 AI 对话额度（与注册邮件中宣传一致）
+    try {
+      await prisma.userCredit.upsert({
+        where: { email },
+        update: {},
+        create: { email, referralCredits: 3, purchasedCredits: 0, totalUsed: 0 },
+      });
+      await prisma.userChatToken.upsert({
+        where: { email },
+        update: {},
+        create: { email, tokens: 20, totalUsed: 0 },
+      });
+    } catch {} // 额度初始化失败不阻断注册（unlock/chat 接口有兜底创建）
+
     // Handle referral reward if applicable (non-blocking)
     let referralBonus = 0;
     if (referralCode) {
@@ -81,6 +95,11 @@ export async function POST(req: NextRequest) {
             prisma.user.update({ where: { id: user.id }, data: { referralViewCount: { increment: 3 } } }),
             prisma.referral.create({ data: { referrerId: referrer.id, refereeId: user.id, rewardGranted: true } }),
           ]);
+          // 双方各 +3 真实查看额度（UserCredit 才是 unlock 实际扣减的表）
+          await prisma.userCredit.upsert({ where: { email }, update: { referralCredits: { increment: 3 } }, create: { email, referralCredits: 6 } }).catch(() => {});
+          if (referrer.email) {
+            await prisma.userCredit.upsert({ where: { email: referrer.email }, update: { referralCredits: { increment: 3 } }, create: { email: referrer.email, referralCredits: 13 } }).catch(() => {});
+          }
           referralBonus = 3;
         }
       } catch {} // referral failure shouldn't block registration

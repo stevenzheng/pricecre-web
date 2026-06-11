@@ -59,7 +59,7 @@ export default function ReferralsAdminPage() {
       </div>
 
       {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       ) : tab === "users" ? (
         <div className="vl-table-wrap">
           <table className="vl-table">

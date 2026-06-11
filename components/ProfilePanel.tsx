@@ -232,6 +232,9 @@ export default function ProfilePanel({ credits, totalCredits, chatTokens, credit
             <form onSubmit={handleLogin}>
               <InputField label="账户邮箱" placeholder="your@email.com" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
               <InputField label="访问密码" placeholder="········" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+              <div style={{ textAlign: "right", marginTop: -2 }}>
+                <a href="/forgot-password" style={{ fontSize: 12, color: "#0070F3", textDecoration: "none", fontFamily: "var(--font-sans)" }}>忘记密码？</a>
+              </div>
               <button type="submit" disabled={loading}
                 style={{ width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 8, border: "none", background: "#0070F3", color: "#FFF", fontSize: 14, fontWeight: 500, cursor: loading ? "default" : "pointer", opacity: loading ? 0.6 : 1, fontFamily: "var(--font-sans)" }}>
                 {loading ? "登录中..." : "登录"}

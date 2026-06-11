@@ -126,7 +126,7 @@ export default function DashboardPage() {
   ];
 
   if (loading) return (
-    <div className="vl-content-inner"><div className="vl-empty"><p className="vl-empty-title">加载中...</p></div></div>
+    <div className="vl-content-inner"><div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div></div>
   );
 
   return (

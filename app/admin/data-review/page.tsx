@@ -48,6 +48,31 @@ export default function DataReviewPage() {
   // 排序：点击选中指标，再次点击切换升/降序
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDesc, setSortDesc] = useState(true);
+  // 批量选择（列表视图；演示数据不可删，不可选）
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batching, setBatching] = useState(false);
+  const toggleSelect = (id: string) => setSelected(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const batchDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`确认批量删除选中的 ${selected.size} 条资产？删除后不可恢复。`)) return;
+    setBatching(true);
+    let ok = 0, fail = 0;
+    for (const id of Array.from(selected)) {
+      try {
+        const res = await fetch(`/api/admin/properties?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        const d = await res.json();
+        if (d.success) ok++; else fail++;
+      } catch { fail++; }
+    }
+    setBatching(false);
+    setSelected(new Set());
+    setMsg(`批量删除完成：成功 ${ok} 条${fail > 0 ? ` · 失败 ${fail} 条` : ""}`);
+    fetchData();
+  };
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDesc(d => !d);
     else { setSortKey(key); setSortDesc(true); }
@@ -130,14 +155,10 @@ export default function DataReviewPage() {
     });
   }
 
-  if (loading) return (
-    <div style={{ padding: 24 }}>
-      <p style={{ fontSize: 13, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>加载中...</p>
-    </div>
-  );
+  if (loading) return <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>;
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200 }}>
+    <div style={{ padding: 24 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
@@ -249,11 +270,28 @@ export default function DataReviewPage() {
 
       {/* List View */}
       {viewMode === "list" && filtered.length > 0 && (
+        <>
+        {selected.size > 0 && (
+          <div style={{ marginBottom: 10, padding: "8px 14px", borderRadius: 8, background: "rgba(0,112,243,0.06)", border: "1px solid rgba(0,112,243,0.25)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#0070F3", fontFamily: "var(--font-sans)" }}>已选 {selected.size} 条</span>
+            <button onClick={batchDelete} disabled={batching} className="vl-btn-danger vl-btn-sm">批量删除</button>
+            <button onClick={() => setSelected(new Set())} className="vl-btn-ghost vl-btn-sm">取消选择</button>
+            {batching && <span style={{ fontSize: 11, color: "var(--bw-hint)" }}>处理中...</span>}
+          </div>
+        )}
         <div style={{ background: "var(--bw-surface)", borderRadius: 8, border: "1px solid var(--bw-line)", overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--bw-line)", background: "var(--bw-panel)" }}>
+                  <th style={{ padding: "10px 14px", width: 36 }}>
+                    <input type="checkbox" style={{ cursor: "pointer" }}
+                      checked={(() => { const sel = filtered.filter(p => !p.isMock); return sel.length > 0 && sel.every(p => selected.has(p.id)); })()}
+                      onChange={() => {
+                        const deletable = filtered.filter(p => !p.isMock);
+                        setSelected(prev => deletable.every(p => prev.has(p.id)) && deletable.length > 0 ? new Set() : new Set(deletable.map(p => p.id)));
+                      }} />
+                  </th>
                   <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>项目名称</th>
                   <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>城市</th>
                   <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 500, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>区域</th>
@@ -266,7 +304,12 @@ export default function DataReviewPage() {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.id} style={{ borderBottom: "1px solid var(--bw-line-soft)" }}>
+                  <tr key={p.id} style={{ borderBottom: "1px solid var(--bw-line-soft)", background: selected.has(p.id) ? "rgba(0,112,243,0.04)" : undefined }}>
+                    <td style={{ padding: "10px 14px" }}>
+                      {!p.isMock ? (
+                        <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)} style={{ cursor: "pointer" }} />
+                      ) : null}
+                    </td>
                     <td style={{ padding: "10px 14px", fontWeight: 500, color: "var(--bw-text)", fontFamily: "var(--font-sans)" }}>{p.projectName}</td>
                     <td style={{ padding: "10px 14px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.city}</td>
                     <td style={{ padding: "10px 14px", color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.district}</td>
@@ -286,6 +329,7 @@ export default function DataReviewPage() {
             </table>
           </div>
         </div>
+        </>
       )}
 
       {/* Card View */}

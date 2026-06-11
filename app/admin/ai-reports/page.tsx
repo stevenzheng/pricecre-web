@@ -55,7 +55,7 @@ export default function AIReportsAdminPage() {
   };
 
   return (
-    <div style={{ maxWidth: 960, padding: 24 }}>
+    <div style={{ padding: 24 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <h2 style={{ fontSize: 20, fontWeight: 600, color: "var(--bw-text)", margin: 0 }}>AI 分析报告管理</h2>
         <button onClick={loadReports} disabled={loading}

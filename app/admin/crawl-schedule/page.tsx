@@ -212,7 +212,7 @@ export default function CrawlSchedulePage() {
   if (loading) {
     return (
       <div className="vl-content-inner">
-        <div style={{ textAlign: "center", padding: "60px 0", color: "var(--bw-hint)" }}>加载中...</div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       </div>
     );
   }

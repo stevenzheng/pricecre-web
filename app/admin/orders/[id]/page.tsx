@@ -71,7 +71,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     setTimeout(() => setMsg(""), 3000);
   };
 
-  if (loading) return <div className="vl-content-inner"><div className="vl-empty"><p className="vl-empty-title">加载中...</p></div></div>;
+  if (loading) return <div className="vl-content-inner"><div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div></div>;
   if (!order) return <div className="vl-content-inner"><div className="vl-empty"><p className="vl-empty-title">订单不存在</p><Link href="/admin/orders" className="vl-btn-ghost">返回列表</Link></div></div>;
 
   const sc = statusColors[order.status] || statusColors[0];

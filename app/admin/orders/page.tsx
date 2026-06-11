@@ -146,7 +146,7 @@ export default function OrdersPage() {
       </div>
 
       {loading ? (
-        <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div>
+        <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div>
       ) : orders.length === 0 ? (
         <div className="vl-empty">
           <p className="vl-empty-title">暂无订单</p>

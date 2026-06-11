@@ -148,7 +148,7 @@ export default function UsersPage() {
         </form>
       )}
 
-      {loading ? <div className="vl-empty"><p className="vl-empty-title">加载中...</p></div> : (
+      {loading ? <div className="bw-loading"><div className="bw-spin" /><span>加载中</span></div> : (
         <div style={{ display: "grid", gap: 10 }}>
           {users.map(u => {
             const isExpanded = expandedUser === u.id;

@@ -1700,3 +1700,47 @@ html[data-bw-admin="dark"] .vl-skeleton { background: rgba(255,255,255,0.06); }
 }
 .bw-theme-switch:hover { background: var(--bw-line-soft); color: var(--bw-text); }
 html[data-bw-admin="dark"] .bw-theme-switch:hover { background: rgba(255,255,255,0.08); }
+
+/* =============================================
+   第八批：全屏自适应 / 加载居中 / Stripe 风格数字字体
+   ============================================= */
+/* 后台内容区全屏自适应（去掉 1280px 上限） */
+.vl-content-inner { max-width: none; width: 100%; }
+
+/* 数字与英文字体：Stripe 风格（比例宽 + 等宽数字 tabular figures）
+   注：Stripe 实际使用的 Söhne 为商业字体不可分发，此处用系统级近似栈，
+   本机装有 Söhne/Inter 时自动启用 */
+body[class] {
+  --font-geist-mono: "Sohne", "Söhne", "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Sohne", "Söhne", "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 后台统一加载态：上下左右居中 + 旋转环 */
+.bw-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: calc(100vh - 120px); gap: 14px; color: var(--bw-hint);
+  font-size: 13px; font-family: var(--font-sans); width: 100%;
+}
+.bw-loading .bw-spin {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 3px solid var(--bw-line); border-top-color: #0070F3;
+  animation: bwspin 0.8s linear infinite;
+}
+@keyframes bwspin { to { transform: rotate(360deg); } }
+
+/* 右上角操作条（主题切换 / 返回前台） */
+.bw-topbar {
+  position: fixed; top: 14px; right: 18px; z-index: 90;
+  display: flex; align-items: center; gap: 8px;
+}
+.bw-topbar .bw-top-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--bw-line); background: var(--bw-surface);
+  color: var(--bw-muted); font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: var(--font-sans); text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.15s ease;
+}
+.bw-topbar .bw-top-btn:hover { color: var(--bw-text); border-color: var(--bw-line-strong); }
+@media (max-width: 768px) { .bw-topbar { top: 64px; right: 12px; } }

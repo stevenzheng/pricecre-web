@@ -201,16 +201,45 @@ export default function DashboardPage() {
 
         <div className="bw-card bw-panel">
           <div className="bw-panel-head"><h3>资产构成</h3></div>
-          {Object.entries(s.byType).map(([k, v]) => {
-            const pct = s.summary.totalAssets > 0 ? Math.round((v / s.summary.totalAssets) * 100) : 0;
+          {(() => {
+            const TYPE_COLORS: Record<string, string> = { OFFICE: "#0070F3", SHOPS: "#0D9488", INDUSTRIAL: "#F5A623" };
+            const entries = Object.entries(s.byType);
+            const total = entries.reduce((sum, [, v]) => sum + v, 0);
+            const R = 34; const C = 2 * Math.PI * R;
+            let offset = 0;
             return (
-              <div key={k} className="bw-bar-row">
-                <span className="bw-bar-label">{typeLabels[k]}</span>
-                <div className="bw-bar-track"><div className="bw-bar-fill" style={{ width: `${pct}%` }} /></div>
-                <span className="bw-bar-val">{v}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <svg width="96" height="96" viewBox="0 0 96 96" style={{ flexShrink: 0 }}>
+                  <circle cx="48" cy="48" r={R} fill="none" stroke="var(--bw-track)" strokeWidth="13" />
+                  {total > 0 && entries.map(([k, v]) => {
+                    const frac = v / total;
+                    const seg = (
+                      <circle key={k} cx="48" cy="48" r={R} fill="none" stroke={TYPE_COLORS[k] || "#888"} strokeWidth="13"
+                        strokeDasharray={`${Math.max(frac * C - 1.5, 0)} ${C}`} strokeDashoffset={-offset * C}
+                        transform="rotate(-90 48 48)" style={{ transition: "stroke-dasharray 0.6s ease" }} />
+                    );
+                    offset += frac;
+                    return seg;
+                  })}
+                  <text x="48" y="45" textAnchor="middle" fill="var(--bw-text)" style={{ fontSize: 16, fontWeight: 650, fontFamily: "var(--font-geist-mono)" }}>{total}</text>
+                  <text x="48" y="59" textAnchor="middle" fill="var(--bw-hint)" style={{ fontSize: 9 }}>总资产</text>
+                </svg>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 5 }}>
+                  {entries.map(([k, v]) => {
+                    const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                    return (
+                      <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 2, background: TYPE_COLORS[k] || "#888", flexShrink: 0 }} />
+                        <span style={{ color: "var(--bw-muted)" }}>{typeLabels[k]}</span>
+                        <span style={{ marginLeft: "auto", color: "var(--bw-text)", fontWeight: 600, fontFamily: "var(--font-geist-mono)" }}>{v}</span>
+                        <span style={{ color: "var(--bw-hint)", width: 32, textAlign: "right" }}>{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
-          })}
+          })()}
           <div className="bw-row" style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--bw-border)" }}>
             <span>高置信度(≥80%)</span><b style={{ color: "var(--bw-accent)" }}>{s.quality.highConfidenceCount} 项</b>
           </div>

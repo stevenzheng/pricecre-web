@@ -13,7 +13,20 @@ interface PropertyRow {
   id: string; projectName: string; city: string; district: string;
   propertyType: string; faceRent: number; dataSource: string;
   confidenceScore: number; createdAt: string; isMock?: boolean;
+  vacancy: number | null; capRate: number | null;
+  netEffectiveRent: number | null; salesEfficiency: number | null;
 }
+
+// 排序键（从客户视角挑选的核心精算指标；坪效仅商业零售业态有值）
+type SortKey = "faceRent" | "vacancy" | "capRate" | "netEffectiveRent" | "salesEfficiency" | "confidenceScore";
+const SORT_OPTIONS: { key: SortKey; label: string; hint?: string }[] = [
+  { key: "faceRent", label: "租金" },
+  { key: "vacancy", label: "空置率" },
+  { key: "capRate", label: "资本化率" },
+  { key: "netEffectiveRent", label: "净有效租金" },
+  { key: "salesEfficiency", label: "坪效", hint: "商业零售" },
+  { key: "confidenceScore", label: "可信度" },
+];
 
 export default function DataReviewPage() {
   const router = useRouter();
@@ -32,6 +45,13 @@ export default function DataReviewPage() {
   const [filterCity, setFilterCity] = useState("全部");
   const [filterType, setFilterType] = useState("全部");
   const [search, setSearch] = useState("");
+  // 排序：点击选中指标，再次点击切换升/降序
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDesc, setSortDesc] = useState(true);
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDesc(d => !d);
+    else { setSortKey(key); setSortDesc(true); }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -51,6 +71,10 @@ export default function DataReviewPage() {
         confidenceScore: Number(p.confidenceScore) || 0,
         createdAt: String(p.createdAt || ""),
         isMock: !!p.isMock,
+        vacancy: p.vacancy ?? null,
+        capRate: p.capRate ?? null,
+        netEffectiveRent: p.netEffectiveRent ?? null,
+        salesEfficiency: p.salesEfficiency ?? null,
       })));
     } catch (e: any) {
       setError("数据加载失败，请刷新重试");
@@ -89,12 +113,22 @@ export default function DataReviewPage() {
   };
 
   // 应用筛选（数据已全量加载，切换即时生效）
-  const filtered = properties.filter(p => {
+  let filtered = properties.filter(p => {
     if (filterCity !== "全部" && p.city !== filterCity) return false;
     if (filterType !== "全部" && p.propertyType !== filterType) return false;
     if (search && !p.projectName.toLowerCase().includes(search.toLowerCase()) && !p.district.includes(search)) return false;
     return true;
   });
+
+  // 应用排序（无该指标值的排在末尾）
+  if (sortKey) {
+    filtered = [...filtered].sort((a, b) => {
+      const av = a[sortKey]; const bv = b[sortKey];
+      if (av === null || av === undefined) return 1;
+      if (bv === null || bv === undefined) return -1;
+      return sortDesc ? Number(bv) - Number(av) : Number(av) - Number(bv);
+    });
+  }
 
   if (loading) return (
     <div style={{ padding: 24 }}>
@@ -157,6 +191,25 @@ export default function DataReviewPage() {
           {(filterCity !== "全部" || filterType !== "全部" || search) && (
             <button onClick={() => { setFilterCity("全部"); setFilterType("全部"); setSearch(""); }}
               style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "none", color: "var(--bw-muted)", fontSize: 12, fontFamily: "var(--font-sans)", cursor: "pointer", textDecoration: "underline" }}>清除筛选</button>
+          )}
+        </div>
+        {/* 排序：点击选中指标，再次点击切换升/降序 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, color: "var(--bw-hint)", fontFamily: "var(--font-sans)", width: 32, flexShrink: 0 }}>排序</span>
+          {SORT_OPTIONS.map(o => {
+            const active = sortKey === o.key;
+            return (
+              <button key={o.key} onClick={() => handleSort(o.key)}
+                title={active ? `再次点击切换为${sortDesc ? "升序" : "降序"}` : `按${o.label}排序`}
+                style={{ padding: "4px 10px", borderRadius: 6, border: active ? "1px solid #0D9488" : "1px solid var(--bw-line)", background: active ? "rgba(13,148,136,0.08)" : "var(--bw-surface)", color: active ? "#0D9488" : "var(--bw-text-2)", fontSize: 12, fontWeight: active ? 600 : 400, fontFamily: "var(--font-sans)", cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                {o.label}{o.hint && <span style={{ fontSize: 9, color: "var(--bw-hint)" }}>({o.hint})</span>}
+                {active && <span style={{ fontSize: 10 }}>{sortDesc ? "↓" : "↑"}</span>}
+              </button>
+            );
+          })}
+          {sortKey && (
+            <button onClick={() => setSortKey(null)}
+              style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "none", color: "var(--bw-muted)", fontSize: 12, fontFamily: "var(--font-sans)", cursor: "pointer", textDecoration: "underline" }}>取消排序</button>
           )}
         </div>
       </div>
@@ -276,6 +329,14 @@ export default function DataReviewPage() {
                   </div>
                 </div>
 
+                {(p.vacancy !== null || p.capRate !== null || p.netEffectiveRent !== null) && (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {p.vacancy !== null && <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "rgba(238,0,0,0.05)", color: "#D85A30", fontFamily: "var(--font-sans)" }}>空置 {Number(p.vacancy).toFixed(1)}%</span>}
+                    {p.capRate !== null && <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "rgba(0,112,243,0.06)", color: "#0070F3", fontFamily: "var(--font-sans)" }}>CAP {Number(p.capRate).toFixed(1)}%</span>}
+                    {p.netEffectiveRent !== null && <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "rgba(13,148,136,0.08)", color: "#0D9488", fontFamily: "var(--font-sans)" }}>净租 ¥{Number(p.netEffectiveRent).toFixed(1)}</span>}
+                    {p.salesEfficiency !== null && <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "rgba(124,58,237,0.08)", color: "#7C3AED", fontFamily: "var(--font-sans)" }}>坪效 ¥{Number(p.salesEfficiency).toFixed(0)}</span>}
+                  </div>
+                )}
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 12, color: "var(--bw-muted)", fontFamily: "var(--font-sans)" }}>数据来源</span>
                   <span style={{ fontSize: 12, color: "var(--bw-text-2)", fontFamily: "var(--font-sans)" }}>{p.dataSource}</span>

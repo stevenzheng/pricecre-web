@@ -104,6 +104,8 @@ interface MapViewProps {
   properties?: Property[];
   onSelectProperty?: (id: string) => void;
   userCoords?: { lat: number; lng: number } | null;
+  /** 由页面注入：渲染完整资产卡片（点击点位/列表项时内嵌显示，不跳转页面） */
+  renderPropertyCard?: (property: any) => React.ReactNode;
 }
 
 // Hash the project name to a deterministic seed for jitter
@@ -113,11 +115,12 @@ function seedFromName(name: string): number {
   return h;
 }
 
-export default function MapView({ properties, onSelectProperty, userCoords }: MapViewProps) {
+export default function MapView({ properties, onSelectProperty, userCoords, renderPropertyCard }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
   const markersLayerRef = useRef<any>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
   const [activeCity, setActiveCity] = useState<string>("上海");
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -247,12 +250,10 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         iconAnchor: [70, 14],
       });
 
+      // 点击点位：不跳转页面，在下方列表区内嵌显示该资产卡片
       L.marker([lat, lng], { icon })
         .addTo(markersLayer)
-        .on("click", () => {
-          setSelectedProperty(p.id);
-          onSelectProperty?.(p.id);
-        });
+        .on("click", () => setSelectedProperty(p.id));
 
       // Add a larger click target (circle) for easier tapping
       L.circle([lat, lng], {
@@ -261,12 +262,19 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         fillColor: "transparent",
         fillOpacity: 0,
         interactive: true,
-      }).addTo(markersLayer).on("click", () => {
-        setSelectedProperty(p.id);
-        onSelectProperty?.(p.id);
-      });
+      }).addTo(markersLayer).on("click", () => setSelectedProperty(p.id));
     });
   }, [activeCity, loaded, displayProperties]);
+
+  // 选中资产后滚动到详情卡片
+  useEffect(() => {
+    if (selectedProperty && detailRef.current) {
+      setTimeout(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+    }
+  }, [selectedProperty]);
+
+  // 切换城市时清除选中
+  useEffect(() => { setSelectedProperty(null); }, [activeCity]);
 
   // 底部列表与地图标记使用同一数据源（真实数据优先）
   const cityProps = displayProperties.filter((p) => p.city === activeCity);
@@ -294,11 +302,12 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         </button>
       </div>
 
-      {/* Map container */}
+      {/* Map container — 浅灰风格通过瓦片层灰度滤镜实现 */}
+      <style>{`.pricecre-gray-map .leaflet-tile-pane { filter: grayscale(0.92) brightness(1.05) contrast(0.92); }`}</style>
       <div
         ref={mapRef}
-        className="flex-1 w-full"
-        style={{ minHeight: fullscreen ? "100vh" : "300px", background: "#d5d5d5", ...(fullscreen ? { position: "fixed", inset: 0, zIndex: 2000 } : {}) }}
+        className="flex-1 w-full pricecre-gray-map"
+        style={{ minHeight: fullscreen ? "100vh" : "min(58vh, 520px)", background: "#E8EAED", ...(fullscreen ? { position: "fixed", inset: 0, zIndex: 2000 } : {}) }}
       >
         {!loaded && (
           <div className="w-full h-full flex items-center justify-center">
@@ -315,14 +324,31 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
         )}
       </div>
 
-      {/* Bottom list */}
+      {/* Bottom area：默认显示当前城市资产列表；点击点位/列表项后在此处内嵌该资产完整卡片 */}
       {cityProps.length > 0 && (
         <div className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
-          <div className="px-4 py-2 flex items-center justify-between">
+          <div ref={detailRef} className="px-4 py-2 flex items-center justify-between">
             <span className="text-xs font-medium" style={{ color: "var(--text-strong)" }}>
-              {activeCity} · {cityProps.length} 资产
+              {selectedProperty ? "资产详情" : `${activeCity} · ${cityProps.length} 资产`}
             </span>
+            {selectedProperty && (
+              <button
+                onClick={() => setSelectedProperty(null)}
+                className="text-[11px] px-2.5 py-1 rounded-md font-medium"
+                style={{ background: "var(--panel)", color: "var(--text-muted)" }}
+              >
+                ← 返回列表
+              </button>
+            )}
           </div>
+          {selectedProperty && renderPropertyCard ? (
+            <div className="px-4 pb-3">
+              {(() => {
+                const sel = displayProperties.find((p) => p.id === selectedProperty);
+                return sel ? renderPropertyCard(sel) : <div className="text-xs py-4 text-center" style={{ color: "var(--text-hint)" }}>未找到该资产</div>;
+              })()}
+            </div>
+          ) : (
           <div className="px-4 pb-3 space-y-1.5">
             {cityProps.map((p) => (
               <div
@@ -332,10 +358,7 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
                     ? "ring-1 bg-[var(--accent-soft)]"
                     : "bg-[var(--panel)] hover:bg-[var(--bg-hover)]"
                 }`}
-                onClick={() => {
-                  setSelectedProperty(p.id);
-                  onSelectProperty?.(p.id);
-                }}
+                onClick={() => setSelectedProperty(p.id)}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
@@ -359,6 +382,7 @@ export default function MapView({ properties, onSelectProperty, userCoords }: Ma
               </div>
             ))}
           </div>
+          )}
         </div>
       )}
     </div>

@@ -22,6 +22,8 @@ export async function GET() {
           email: asText(a.email),
           projectName: asText(r.projectName),
           city: asText(r.city),
+          district: asText(r.district),
+          propertyType: asText(r.propertyType),
           summary: asText(a.summary || (a.score !== undefined ? `${a.score}分` : "")),
           content: asText(a.content || a.conclusion),
           createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : "",

@@ -50,7 +50,19 @@ function LoginFormInner() {
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <img src="/og-image.png" alt="PriceCRE" style={{ width: 40, height: 40, borderRadius: 8, display: "block", margin: "0 auto 16px", background: "#fff" }} />
+          {/* 与前台一致的蓝色 Logo */}
+          <div style={{ width: 40, height: 40, borderRadius: 9, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="8" y="2" width="8" height="4" rx="1" />
+              <rect x="8" y="10" width="8" height="4" rx="1" />
+              <rect x="8" y="18" width="8" height="4" rx="1" />
+              <rect x="2" y="6" width="6" height="3" rx="1" />
+              <rect x="2" y="14" width="6" height="3" rx="1" />
+              <rect x="2" y="22" width="6" height="3" rx="1" />
+              <rect x="16" y="6" width="6" height="3" rx="1" />
+              <rect x="16" y="14" width="6" height="3" rx="1" />
+            </svg>
+          </div>
           <h2 style={{
             fontSize: 16, fontWeight: 600, color: "var(--bw-text)", margin: "0 0 4px",
             fontFamily: "var(--font-sans)", letterSpacing: "-0.02em",

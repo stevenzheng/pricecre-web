@@ -70,6 +70,7 @@ export default function Home() {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [showUnlockedAssets, setShowUnlockedAssets] = useState(false);
+  const [showUpdateTimeline, setShowUpdateTimeline] = useState(false);
   const [showAiReports, setShowAiReports] = useState(false);
   const [aiReports, setAiReports] = useState<any[]>([]);
   const [showReportDetail, setShowReportDetail] = useState<any>(null);
@@ -342,7 +343,8 @@ export default function Home() {
     return () => document.removeEventListener("credit-panel-action", h);
   }, [userEmail]);
 
-  const totalCredits = credits.shared + credits.referral + credits.purchased;
+  // Number() 兜底：localStorage 旧数据结构缺字段时避免 NaN（未登录顶部额度显示）
+  const totalCredits = (Number(credits?.shared) || 0) + (Number(credits?.referral) || 0) + (Number(credits?.purchased) || 0);
   const { lang } = useLanguage();
 
   // Nearby city mapping for geo-location fallback (HK→深圳, 杭州→上海, etc.)
@@ -494,15 +496,36 @@ export default function Home() {
     [allProperties, unlockedIds]
   );
 
+  // 按更新日期分组（用于「今日更新」计数与时间线抽屉）
+  const updateTimeline = useMemo(() => {
+    const groups = new Map<string, typeof allProperties>();
+    for (const p of allProperties) {
+      const d = String((p as any).updatedAt || "").slice(0, 10);
+      if (!d) continue;
+      if (!groups.has(d)) groups.set(d, []);
+      groups.get(d)!.push(p);
+    }
+    return Array.from(groups.entries()).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 14);
+  }, [allProperties]);
+
+  const todayStr = useMemo(() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  }, []);
+  const todayUpdated = useMemo(
+    () => (updateTimeline.find(([d]) => d === todayStr)?.[1].length) || 0,
+    [updateTimeline, todayStr]
+  );
+
   const stats = useMemo(() => {
     const cities = new Set(allProperties.map((p) => p.city)).size;
     return {
       total: allProperties.length,
       unlocked: unlockedProperties.length,
       cities,
-      volume: serverStats.volume || 12,
+      todayUpdated,
     };
-  }, [allProperties, unlockedProperties.length, serverStats.volume]);
+  }, [allProperties, unlockedProperties.length, todayUpdated]);
 
   // Fetch real stats from API
   useEffect(() => {
@@ -599,10 +622,7 @@ export default function Home() {
     []
   );
 
-  const handleMapSelectProperty = useCallback((id: string) => {
-    setFocusedPropertyId(id);
-    setMobileTab("market");
-  }, []);
+  // 地图选中资产改为在地图页内嵌展示完整卡片（renderPropertyCard），不再跳转页面
 
   // Scroll to focused property
   useEffect(() => {
@@ -635,7 +655,7 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen relative"
+      className="min-h-screen relative flex flex-col"
       style={{ background: "var(--bg)", color: "var(--text)" }}
     >
       {/* ====== Hamburger Menu ====== */}
@@ -795,7 +815,7 @@ export default function Home() {
       </header>
 
       {/* ====== Main Content ====== */}
-      <main className="pt-[var(--nav-height)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+40px)] lg:pb-8">
+      <main className="flex-1 pt-[var(--nav-height)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+40px)] lg:pb-8">
         {/* Referral Welcome Toast */}
         {referralToast && (
           <div className="max-w-7xl mx-auto px-4 pt-3">
@@ -836,11 +856,11 @@ export default function Home() {
                 <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" className="inline-block mr-1 align-middle"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>覆盖城市</div>
                 <div className="stat-value">{stats.cities}</div>
               </div>
-              <div className="stat-item" onClick={() => setStatFilter(statFilter === "recent" ? null : "recent")}
-                style={{ cursor: "pointer", background: statFilter === "recent" ? "rgba(0,112,243,0.06)" : undefined, borderRadius: statFilter === "recent" ? 8 : undefined }}
-                title="点击筛选近期成交">
-                <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>成交量</div>
-                <div className="stat-value">{stats.volume}</div>
+              <div className="stat-item" onClick={() => setShowUpdateTimeline(true)}
+                style={{ cursor: "pointer" }}
+                title="点击查看数据更新时间线">
+                <div className="stat-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" className="inline-block mr-1 align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>今日更新</div>
+                <div className="stat-value">{stats.todayUpdated}</div>
               </div>
             </div>
           </div>
@@ -952,9 +972,15 @@ export default function Home() {
                           </div>
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <code style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.8)", padding: "8px 12px", borderRadius: 6, wordBreak: "break-all", fontWeight: 500 }}>pricecre.com/r/{myReferralCode}</code>
-                          <button onClick={(e) => { e.preventDefault(); navigator.clipboard.writeText("https://pricecre.com/r/" + myReferralCode); const btn = e.currentTarget as HTMLButtonElement; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000); }}
-                            style={{ padding: "8px 18px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>一键邀约</button>
+                          <code style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)", color: "#2563EB", background: "rgba(255,255,255,0.8)", padding: "8px 12px", borderRadius: 6, wordBreak: "break-all", fontWeight: 500 }}>
+                            {myReferralCode ? `pricecre.com/r/${myReferralCode}` : "登录后获取专属邀请链接"}
+                          </code>
+                          <button onClick={(e) => {
+                            e.preventDefault();
+                            if (!myReferralCode) { setMobileTab("profile"); return; }
+                            navigator.clipboard.writeText("https://pricecre.com/r/" + myReferralCode); const btn = e.currentTarget as HTMLButtonElement; const orig = btn.innerHTML; btn.innerHTML = "✓ 已复制"; btn.style.background = "#10B981"; btn.style.borderColor = "#10B981"; setTimeout(() => { btn.innerHTML = orig; btn.style.background = "#2563EB"; btn.style.borderColor = "#2563EB"; }, 2000);
+                          }}
+                            style={{ padding: "8px 18px", borderRadius: 6, border: "1.5px solid #2563EB", background: "#2563EB", color: "#FFF", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "var(--font-sans)", transition: "all 0.2s" }}>{myReferralCode ? "一键邀约" : "去登录"}</button>
                         </div>
                       </div>
                     </div>
@@ -1041,7 +1067,7 @@ export default function Home() {
                   fontFamily: "var(--font-mono)",
                 }}
               >
-                https://pricecre.com/r/{myReferralCode}
+                {myReferralCode ? `https://pricecre.com/r/${myReferralCode}` : "登录后获取专属邀请链接"}
               </code>
               <button
                 className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95"
@@ -1050,6 +1076,7 @@ export default function Home() {
                   color: "var(--accent)",
                 }}
                 onClick={() => {
+                  if (!myReferralCode) { setMobileTab("profile"); return; }
                   navigator.clipboard.writeText(`https://pricecre.com/r/${myReferralCode}`);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
@@ -1074,7 +1101,30 @@ export default function Home() {
         )}
 
         {/* Map Tab */}
-        {mobileTab === "map" && <MapView properties={allProperties} onSelectProperty={handleMapSelectProperty} userCoords={userCoords} />}
+        {mobileTab === "map" && (
+          <MapView
+            properties={allProperties}
+            userCoords={userCoords}
+            renderPropertyCard={(p: any) => {
+              const isRealUnlocked = unlockedIds.has(p.id);
+              const realIndicators = unlockedData[p.id];
+              return (
+                <PropertyCard
+                  property={{
+                    ...p,
+                    isUnlocked: p.isUnlocked || isRealUnlocked,
+                    dynamicIndicators: realIndicators ? { ...p.dynamicIndicators, ...realIndicators } : (p.dynamicIndicators || {}),
+                  }}
+                  remainingCredits={totalCredits}
+                  onUnlock={handleUnlock}
+                  autoExpand
+                  isLoggedIn={!!userEmail}
+                  onNotLoggedIn={() => { document.dispatchEvent(new CustomEvent("nav-to-tab", { detail: "profile" })); }}
+                />
+              );
+            }}
+          />
+        )}
 
         {/* Share Tab */}
         {mobileTab === "share" && <ShareCenter />}
@@ -1140,6 +1190,35 @@ export default function Home() {
             </div>
           </RightDrawer>
         )}
+        {showUpdateTimeline && (
+          <RightDrawer title="数据更新时间线" onClose={() => setShowUpdateTimeline(false)}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {updateTimeline.map(([date, items]) => (
+                <div key={date}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: date === todayStr ? "#10B981" : "#D4D4D4", flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#171717" }}>{date}{date === todayStr ? " · 今天" : ""}</span>
+                    <span style={{ fontSize: 11, color: "#A3A3A3" }}>{items.length} 条更新</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginLeft: 16, borderLeft: "2px solid #F0F0F0", paddingLeft: 12 }}>
+                    {items.slice(0, 20).map((p) => (
+                      <div key={p.id} onClick={() => { setShowUpdateTimeline(false); setMobileTab("market"); setFocusedPropertyId(p.id); }}
+                        style={{ padding: "8px 10px", background: "#FAFAFA", borderRadius: 6, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 500, color: "#171717", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.projectName}</div>
+                          <div style={{ fontSize: 10, color: "#A3A3A3" }}>{p.city} · {p.district || "—"}</div>
+                        </div>
+                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "#2563EB", flexShrink: 0 }}>¥{Number(p.faceRent).toFixed(1)}</span>
+                      </div>
+                    ))}
+                    {items.length > 20 && <div style={{ fontSize: 11, color: "#A3A3A3", padding: "4px 10px" }}>… 还有 {items.length - 20} 条</div>}
+                  </div>
+                </div>
+              ))}
+              {updateTimeline.length === 0 && <div style={{ textAlign: "center", padding: 24, color: "#A3A3A3" }}>暂无更新记录</div>}
+            </div>
+          </RightDrawer>
+        )}
         {showAiReports && (
           <RightDrawer title="AI分析报告" onClose={() => setShowAiReports(false)}>
             {showReportDetail ? (
@@ -1176,13 +1255,14 @@ export default function Home() {
         )}
       </main>
 
-      {/* ====== Footer ====== */}
+      {/* ====== Footer（含底部安全区，footer 以下全部为白色面板色） ====== */}
       <footer className="border-t" style={{ borderColor: "var(--line)", background: "var(--bg-surface)" }}>
         <div className="max-w-7xl mx-auto px-4 py-3 text-center">
           <span className="text-[12px]" style={{ color: "var(--text-hint)" }}>
             &copy; 2026 PriceCRE 商业地产量化精算资产终端
           </span>
         </div>
+        <div style={{ height: "calc(var(--bottom-nav-h) + env(safe-area-inset-bottom))", background: "var(--bg-surface)" }} />
       </footer>
 
       <Modal />

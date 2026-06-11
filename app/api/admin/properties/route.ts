@@ -6,6 +6,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// 提取列表页排序/筛选所需的核心精算指标
+function pickIndicators(di: any) {
+  const d = di || {};
+  const num = (v: any) => (v === null || v === undefined || isNaN(Number(v)) ? null : Number(v));
+  return {
+    vacancy: num(d.submarketVacancy),
+    capRate: num(d.capRate),
+    netEffectiveRent: num(d.netEffectiveRent),
+    salesEfficiency: num(d.salesEfficiency),
+  };
+}
+
+/** 资产名称标准化（去空白/全角/分隔符），用于跨来源去重 */
+function normName(name: string): string {
+  return (name || "").replace(/\s+/g, "").replace(/·|•|・/g, "").toLowerCase();
+}
+
 async function getMockProperties() {
   const m = await import("@/lib/mock-data");
   return m.mockProperties.map((p: any) => ({
@@ -18,6 +35,7 @@ async function getMockProperties() {
     dataSource: String(p.dataSource || "mock"),
     confidenceScore: Number(p.confidenceScore) || 0.85,
     createdAt: String(p.updatedAt || ""),
+    ...pickIndicators(p.dynamicIndicators),
     isMock: true,
   }));
 }
@@ -44,18 +62,33 @@ export async function GET(request: NextRequest) {
         id: true, projectName: true, city: true, district: true,
         propertyType: true, faceRent: true, dataSource: true,
         updatedAt: true, confidenceScore: true, createdAt: true,
+        dynamicIndicators: true,
       },
     });
-    dbProperties = rows.map((p) => ({ ...p, faceRent: Number(p.faceRent), isMock: false }));
+    dbProperties = rows.map((p) => ({
+      id: p.id, projectName: p.projectName, city: p.city, district: p.district,
+      propertyType: p.propertyType, faceRent: Number(p.faceRent), dataSource: p.dataSource,
+      updatedAt: p.updatedAt, confidenceScore: p.confidenceScore, createdAt: p.createdAt,
+      ...pickIndicators(p.dynamicIndicators),
+      isMock: false,
+    }));
   } catch {
     dbProperties = [];
   }
 
-  // 数据库有数据 → 数据库优先，mock 中不重名的补充在后（与前台合并逻辑一致）
+  // 合并去重：标准化名称+城市为指纹；数据库优先，库内重名保留可信度最高的一条
   try {
     const mock = await getMockProperties();
-    const names = new Set(dbProperties.map((p) => p.projectName));
-    const merged = [...dbProperties, ...mock.filter((m) => !names.has(m.projectName))];
+    const seen = new Map<string, any>();
+    for (const p of [...dbProperties, ...mock]) {
+      const fp = `${normName(p.projectName)}_${p.city}`;
+      const existing = seen.get(fp);
+      if (!existing) { seen.set(fp, p); continue; }
+      // 数据库记录优先于 mock；同为数据库记录取可信度高者
+      if (existing.isMock && !p.isMock) seen.set(fp, p);
+      else if (existing.isMock === p.isMock && (p.confidenceScore || 0) > (existing.confidenceScore || 0)) seen.set(fp, p);
+    }
+    const merged = Array.from(seen.values());
     return NextResponse.json({ properties: merged, total: merged.length, dbCount: dbProperties.length });
   } catch {
     return NextResponse.json({ properties: dbProperties, total: dbProperties.length, dbCount: dbProperties.length });

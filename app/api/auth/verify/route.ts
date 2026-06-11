@@ -51,47 +51,39 @@ export async function POST(req: NextRequest) {
     // Referral code from request body
     const referralCode = req.nextUrl?.searchParams?.get("ref") || "";
 
-    // Create user in Supabase
+    // Create user in Supabase — handle gracefully
+    const hashedPw = password ? await bcrypt.hash(password, 10).catch(() => null) : null;
     const userData: any = {
       email,
-      password: password ? await bcrypt.hash(password, 10) : null,
+      password: hashedPw,
       myReferralCode: generateReferralCode(),
-      referralViewCount: 3, // base credits
+      referralViewCount: 3,
     };
 
-    const user = await prisma.user.create({ data: userData });
+    let user;
+    try {
+      user = await prisma.user.create({ data: userData });
+    } catch (e: any) {
+      if (e?.code === "P2002") {
+        return NextResponse.json({ error: "该邮箱已注册" }, { status: 409 });
+      }
+      return NextResponse.json({ error: "注册失败，请稍后重试" }, { status: 500 });
+    }
 
-    // Handle referral reward if applicable
+    // Handle referral reward if applicable (non-blocking)
     let referralBonus = 0;
     if (referralCode) {
-      const referrer = await prisma.user.findFirst({
-        where: { myReferralCode: referralCode },
-      });
-
-      if (referrer && referrer.id !== user.id) {
-        // Reward both parties: +3 credits each
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: referrer.id },
-            data: {
-              referralViewCount: { increment: 3 },
-              lifetimeReferralEarned: { increment: 3 },
-            },
-          }),
-          prisma.user.update({
-            where: { id: user.id },
-            data: { referralViewCount: { increment: 3 } },
-          }),
-          prisma.referral.create({
-            data: {
-              referrerId: referrer.id,
-              refereeId: user.id,
-              rewardGranted: true,
-            },
-          }),
-        ]);
-        referralBonus = 3;
-      }
+      try {
+        const referrer = await prisma.user.findFirst({ where: { myReferralCode: referralCode } });
+        if (referrer && referrer.id !== user.id) {
+          await prisma.$transaction([
+            prisma.user.update({ where: { id: referrer.id }, data: { referralViewCount: { increment: 3 }, lifetimeReferralEarned: { increment: 3 } } }),
+            prisma.user.update({ where: { id: user.id }, data: { referralViewCount: { increment: 3 } } }),
+            prisma.referral.create({ data: { referrerId: referrer.id, refereeId: user.id, rewardGranted: true } }),
+          ]);
+          referralBonus = 3;
+        }
+      } catch {} // referral failure shouldn't block registration
     }
 
     return NextResponse.json({

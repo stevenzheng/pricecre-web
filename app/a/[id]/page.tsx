@@ -37,7 +37,7 @@ export default async function SharedAnalysisPage({ params, searchParams }: { par
 body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;color:#1a1a2e;line-height:1.7;max-width:860px;margin:0;padding:40px 36px;background:#FFF}
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}
 .page-header .brand{display:flex;align-items:center;gap:10px}
-.page-header .brand .logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0f172a,#334155);color:#FFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.page-header .brand .logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0070F3,#00C6FF);color:#FFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .page-header .brand .names{display:flex;flex-direction:column}
 .page-header .brand .name{font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.02em}
 .page-header .brand .sub{font-size:10px;color:#94a3b8;font-weight:500;letter-spacing:0.02em}
@@ -89,19 +89,21 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
               <span>CRE Intelligence</span>
             </div>
             <div className="web-url">{shareUrl}</div>
-            <div className="qr-wrap">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(shareUrl)}`} alt="QR code" />
-              <div className="qr-label">扫码<br/>查看</div>
-            </div>
           </div>
         </div>
 
-        <div className="title-block">
-          <div className="asset-name">{cached.projectName}</div>
-          <div className="asset-addr">{cached.city} · {cached.district} · {cached.propertyType}</div>
-          <div className="asset-rent">挂牌面价 <span>¥{faceRent}/㎡/天</span>{netEffectiveRent ? <> &nbsp;|&nbsp; 净有效租金 <span>¥{netEffectiveRent.toFixed(1)}/㎡/天</span></> : ""}</div>
-          <div className="score-badge"><span className="num">{analysis.score}</span><span className="label">/ 100 综合精算评分</span></div>
+        <div className="title-block" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div className="asset-name">{cached.projectName}</div>
+            <div className="asset-addr">{cached.city} · {cached.district} · {cached.propertyType}</div>
+            <div className="asset-rent">挂牌面价 <span>¥{faceRent}/㎡/天</span>{netEffectiveRent ? <> &nbsp;|&nbsp; 净有效租金 <span>¥{netEffectiveRent.toFixed(1)}/㎡/天</span></> : ""}</div>
+            <div className="score-badge"><span className="num">{analysis.score}</span><span className="label">/ 100 综合精算评分</span></div>
+          </div>
+          <div className="qr-wrap" style={{ marginLeft: 16, flexShrink: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(shareUrl)}`} alt="QR code" />
+            <div className="qr-label">扫码<br/>查看</div>
+          </div>
         </div>
 
         <div className="main-grid">
@@ -114,7 +116,7 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
             <div className="ai-conclusion">{analysis.conclusion}</div>
           </div>
           <div>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", borderLeft: "3px solid #0d9488", paddingLeft: 10, marginBottom: 10 }}>资产精算指标</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", borderLeft: "3px solid #0d9488", paddingLeft: 10, marginBottom: 10 }}>资产价值指标</h3>
             <div className="ind-grid" dangerouslySetInnerHTML={{ __html: indicatorBlocks || '<p style="font-size:12px;color:#94a3b8;grid-column:1/-1">暂无指标数据</p>' }} />
           </div>
         </div>

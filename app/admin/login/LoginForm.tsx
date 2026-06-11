@@ -51,7 +51,7 @@ function LoginFormInner() {
       }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           {/* 与前台一致的蓝色 Logo */}
-          <div style={{ width: 40, height: 40, borderRadius: 9, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 9, background: "#0070F3", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="8" y="2" width="8" height="4" rx="1" />
               <rect x="8" y="10" width="8" height="4" rx="1" />

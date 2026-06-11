@@ -475,7 +475,7 @@ export default function PropertyCard({
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2l1.5 5.5L19 4l-3.5 4.5L22 12l-6.5 1.5L19 20l-5.5-4L12 22l-1.5-6L4 20l4-7L2 12l6-2.5L4 4l6.5 4.5L12 2z"/>
                     </svg>
-                    价值数据
+                    态势报告
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); openChat(); }}
@@ -523,9 +523,9 @@ export default function PropertyCard({
           {/* Indicators Grid */}
           <div className="p-4 sm:p-5">
             <div className="section-title">
-              附属精算指标
+              价值指标（供参考）
               {!isUnlocked && (
-                <span className="font-normal ml-2 text-[11px]" style={{ color: "var(--text-hint)" }}>解锁后查看</span>
+                <span className="font-normal ml-auto text-[11px]" style={{ color: "#0070F3" }}>解锁后查看</span>
               )}
             </div>
             {/* Mobile: 3 cols, Desktop: 4 cols */}

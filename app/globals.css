@@ -37,9 +37,17 @@
   font-display: swap;
 }
 
+/* JetBrains Mono via jsDelivr CDN (fontsource) — 英文与数字专用，外观接近 SF Mono，全设备一致 */
+@font-face { font-family: 'JetBrains Mono'; src: url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/files/jetbrains-mono-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/files/jetbrains-mono-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/files/jetbrains-mono-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/files/jetbrains-mono-latin-700-normal.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
 :root {
-  --font-sans: var(--font-geist-sans), 'MiSans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --font-mono: var(--font-geist-mono), 'SF Mono', 'Cascadia Code', 'JetBrains Mono', ui-monospace, monospace;
+  /* 中文 = MiSans；英文与数字 = JetBrains Mono（仅含拉丁+数字字形，故排在 MiSans 前，中文自动落到 MiSans）。
+     JetBrains Mono 通过 CDN 加载，全设备（苹果/Windows/安卓）显示一致。 */
+  --font-sans: 'JetBrains Mono', 'MiSans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'MiSans', ui-monospace, 'SF Mono', monospace;
 }
 
 /* ---- Light Theme (Default) ---- */
@@ -1731,8 +1739,8 @@ body[class] {
 
 /* 右上角操作条（主题切换 / 返回前台） */
 .bw-topbar {
-  position: fixed; top: 14px; right: 18px; z-index: 90;
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 16px 24px 4px;
 }
 .bw-topbar .bw-top-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1743,4 +1751,4 @@ body[class] {
   box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.15s ease;
 }
 .bw-topbar .bw-top-btn:hover { color: var(--bw-text); border-color: var(--bw-line-strong); }
-@media (max-width: 768px) { .bw-topbar { top: 64px; right: 12px; } }
+@media (max-width: 768px) { .bw-topbar { padding: 12px 14px 4px; } }

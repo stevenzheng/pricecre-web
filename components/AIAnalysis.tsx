@@ -81,8 +81,8 @@ export default function AIAnalysis({
         style={{ background: "var(--bg-surface)", border: "1px solid var(--line)" }} onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 z-10 px-5 py-4 flex items-center justify-between border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--line)" }}>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--accent)" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 014 4c0 1.1-.4 2.1-1.2 2.8l1.2 1.2c1.5-1 3.5-1.2 5.2-.4-1.1 1.6-2.3 3.1-3.7 4.4A12 12 0 0121 17.6c-1.7-1-3.7-1.4-5.6-.8l-2.4 2.4V22h-2v-2.8l-2.4-2.4c-1.9-.6-3.9-.2-5.6.8A12 12 0 016.3 14c1.4-1.3 2.6-2.8 3.7-4.4 1.7-.8 3.7-.6 5.2.4l1.2-1.2A3.9 3.9 0 0112 6a4 4 0 010-4z"/><circle cx="12" cy="4" r="1.5" fill="#fff"/></svg>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,#FBBF24,#F59E0B)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10.5h6M9 13.5h6"/></svg>
             </div>
             <span className="text-sm font-bold" style={{ color: "var(--text-strong)" }}>资产全维度价值指标</span>
           </div>

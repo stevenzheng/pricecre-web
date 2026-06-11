@@ -204,11 +204,8 @@ export default function PropertyChat({ property, email, onClose }: { property: P
               {/* Header with avatar */}
               <div style={{ padding: "14px 16px", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, background: "#FAFAFA", flexShrink: 0 }}>
                 <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #1a73e8 0%, #4285f4 25%, #7baaf7 50%, #a1c4fd 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(26,115,232,0.3)" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round">
-                    <circle cx="12" cy="12" r="3" fill="#FFFFFF" fillOpacity="0.3"/>
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-                    <path d="M12 6a6 6 0 016 6" strokeDasharray="2 2"/>
-                    <circle cx="12" cy="12" r="1" fill="#FFFFFF"/>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFFFFF">
+                    <path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12C17.373 12 12 6.627 12 0Z"/>
                   </svg>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -284,11 +281,8 @@ export default function PropertyChat({ property, email, onClose }: { property: P
       {/* Header with avatar */}
       <div style={{ padding: "10px 14px", borderBottom: "1px solid #E5E5E5", display: "flex", alignItems: "center", gap: 10, background: "#FAFAFA", paddingTop: "max(10px, env(safe-area-inset-top))", flexShrink: 0 }}>
         <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #1a73e8 0%, #4285f4 25%, #7baaf7 50%, #a1c4fd 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", flexShrink: 0, boxShadow: "0 2px 8px rgba(26,115,232,0.3)" }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round">
-            <circle cx="12" cy="12" r="3" fill="#FFFFFF" fillOpacity="0.3"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-            <path d="M12 6a6 6 0 016 6" strokeDasharray="2 2"/>
-            <circle cx="12" cy="12" r="1" fill="#FFFFFF"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFFFFF">
+            <path d="M12 0C12 6.627 6.627 12 0 12c6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12C17.373 12 12 6.627 12 0Z"/>
           </svg>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>

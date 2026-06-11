@@ -303,7 +303,7 @@ export default function MapView({ properties, onSelectProperty, userCoords, rend
       </div>
 
       {/* Map container — 浅灰风格通过瓦片层灰度滤镜实现 */}
-      <style>{`.pricecre-gray-map .leaflet-tile-pane { filter: grayscale(0.92) brightness(1.05) contrast(0.92); }`}</style>
+      <style>{`.pricecre-gray-map .leaflet-tile-pane { filter: grayscale(0.45) brightness(1.04) contrast(0.96); }`}</style>
       <div
         ref={mapRef}
         className="flex-1 w-full pricecre-gray-map"

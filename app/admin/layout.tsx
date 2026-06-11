@@ -70,42 +70,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* 右上角操作条：主题切换 + 返回前台 */}
-      <div className="bw-topbar">
-        <button className="bw-top-btn" onClick={toggleTheme} type="button">
-          {theme === "dark" ? (
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          ) : (
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-          )}
-          <span>{theme === "dark" ? "白天模式" : "夜间模式"}</span>
-        </button>
-        <Link href="/" className="bw-top-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          <span>返回前台</span>
-        </Link>
-      </div>
-
       {/* Sidebar */}
       <aside className={`vl-sidebar${sidebarOpen ? " vl-sidebar-open" : ""}`}>
         <div className="vl-sidebar-brand">
-          {/* 与前台一致的蓝色 Logo */}
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: "#0070F3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="8" y="2" width="8" height="4" rx="1" />
-              <rect x="8" y="10" width="8" height="4" rx="1" />
-              <rect x="8" y="18" width="8" height="4" rx="1" />
-              <rect x="2" y="6" width="6" height="3" rx="1" />
-              <rect x="2" y="14" width="6" height="3" rx="1" />
-              <rect x="2" y="22" width="6" height="3" rx="1" />
-              <rect x="16" y="6" width="6" height="3" rx="1" />
-              <rect x="16" y="14" width="6" height="3" rx="1" />
-            </svg>
+          {/* Logo 与标题同一行 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 7, background: "#0070F3", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="8" y="2" width="8" height="4" rx="1" />
+                <rect x="8" y="10" width="8" height="4" rx="1" />
+                <rect x="8" y="18" width="8" height="4" rx="1" />
+                <rect x="2" y="6" width="6" height="3" rx="1" />
+                <rect x="2" y="14" width="6" height="3" rx="1" />
+                <rect x="2" y="22" width="6" height="3" rx="1" />
+                <rect x="16" y="6" width="6" height="3" rx="1" />
+                <rect x="16" y="14" width="6" height="3" rx="1" />
+              </svg>
+            </div>
+            <Link href="/admin" style={{ textDecoration: "none" }} onClick={handleNav}>
+              <p className="vl-sidebar-title" style={{ whiteSpace: "nowrap" }}>PriceCRE · 地产价值</p>
+            </Link>
           </div>
-          <Link href="/admin" style={{ textDecoration: "none" }} onClick={handleNav}>
-            <p className="vl-sidebar-title">PriceCRE · 地产价值</p>
-          </Link>
-          <p className="vl-sidebar-subtitle">Admin Console</p>
+          <p className="vl-sidebar-subtitle" style={{ marginTop: 6 }}>Admin Console</p>
         </div>
 
         <nav className="vl-sidebar-nav">
@@ -146,7 +132,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Content */}
-      <main className="vl-content">{children}</main>
+      <main className="vl-content">
+        {/* 操作条：主题切换 + 返回前台（占据独立空间，不漂浮遮挡内容） */}
+        <div className="bw-topbar">
+          <button className="bw-top-btn" onClick={toggleTheme} type="button">
+            {theme === "dark" ? (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            )}
+            <span>{theme === "dark" ? "白天模式" : "夜间模式"}</span>
+          </button>
+          <Link href="/" className="bw-top-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>返回前台</span>
+          </Link>
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

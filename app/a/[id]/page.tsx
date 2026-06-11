@@ -37,7 +37,7 @@ export default async function SharedAnalysisPage({ params, searchParams }: { par
 body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;color:#1a1a2e;line-height:1.7;max-width:860px;margin:0;padding:40px 36px;background:#FFF}
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}
 .page-header .brand{display:flex;align-items:center;gap:10px}
-.page-header .brand .logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0070F3,#00C6FF);color:#FFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.page-header .brand .logo{width:36px;height:36px;border-radius:8px;background:#0070F3;color:#FFF;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .page-header .brand .names{display:flex;flex-direction:column}
 .page-header .brand .name{font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.02em}
 .page-header .brand .sub{font-size:10px;color:#94a3b8;font-weight:500;letter-spacing:0.02em}
@@ -76,7 +76,18 @@ body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-s
       <body>
         <div className="page-header">
           <div className="brand">
-            <div className="logo">PC</div>
+            <div className="logo">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="8" y="2" width="8" height="4" rx="1" />
+                <rect x="8" y="10" width="8" height="4" rx="1" />
+                <rect x="8" y="18" width="8" height="4" rx="1" />
+                <rect x="2" y="6" width="6" height="3" rx="1" />
+                <rect x="2" y="14" width="6" height="3" rx="1" />
+                <rect x="2" y="22" width="6" height="3" rx="1" />
+                <rect x="16" y="6" width="6" height="3" rx="1" />
+                <rect x="16" y="14" width="6" height="3" rx="1" />
+              </svg>
+            </div>
             <div className="names">
               <div className="name">PriceCRE · 地产价值</div>
               <div className="sub">Commercial Real Estate Intelligence</div>

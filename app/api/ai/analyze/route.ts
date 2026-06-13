@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 const API_KEY = process.env.ANTHROPIC_API_KEY || "";
 const API_BASE = process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn";
-const MODEL = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
+const MODEL = process.env.ANTHROPIC_MODEL || "MiniMax-M3";
 
 interface AnalyzeRequest {
   email?: string;
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
 
-    // MiniMax-M2.7 returns content as array: [thinking, text, ...]
+    // MiniMax-M3 returns content as array: [thinking, text, ...]
     // Find the text-type block, skip thinking blocks
     const contentList = data.content || data.message?.content || [];
     const textBlock = Array.isArray(contentList)

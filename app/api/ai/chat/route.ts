@@ -10,7 +10,7 @@ export const maxDuration = 60;
 export async function POST(request: Request) {
   const apiKey = (process.env.ANTHROPIC_API_KEY || "").replace(/^"|"$/g, "");
   const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://mydamoxing.cn").replace(/\/$/, "");
-  const model = process.env.ANTHROPIC_MODEL || "MiniMax-M2.7-highspeed";
+  const model = process.env.ANTHROPIC_MODEL || "MiniMax-M3";
 
   // 🔒 安全修复：更严格的API Key验证（Issue #3 - P1-Security）
   if (!apiKey || apiKey.length < 20 || apiKey.includes('"') || apiKey.includes("'")) {
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         throw Error(`Anthropic API ${anthroRes.status}`);
       }
       const data = await anthroRes.json();
-      // Handle MiniMax content format: find text block, skip thinking blocks
+      // Handle MiniMax-M3 content format: find text block, skip thinking blocks
       const contentList = data.content || data.message?.content || [];
       const textBlock = Array.isArray(contentList)
         ? contentList.find((c: any) => c.type === "text")

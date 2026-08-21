@@ -37,7 +37,11 @@ function verifyCodeStr(email: string, input: string): boolean {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, code, password } = await req.json();
+    const body = await req.json();
+    // 邮箱统一转小写：覆盖验证码校验、User/UserCredit/UserChatToken 存储，避免大小写敏感
+    const email = String(body.email || "").toLowerCase();
+    const code = body.code;
+    const password = body.password;
 
     if (!email || !code) {
       return NextResponse.json({ error: "参数不完整" }, { status: 400 });

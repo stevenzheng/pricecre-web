@@ -21,10 +21,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await adminAuth();
-    const { email, password, role } = await request.json();
+    const body = await request.json();
+    const email = String(body.email || "").toLowerCase(); // 小写归一化，避免大小写不同导致重复创建
+    const password = body.password;
+    const role = body.role;
     if (!email || !password) return NextResponse.json({ error: "email and password required" }, { status: 400 });
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findFirst({ where: { email: { equals: email, mode: "insensitive" } } });
     if (existing) return NextResponse.json({ error: "用户已存在" }, { status: 409 });
 
     const { nanoid } = await import("nanoid");

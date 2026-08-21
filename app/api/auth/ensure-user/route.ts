@@ -12,7 +12,8 @@ function generateReferralCode(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    const body = await req.json();
+    const email = String(body.email || "").toLowerCase(); // 小写归一化，避免大小写不同导致重复创建
     if (!email) return NextResponse.json({ error: "缺少email" }, { status: 400 });
 
     let user = await prisma.user.findUnique({ where: { email } });

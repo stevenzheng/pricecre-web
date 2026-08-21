@@ -5,12 +5,13 @@ import { sendEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json().catch(() => ({}));
+    const raw = await req.json().catch(() => ({}));
+    const email = String(raw.email || "").toLowerCase(); // 小写归一化，验证码 key 与用户查询一致
     if (!email) return NextResponse.json({ error: "请输入邮箱" }, { status: 400 });
 
-    // Check user exists
+    // Check user exists（大小写不敏感，兼容历史大写邮箱）
     let user;
-    try { user = await prisma.user.findUnique({ where: { email } }); } catch { return NextResponse.json({ error: "系统繁忙" }, { status: 500 }); }
+    try { user = await prisma.user.findFirst({ where: { email: { equals: email, mode: "insensitive" } } }); } catch { return NextResponse.json({ error: "系统繁忙" }, { status: 500 }); }
     if (!user) return NextResponse.json({ success: true, message: "如果该邮箱已注册，重置验证码已发送" }); // Don't reveal user existence
 
     // Generate 6-digit code, valid 10 minutes

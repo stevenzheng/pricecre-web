@@ -16,7 +16,10 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error(GENERIC_AUTH_ERROR);
         }
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+        // 大小写不敏感登录，兼容历史存了大写字母的邮箱（如 Jacky@qq.com）
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: credentials.email, mode: "insensitive" } },
+        });
         if (!user || !user.password) {
           throw new Error(GENERIC_AUTH_ERROR);
         }

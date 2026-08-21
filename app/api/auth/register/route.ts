@@ -27,7 +27,10 @@ function generateCode(email: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    // 邮箱统一转小写，保证 generateCode（注册）与 verify（校验）两端一致，并避免登录大小写敏感
+    const email = String(body.email || "").toLowerCase();
+    const password = body.password;
 
     if (!email || !password) {
       return NextResponse.json({ error: "邮箱和密码不能为空" }, { status: 400 });
